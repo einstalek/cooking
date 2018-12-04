@@ -1,0 +1,20 @@
+Final
+    TakeOutCutlets
+        WaitBakingCutlets
+            PutCutletsInOven
+                WaitOvenWarming
+                    TurnOnOven
+                PutCutletsOnTray
+                    PrepareSheet
+                        MixMeat
+                            MincePepper
+                                CleanPepper
+                            GrateCheese
+    MincePotato
+        TakeOutPotato
+            BoilPotato
+                PutPotatoInPan
+                    CutPotato
+                        CleanPotato
+    AddCream
+        StartCream
