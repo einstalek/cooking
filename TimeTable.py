@@ -2,6 +2,7 @@ from typing import List
 from Node import Node
 from math import exp
 
+
 class TimeTable:
     """
     Таблица, показывающая занятость ресурсов при определенном обходе дерева
@@ -41,21 +42,4 @@ class TimeTable:
     def print(self):
         for req in self.requirements:
             print(self.taken[req][:self.time()], req)
-
-    @staticmethod
-    def line_fit(line: List[int]):
-        return sum(line) / len(line)
-
-    @staticmethod
-    def softmax(vec: List[float]):
-        result = []
-        for x in vec:
-            result.append(exp(x) / sum(exp(t) for t in vec))
-        return result
-
-    def fit(self):
-        fit_vec = []
-        for req in self.requirements:
-            fit_vec.append(self.line_fit(self.taken[req][:self.time()]))
-        return self.softmax(fit_vec)
 

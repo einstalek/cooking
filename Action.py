@@ -2,17 +2,18 @@ from enum import Enum
 from typing import List
 
 from Node import Node
-from Timer import Timer
+from Timer import Timer, Manager
 
 
 class Intent(Enum):
     NEXT = 0,
     REPEAT = 1,
     TIMEOUT = 2,
+    TEMP_SKIP = 3,
 
 
 class Action:
-    def __init__(self, node: Node, dm):
+    def __init__(self, node: Node, dm: Manager):
         self.node = node
         node.parent = self
         self.timer = Timer(node.time, node.name, self)
@@ -31,7 +32,7 @@ class Action:
             child.stop()
 
     def speak(self):
-        print(self.node.name)
+        print(self.node.name, self.node.time)
 
     def is_technical(self):
         return 'h' not in self.node.requirements
@@ -46,5 +47,8 @@ class Action:
                 _get_children(inp.parent)
         _get_children(self)
         return children
+
+    def __repr__(self):
+        return self.node.name
 
 

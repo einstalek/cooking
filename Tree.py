@@ -1,6 +1,7 @@
 from typing import List
 import random
 
+from TimeTable import TimeTable
 from Node import Node
 
 
@@ -11,7 +12,7 @@ class Tree:
         self.num_queues = len(self.head.inp)
         self.queue_names = []
 
-    def leaves(self, start_node=None) -> List[Node]:
+    def __leaves(self, start_node=None) -> List[Node]:
         """
         Листья всего дерева или поддерева, начинающегося из start_node
         :param start_node:
@@ -77,7 +78,7 @@ class Tree:
         if finished is None:
             finished = set()
             all_visited_nodes = []
-            start_node: Node = random.sample(self.leaves(), 1)[0]
+            start_node: Node = random.sample(self.__leaves(), 1)[0]
 
         current_node, current_queue = start_node, start_node.queue_name
         while True:
@@ -129,7 +130,7 @@ class Tree:
         """
         finished = set()
         all_visited_nodes = path.copy()
-        start_nodes = [node for node in self.leaves() if node not in all_visited_nodes]
+        start_nodes = [node for node in self.__leaves() if node not in all_visited_nodes]
 
         for queue_name in self.queue_names:
             queue_nodes = self.queue_nodes(queue_name)
@@ -141,13 +142,14 @@ class Tree:
         start_node = random.sample(start_nodes, 1)[0]
         return self.random_path(finished, all_visited_nodes, start_node)
 
-    def path(self, path: List[Node]=None):
+    def path(self, path: List[Node] = None):
         """
         Находит путь случайных обход дерева
         Можно указать, с каких узлов начинать обход
         :param path:
         :return:
         """
+        # TODO: возможно лучше использовать генетический алгоритм или Q-Learning
         if path is None:
             return self.random_path()
         else:
@@ -165,8 +167,24 @@ class Tree:
                 for req in inp.requirements:
                     requirements.add(req)
                 _get_requirements(inp)
+
         _get_requirements(self.head)
         return sorted(requirements)
+
+    def __nodes(self):
+        """
+        Возвращает все узлы дерева кроме корня
+        :return:
+        """
+        children = []
+
+        def _get_children(node: Node):
+            for inp in node.inp:
+                children.append(inp)
+                _get_children(inp)
+
+        _get_children(self.head)
+        return children
 
     def __len__(self):
         """
@@ -183,3 +201,144 @@ class Tree:
 
         _count_children(self.head)
         return _len
+
+    def individual(self) -> List[Node]:
+        # nodes = self.__nodes()
+        # random.shuffle(nodes)
+        return self.path()
+
+    def fitness(self, individual: List[Node]):
+        """
+        The bigger the better
+        :param individual:
+        :return:
+        """
+        _sum = 0
+        visited_nodes = []
+        for node in individual:
+            if not all(inp in visited_nodes for inp in node.inp):
+                # Если посетили узел, не посетив всех его детей
+                _sum -= 50
+            try:
+                prev_node = visited_nodes[-1]
+                if not prev_node.switchable and node != prev_node.out:
+                    # Если перескочили на узле, на котором нельзя было это делать
+                    _sum -= 10
+            except IndexError:
+                pass
+            if len(node.inp) == 1 and node.inp[0].technical:
+                # Штрафуем за чрезмерное ожидание после технического действия
+                prev_tech_node = node.inp[0]
+                try:
+                    idx = visited_nodes.index(prev_tech_node)
+                    time = prev_tech_node.time
+                    delta = time
+                    try:
+                        for _node in visited_nodes[idx + 1:]:
+                            if not node.technical:
+                                delta -= _node.time
+                    except IndexError:
+                        pass
+                    _sum -= abs(delta)
+                except ValueError:
+                    pass
+
+            try:
+                if node.queue_name != visited_nodes[-1].queue_name:
+                    # Штрафуем за скачки между очередями
+                    _sum -= 10
+            except IndexError:
+                pass
+
+            visited_nodes.append(node)
+        _sum -= TimeTable(self.requirements(), max_size=300)(individual).time()
+        return _sum
+
+    def population(self, count: int) -> List[List[Node]]:
+        return [self.individual() for _ in range(count)]
+
+    def grade(self, population: List[List[Node]]):
+        _sum = sum(self.fitness(individual) for individual in population)
+        return _sum / len(population)
+
+    def cross_individuals(self, first: List[Node], second: List[Node], n_trials: int=10):
+        """
+        Скрещивание двух особей
+        Особь на выходе получается не хуже обоих родителей
+        :param n_trials:
+        :param first:
+        :param second:
+        :return:
+        """
+        fit_first, fit_second = self.fitness(first), self.fitness(second)
+        best = first[:] if fit_first > fit_second else second[:]
+        max_ind, max_fit = best, self.fitness(best)
+        for i in range(n_trials):
+            idx1, idx2 = random.sample(list(range(0, len(best))), 2)
+            temp = max_ind[:]
+            temp[idx1], temp[idx2] = temp[idx2], temp[idx1]
+            temp_fit = self.fitness(temp)
+            if temp_fit > max_fit:
+                max_ind = temp
+                max_fit = temp_fit
+        return max_ind
+
+    def mutation(self):
+        new = self.path()
+        return new
+
+    def epoch(self, population, retain=0.5, mutate=0.3):
+        """
+        Смена одного поколения
+        Новое поколение формируется из скрещиваний и мутаций
+        :param population:
+        :param retain:
+        :param mutate:
+        :return:
+        """
+        grades = [(ind, self.fitness(ind)) for ind in population]
+        pop_size = len(population)
+        sorted_pop = [x[0] for x in sorted(grades, key=lambda x: x[1], reverse=True)]
+        parents = sorted_pop[:int(pop_size * retain)]
+        new_pop = []
+        for i in range(pop_size):
+            if random.random() < mutate:
+                new = self.mutation()
+            else:
+                idx1, idx2 = random.sample(list(range(0, len(parents))), 2)
+                new = self.cross_individuals(parents[idx1], parents[idx2])
+            new_pop.append(new)
+        assert len(new_pop) == pop_size
+        return new_pop
+
+    def evolve(self, count: int=100, epochs: int=100, retain: float=0.5, mutate: float=0.3):
+        """
+        Процесс отбора в нескольких поколениях
+        :param count:
+        :param epochs:
+        :param retain:
+        :param mutate:
+        :return:
+        """
+        mean_error = []
+        start_pop = self.population(count)
+        current_epoch, current_pop = 0, start_pop
+        while current_epoch < epochs:
+            new_pop = self.epoch(current_pop, retain, mutate)
+            mean_error.append(self.grade(new_pop))
+            new_best_ind = self.select(new_pop, 1)[0]
+            # new_best_score = self.fitness(new_best_ind)
+            # best_error.append(new_best_score)
+            current_pop = new_pop
+            current_epoch += 1
+        return current_pop, mean_error
+
+    def select(self, population: List[List[Node]], count: int=1):
+        grades = [(ind, self.fitness(ind)) for ind in population]
+        sorted_pop = [x[0] for x in sorted(grades, key=lambda x: x[1], reverse=True)]
+        return sorted_pop[:count]
+
+
+
+
+

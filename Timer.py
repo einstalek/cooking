@@ -8,6 +8,9 @@ class Manager(ABC):
     def on_timer_elapsed(self, timer: object):
         pass
 
+    def handle_intent(self, intent):
+        pass
+
 
 class Timer:
     def __init__(self, seconds, name, parent):
@@ -39,6 +42,7 @@ class Timer:
         :return:
         """
         if self.active and not self.elapsed and datetime.datetime.now() > self.time_elapsed:
+            print("Timer", self.parent, "elapsed")
             dm: Manager = self.parent.dm
             dm.on_timer_elapsed(self)
             self.elapsed = True

@@ -1,11 +1,12 @@
 from typing import List
 from Action import Action, Intent
 from Node import Node
-from TimeTable import TimeTable
 from threading import Thread
 import time
 
+from TimeTable import TimeTable
 from Timer import Timer, Manager
+from InputHandler import InputHandler
 
 
 class DialogManager(Manager):
@@ -15,39 +16,22 @@ class DialogManager(Manager):
         self.stack: List[Action] = []
         self.path: List[Node] = None
         self.current_idx = None
+        self.input = InputHandler(self)
 
         Manager.__init__(self)
 
         t = Thread(target=self.update)
         t.start()
 
-    def fastest_path(self, tree, start_path=None):
-        """
-        Находит скорейший путь по дереву
-        :param tree:
-        :param start_path:
-        :return:
-        """
-        requirements = tree.requirements()
-        min_path, min_time, min_table = None, 110, None
-        for i in range(self.n_iterations):
-            path = tree.path(start_path)
-            table = TimeTable(requirements, 200)(path)
-            if table.time() < min_time:
-                min_time = table.time()
-                min_path = path
-                min_table = table
-        return min_path, min_table
-
     def initialize(self):
-        self.path, table = self.fastest_path(self.tree)
+        pop, err = self.tree.evolve(count=100, epochs=250, mutate=0.5)
+        self.path = self.tree.select(pop, 1)[0]
+        print("OVERALL:", TimeTable(self.tree.requirements())(self.path).time())
         self.current_idx = 0
         self.stack.append(Action(self.path[self.current_idx], self))
-
         print(self.path)
-        table.print()
 
-        # self.on_stack_changed()
+        self.on_stack_changed()
 
     def on_stack_changed(self):
         """
@@ -72,12 +56,8 @@ class DialogManager(Manager):
         Ожидание реплики со стороны клиента
         :return:
         """
-        response = input()
-        if 'r' == response:
-            intent = Intent.REPEAT
-        else:
-            intent = Intent.NEXT
-        self.handle_intent(intent)
+        t = Thread(target=self.input.run)
+        t.start()
 
     def update(self):
         """
@@ -90,7 +70,7 @@ class DialogManager(Manager):
                 action.update()
             time.sleep(1)
 
-    def handle_intent(self, intent: Intent, *args, **kargs):
+    def handle_intent(self, intent: Intent):
         """
         Обработчик интентов
         :param intent:
@@ -102,12 +82,12 @@ class DialogManager(Manager):
             self.handle_next_response()
         elif intent == Intent.REPEAT:
             self.handle_repeat_response()
-        elif intent == Intent.TIMEOUT:
-            self.handle_timeout_response()
 
     def handle_next_response(self):
         """
         Интент перехода к следующему действию
+        :param args:
+        :param kargs:
         :return:
         """
         top_action = self.stack[-1]
@@ -122,7 +102,7 @@ class DialogManager(Manager):
             return
         self.on_stack_changed()
 
-    def handle_repeat_response(self):
+    def handle_repeat_response(self, *args, **kargs):
         """
         Интент повторения реплики текущего действия
         :return:
@@ -136,7 +116,8 @@ class DialogManager(Manager):
         Обработчик таймаута у текущего действия, если оно не является техническим
         :return:
         """
-        pass
+        print("isn't it done yet?")
+        self.wait_for_response()
 
     def on_timer_elapsed(self, timer: Timer):
         """
@@ -145,7 +126,11 @@ class DialogManager(Manager):
         :return:
         """
         action: Action = timer.parent
-        print("REMINDER:", action.node.name)
+        if action.is_technical():
+            print("REMINDER:", action)
+        else:
+            self.handle_timeout_response()
+
 
 
 
