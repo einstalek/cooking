@@ -5,7 +5,7 @@ from abc import ABC
 
 
 class Manager(ABC):
-    def on_timer_elapsed(self, timer: object):
+    def on_timer_elapsed(self, action: object):
         pass
 
     def handle_intent(self, intent):
@@ -22,6 +22,7 @@ class Timer:
         self.name = name
         self.parent = parent
         self.paused = False
+        self.passed = None
 
     def start(self) -> None:
         self.time_started = datetime.datetime.now()
@@ -41,10 +42,10 @@ class Timer:
         Если статус изменился, уведомляет об этом DM
         :return:
         """
-        if self.active and not self.elapsed and datetime.datetime.now() > self.time_elapsed:
-            print("Timer", self.parent, "elapsed")
+        if self.active and not self.elapsed and not self.paused and datetime.datetime.now() > self.time_elapsed:
+            # print("Timer", self.parent, "elapsed")
             dm: Manager = self.parent.dm
-            dm.on_timer_elapsed(self)
+            dm.on_timer_elapsed(self.parent)
             self.elapsed = True
 
     def stop(self):
@@ -52,8 +53,10 @@ class Timer:
 
     def pause(self):
         self.paused = True
+        self.passed = datetime.datetime.now() - self.time_started
 
     def restart(self):
+        self.time_elapsed = datetime.datetime.now() + self.passed
         self.paused = False
 
 

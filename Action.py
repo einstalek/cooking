@@ -10,6 +10,7 @@ class Intent(Enum):
     REPEAT = 1,
     TIMEOUT = 2,
     TEMP_SKIP = 3,
+    NOT_READY = 4,
 
 
 class Action:
@@ -31,6 +32,9 @@ class Action:
             assert isinstance(child, Action)
             child.stop()
 
+    def pause(self):
+        self.timer.pause()
+
     def speak(self):
         print(self.node.name, self.node.time)
 
@@ -41,7 +45,10 @@ class Action:
         children = []
 
         def _get_children(action):
-            node: Node = action.node
+            try:
+                node: Node = action.node
+            except AttributeError:
+                print(action)
             for inp in node.inp:
                 children.append(inp.parent)
                 _get_children(inp.parent)

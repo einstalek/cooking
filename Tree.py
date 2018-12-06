@@ -251,7 +251,7 @@ class Tree:
                 pass
 
             visited_nodes.append(node)
-        _sum -= TimeTable(self.requirements(), max_size=300)(individual).time()
+        _sum -= TimeTable(self.requirements(), max_size=200)(individual).time()
         return _sum
 
     def population(self, count: int) -> List[List[Node]]:
@@ -261,7 +261,7 @@ class Tree:
         _sum = sum(self.fitness(individual) for individual in population)
         return _sum / len(population)
 
-    def cross_individuals(self, first: List[Node], second: List[Node], n_trials: int=10):
+    def cross_individuals(self, first: List[Node], second: List[Node], n_trials: int=20):
         """
         Скрещивание двух особей
         Особь на выходе получается не хуже обоих родителей
@@ -311,7 +311,7 @@ class Tree:
         assert len(new_pop) == pop_size
         return new_pop
 
-    def evolve(self, count: int=100, epochs: int=100, retain: float=0.5, mutate: float=0.3):
+    def evolve(self, count: int=50, epochs: int=100, retain: float=0.5, mutate: float=0.2):
         """
         Процесс отбора в нескольких поколениях
         :param count:
@@ -337,6 +337,18 @@ class Tree:
         grades = [(ind, self.fitness(ind)) for ind in population]
         sorted_pop = [x[0] for x in sorted(grades, key=lambda x: x[1], reverse=True)]
         return sorted_pop[:count]
+
+    def mm_path(self, n_iterations: int = 100) -> List[Node]:
+        best = self.path()
+        best_fit = self.fitness(best)
+        for i in range(n_iterations):
+            path = self.path()
+            fit = self.fitness(path)
+            if fit > best_fit:
+                best_fit = fit
+                best = path
+        return best
+
 
 
 

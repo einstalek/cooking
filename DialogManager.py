@@ -3,6 +3,7 @@ from Action import Action, Intent
 from Node import Node
 from threading import Thread
 import time
+import random
 
 from TimeTable import TimeTable
 from Timer import Timer, Manager
@@ -14,8 +15,9 @@ class DialogManager(Manager):
         self.n_iterations = n_iterations
         self.tree = tree
         self.stack: List[Action] = []
+        self.finished_stack = []
         self.path: List[Node] = None
-        self.current_idx = None
+        self.current_path_idx = None
         self.input = InputHandler(self)
 
         Manager.__init__(self)
@@ -24,25 +26,30 @@ class DialogManager(Manager):
         t.start()
 
     def initialize(self):
-        pop, err = self.tree.evolve(count=100, epochs=250, mutate=0.5)
-        self.path = self.tree.select(pop, 1)[0]
-        print("OVERALL:", TimeTable(self.tree.requirements())(self.path).time())
-        self.current_idx = 0
-        self.stack.append(Action(self.path[self.current_idx], self))
+        # pop, err = self.tree.evolve(count=100, epochs=300, mutate=0.25)
+        # self.path = self.tree.select(pop, 1)[0]
+        random.seed(10)
+        self.path = self.tree.mm_path(n_iterations=2000)
+        print("OVERALL TIME:", TimeTable(self.tree.requirements())(self.path).time())
+        self.current_path_idx = 0
+        self.stack.append(Action(self.path[self.current_path_idx], self))
         print(self.path)
 
-        self.on_stack_changed()
+        self.handle_top_action()
 
-    def on_stack_changed(self):
+    def handle_top_action(self):
         """
-        Вызывается для обработки действия на верху стэка
+        Вызывается для обработки несовершенного действия на вершине стэка
         :return:
         """
         try:
             top_action = self.stack[-1]
         except IndexError:
-            print("stack is empty")
+            print("Finished")
             return
+
+        if top_action.timer.paused:
+            top_action.timer.restart()
         top_action.speak()
         top_action.start()
         if top_action.is_technical():
@@ -68,14 +75,14 @@ class DialogManager(Manager):
         while True:
             for action in self.stack:
                 action.update()
+            for action in self.finished_stack:
+                action.update()
             time.sleep(1)
 
     def handle_intent(self, intent: Intent):
         """
         Обработчик интентов
         :param intent:
-        :param args:
-        :param kargs:
         :return:
         """
         if intent == Intent.NEXT:
@@ -84,23 +91,25 @@ class DialogManager(Manager):
             self.handle_repeat_response()
 
     def handle_next_response(self):
+        print(self.stack, self.finished_stack)
         """
         Интент перехода к следующему действию
-        :param args:
-        :param kargs:
         :return:
         """
         top_action = self.stack[-1]
         if not top_action.is_technical():
-            # Если действие не техническое, то останавливаем таймеры у всех детей и добавляем в стэк следующее действие
             top_action.stop()
-        self.current_idx += 1
-        try:
-            self.stack.append(Action(self.path[self.current_idx], self))
-        except IndexError:
-            print("Finished")
-            return
-        self.on_stack_changed()
+        self.stack.pop()
+        self.finished_stack.append(top_action)
+
+        if len(self.stack) == 0:
+            try:
+                self.current_path_idx += 1
+                self.stack.append(Action(self.path[self.current_path_idx], self))
+            except IndexError:
+                print("Finished")
+                return
+        self.handle_top_action()
 
     def handle_repeat_response(self, *args, **kargs):
         """
@@ -111,25 +120,30 @@ class DialogManager(Manager):
         top_action.speak()
         self.wait_for_response()
 
-    def handle_timeout_response(self):
+    def handle_timeout_response(self, action: Action):
         """
-        Обработчик таймаута у текущего действия, если оно не является техническим
+        Обработчик таймаута у текущего действия
         :return:
         """
-        print("isn't it done yet?")
-        self.wait_for_response()
+        current_action = self.stack[-1]
+        if not action.is_technical():
+            # Если действие не техническое, то просто напоминаем о нем
+            print("isn't", action, "done yet?")
+            self.wait_for_response()
+        else:
+            print()
+            print("Let's return to", action.node.queue_name)
+            next_action = Action(action.node.out, self)
+            self.stack.append(next_action)
+            current_action.pause()
+            self.handle_top_action()
 
-    def on_timer_elapsed(self, timer: Timer):
+    def on_timer_elapsed(self, action: Action):
         """
         Обработчик события истечения времени у таймера
-        :param timer:
         :return:
         """
-        action: Action = timer.parent
-        if action.is_technical():
-            print("REMINDER:", action)
-        else:
-            self.handle_timeout_response()
+        self.handle_timeout_response(action)
 
 
 

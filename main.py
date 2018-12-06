@@ -46,26 +46,16 @@ if __name__ == '__main__':
     tree.assign_queue_names(["meat", "puree", "sauce"])
 
     # t1 = time.time()
-    # pop, mean_err, best_err = tree.evolve(count=50, epochs=200, mutate=0.5)
+    # pop, mean_err = tree.evolve(count=100, epochs=300, mutate=0.1)
     # print("OVERALL TIME:", time.time() - t1)
     # best = tree.select(pop)[0]
     # print(best)
     # print(tree.fitness(best))
-    # with open("best_error.txt", "w") as f:
-    #     for x in best_err:
-    #         f.write("%.5f\n" % x)
-    # with open("mean_error.txt", "w") as f:
+    # with open("error.txt", "w") as f:
     #     for x in mean_err:
     #         f.write("%.5f\n" % x)
     # table = TimeTable(tree.requirements())(best)
     # print('time:', table.time())
-
-    # result = []
-    # path, _ = fastest_path(tree)
-    # table = TimeTable(tree.requirements())(path)
-    # print(path)
-    # table.print()
-    # print(table.time())
 
     dm = DialogManager(tree)
     dm.initialize()
