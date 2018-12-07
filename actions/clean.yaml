@@ -1,0 +1,13 @@
+Name:
+    "Мытье"
+
+Phrase:
+    - "Помойте {ingredients} под холодной водой"
+    - "Промойте {ingredients} под водой"
+
+Remind:
+    - "Вы уже помыли {ingredients}"
+    - "{ingredients} уже помыты?"
+    - "Закончили с мытьем {ingredients}"
+
+Warning:

@@ -1,0 +1,12 @@
+Name:
+    "Смешмвание"
+
+Phrase:
+    - "Смешайте {ingredients}"
+    - "Перемешайте {ingredients} "
+
+Remind:
+    - "Вы уже перемешали {ingredients}?"
+    - "Еще не перемешали {ingredients}?"
+
+Warning:

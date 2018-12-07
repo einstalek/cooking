@@ -1,7 +1,6 @@
 from TimeTable import TimeTable
 from Tree import Node, Tree
-from DialogManager import DialogManager
-import time
+from ContextManager import ContextManager
 
 
 def fastest_path(tree, start_path=None, n_iterations=1000):
@@ -18,12 +17,12 @@ def fastest_path(tree, start_path=None, n_iterations=1000):
 
 
 if __name__ == '__main__':
-    clean_pepper = Node("clean pepper", 5, ["h"])
-    mince_pepper = Node("mince pepper", 7, ["h"])(clean_pepper)
+    clean_pepper = Node("clean pepper", 5, ["h"], file="clean.yaml")
+    mince_pepper = Node("mince pepper", 7, ["h"], file="mince.yaml")(clean_pepper)
     grate_cheese = Node("grate cheese", 8, ["h"])
-    mix_meat = Node("mix meat with pepper", 7, ["h"])(mince_pepper, grate_cheese)
+    mix_meat = Node("mix meat with pepper", 7, ["h"], file="mix.yaml")(mince_pepper, grate_cheese)
     lay_tray = Node("lay tray", 4, ["h"])(mix_meat)
-    put_on_tray = Node("put meat on tray", 10, ["h"])(lay_tray)
+    put_on_tray = Node("put meat on tray", 10, ["h"], file="put_on_tray.yaml")(lay_tray)
 
     turn_on_oven = Node("turn on oven", 2, ["h", "o"], False)
     wait_oven_warming = Node("waiting oven", 15, ["o"])(turn_on_oven)
@@ -57,5 +56,5 @@ if __name__ == '__main__':
     # table = TimeTable(tree.requirements())(best)
     # print('time:', table.time())
 
-    dm = DialogManager(tree)
-    dm.initialize()
+    cm = ContextManager(tree)
+    cm.initialize()

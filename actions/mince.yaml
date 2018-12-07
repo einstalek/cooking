@@ -1,0 +1,14 @@
+Name:
+    "Нарезание"
+
+Phrase:
+    - "Нарежьте {ingredients} {how}"
+    - "Порежьте {ingredients} "
+
+Remind:
+    - "Вы уже нарезали {ingredients}?"
+    - "{ingredient} уже нарезали?"
+
+Warning:
+    - "Будьте осторожны с ножом"
+    - "Осторожней с ножом"

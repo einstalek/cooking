@@ -339,6 +339,11 @@ class Tree:
         return sorted_pop[:count]
 
     def mm_path(self, n_iterations: int = 100) -> List[Node]:
+        """
+        Ищет лучший обход среди случайно сгенерированных
+        :param n_iterations:
+        :return:
+        """
         best = self.path()
         best_fit = self.fitness(best)
         for i in range(n_iterations):

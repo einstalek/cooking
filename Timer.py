@@ -14,27 +14,20 @@ class Manager(ABC):
 
 class Timer:
     def __init__(self, seconds, name, parent):
+        self.name = name
         self.timedelta = seconds
         self.time_started = None
         self.time_elapsed = None
         self.elapsed = False
         self.active = False
-        self.name = name
+        self.paused = None
+        self.left = None
         self.parent = parent
-        self.paused = False
-        self.passed = None
 
     def start(self) -> None:
         self.time_started = datetime.datetime.now()
         self.time_elapsed = self.time_started + datetime.timedelta(seconds=self.timedelta)
         self.active = True
-        if self.name:
-            print('Timer "' + self.name + '" started')
-
-    def time_left(self) -> Optional[datetime.datetime]:
-        if self.active:
-            return self.time_elapsed - datetime.datetime.now()
-        return None
 
     def update(self) -> None:
         """
@@ -43,20 +36,22 @@ class Timer:
         :return:
         """
         if self.active and not self.elapsed and not self.paused and datetime.datetime.now() > self.time_elapsed:
-            # print("Timer", self.parent, "elapsed")
-            dm: Manager = self.parent.dm
-            dm.on_timer_elapsed(self.parent)
             self.elapsed = True
+            cm: Manager = self.parent.cm
+            cm.on_timer_elapsed(self.parent)
 
     def stop(self):
+        if self.elapsed:
+            return
         self.elapsed = True
 
     def pause(self):
+        assert self.active
         self.paused = True
-        self.passed = datetime.datetime.now() - self.time_started
+        self.left = datetime.timedelta(seconds=self.timedelta) - (datetime.datetime.now() - self.time_started)
 
     def restart(self):
-        self.time_elapsed = datetime.datetime.now() + self.passed
+        self.time_elapsed = datetime.datetime.now() + self.left
         self.paused = False
 
 
@@ -65,4 +60,3 @@ if __name__ == "__main__":
     timer.start()
     while not timer.elapsed:
         timer.update()
-

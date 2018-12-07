@@ -1,8 +1,10 @@
 from typing import List
+import yaml
 
 
 class Node:
-    def __init__(self, name, time: int, requirements=None, switchable=True, technical=False, parent=None):
+    def __init__(self, name, time: int, requirements=None, switchable=True, technical=False,
+                 parent=None, file: str = None):
         """
 
         :param name:
@@ -24,6 +26,10 @@ class Node:
         self.switchable = switchable
         self.technical = technical
         self.parent = parent
+        self.file = file
+        self.info = {}
+        if self.file:
+            self.info = yaml.load(open("actions/" + self.file))
 
     def add_input(self, other):
         self.inp.extend(other)

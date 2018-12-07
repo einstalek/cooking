@@ -1,0 +1,12 @@
+Name:
+    "Натирание"
+
+Phrase:
+    - "Натрите {ingredient} на {how} терке"
+
+Remind:
+    - "Натерли {ingredient}?"
+    - "Еще не натерли {ingredient}?"
+
+Warning:
+    - "Аккуратней с теркой, берегите пальцы"
