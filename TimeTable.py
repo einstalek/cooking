@@ -42,4 +42,3 @@ class TimeTable:
     def print(self):
         for req in self.requirements:
             print(self.taken[req][:self.time()], req)
-

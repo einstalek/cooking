@@ -31,15 +31,13 @@ class ContextManager(Manager):
         t.start()
 
     def initialize(self):
-        # pop, err = self.tree.evolve(count=100, epochs=300, mutate=0.25)
-        # self.path = self.tree.select(pop, 1)[0]
-        random.seed(10)
-        self.path = self.tree.mm_path(n_iterations=2000)
-        print("OVERALL TIME:", TimeTable(self.tree.requirements())(self.path).time())
+        pop, err = self.tree.evolve(count=100, epochs=400, mutate=0.2)
+        self.path = self.tree.select(pop, 1)[0]
+        # random.seed(10)
+        # self.path = self.tree.mm_path(n_iterations=2000)
+        print("РАСЧЕТНОЕ ВРЕМЯ:", TimeTable(self.tree.requirements())(self.path).time())
         self.current_path_idx = 0
         self.stack.append(Action(self.path[self.current_path_idx], self))
-        # print(self.path)
-
         self.handle_top_action()
 
     def handle_top_action(self):
@@ -52,6 +50,20 @@ class ContextManager(Manager):
         except IndexError:
             print("Finished")
             return
+
+        # Произошел переход к действию до того,
+        # как предыдущее техническое завершилось
+        # TODO: такого не должно было произойти, нужно поменять handle_next_response
+        prev_action = None
+        for action in self.finished_stack:
+            if action.queue_name() == top_action.queue_name() \
+                    and not action.timer.elapsed \
+                    and action in top_action.child_actions():
+                prev_action = action
+                break
+        if prev_action:
+            print("Когда будет готово", prev_action)
+            self.wait_for_response()
 
         top_action.speak()
 
@@ -172,6 +184,7 @@ class ContextManager(Manager):
                         next_action = Action(node, self)
                         break
                 idx = self.path.index(next_action.node())
+                # TODO: Здесь нужно пересчтитать path
                 self.path[self.current_path_idx:] = [self.path[idx]] + \
                                                     [x for x in self.path[self.current_path_idx:]
                                                      if x != next_action.node()]
@@ -182,18 +195,19 @@ class ContextManager(Manager):
         if not action.is_technical():
             action.remind()
         else:
-            print("REMINDER:", action)
+            print("НАПОМИНАНИЕ:", action)
         self.wait_for_response()
 
     def handle_not_ready_response(self):
-        # TODO
         top_action = self.stack[-1]
         prev_action = None
         for action in self.finished_stack:
             if action.queue_name() == top_action.queue_name() and not action.timer.elapsed:
                 prev_action = action
+                break
         assert prev_action is not None
         self.wait_for_response()
+
 
 
 

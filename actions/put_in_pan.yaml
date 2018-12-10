@@ -7,6 +7,6 @@ Phrase:
 
 Remind:
     - "Положили {ingredients} в кастрюлю?"
-    - "{ingredient} уже в кастрюле?"
+    - "{ingredients} уже в кастрюле?"
 
 Warning:

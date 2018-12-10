@@ -152,7 +152,6 @@ class Tree:
         :param path:
         :return:
         """
-        # TODO: возможно лучше использовать генетический алгоритм или Q-Learning
         if path is None:
             return self.random_path()
         else:
@@ -356,9 +355,3 @@ class Tree:
                 best_fit = fit
                 best = path
         return best
-
-
-
-
-
-

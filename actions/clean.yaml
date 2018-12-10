@@ -6,8 +6,8 @@ Phrase:
     - "Промойте {ingredients} под водой"
 
 Remind:
-    - "Вы уже помыли {ingredients}"
+    - "Вы уже помыли {ingredients}?"
     - "{ingredients} уже помыты?"
-    - "Закончили с мытьем {ingredients}"
+    - "Закончили с мытьем {ingredients}?"
 
 Warning:

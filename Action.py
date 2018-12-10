@@ -11,6 +11,7 @@ class Action:
         node.parent = self
         self.timer = Timer(node.time, node.name, self)
         self.cm = cm
+        self.name = None
 
     def node(self):
         return self.__node
@@ -64,6 +65,8 @@ class Action:
         return children
 
     def __repr__(self):
+        if self.__node.file:
+            return self.__node.info["Name"]
         return self.__node.name
 
     def speak(self):

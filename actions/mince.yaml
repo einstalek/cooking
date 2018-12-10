@@ -7,7 +7,7 @@ Phrase:
 
 Remind:
     - "Вы уже нарезали {ingredients}?"
-    - "{ingredient} уже нарезали?"
+    - "{ingredients} уже нарезали?"
 
 Warning:
     - "Будьте осторожны с ножом"

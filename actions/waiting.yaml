@@ -1,9 +1,10 @@
 Name:
-    "Ждите"
+    "Ожидание"
 
 Phrase:
     - "Ожидайте {what} примерно в течение {time}"
     - "Ждите примерно {time} {what}"
+
 Remind:
 
 Warning:
