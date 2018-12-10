@@ -1,0 +1,11 @@
+Name:
+    "Толчение"
+
+Phrase:
+    - "Толчите {ingredients}"
+    - "Потолчите {ingredients} "
+
+Remind:
+    - "{ingredients} готова?"
+
+Warning:

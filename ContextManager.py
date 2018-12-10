@@ -15,6 +15,7 @@ class ContextManager(Manager):
     Класс, ответственный за переключения между действиями
     Так же принимает Intent от DialogManager-а при реагирует на него
     """
+
     def __init__(self, tree, n_iterations=500):
         self.n_iterations = n_iterations
         self.tree = tree
@@ -32,7 +33,7 @@ class ContextManager(Manager):
     def initialize(self):
         # pop, err = self.tree.evolve(count=100, epochs=300, mutate=0.25)
         # self.path = self.tree.select(pop, 1)[0]
-        # random.seed(10)
+        random.seed(10)
         self.path = self.tree.mm_path(n_iterations=2000)
         print("OVERALL TIME:", TimeTable(self.tree.requirements())(self.path).time())
         self.current_path_idx = 0
@@ -96,6 +97,8 @@ class ContextManager(Manager):
             self.handle_next_response()
         elif intent == Intent.REPEAT:
             self.handle_repeat_response()
+        elif intent == Intent.NOT_READY:
+            self.handle_not_ready_response()
 
     def handle_next_response(self):
         """
@@ -155,6 +158,8 @@ class ContextManager(Manager):
             current_action = self.stack[-1]
             # Совпадает ли очередь у действия на вершине стэка и у сработавшего действия
             if action.queue_name() == current_action.queue_name():
+                # Тут ситцация, когда перешли в действию, когда предшествующее ему
+                # техническое действие не успело завершиться
                 self.wait_for_response()
             else:
                 # Ставим в стэк над приостановленным действием следующее и меняем их порядок в self.path
@@ -168,7 +173,8 @@ class ContextManager(Manager):
                         break
                 idx = self.path.index(next_action.node())
                 self.path[self.current_path_idx:] = [self.path[idx]] + \
-                                                    [x for x in self.path[self.current_path_idx:] if x != next_action.node()]
+                                                    [x for x in self.path[self.current_path_idx:]
+                                                     if x != next_action.node()]
                 self.stack.append(next_action)
                 self.handle_top_action()
 
@@ -178,3 +184,16 @@ class ContextManager(Manager):
         else:
             print("REMINDER:", action)
         self.wait_for_response()
+
+    def handle_not_ready_response(self):
+        # TODO
+        top_action = self.stack[-1]
+        prev_action = None
+        for action in self.finished_stack:
+            if action.queue_name() == top_action.queue_name() and not action.timer.elapsed:
+                prev_action = action
+        assert prev_action is not None
+        self.wait_for_response()
+
+
+

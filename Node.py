@@ -1,10 +1,15 @@
 from typing import List
 import yaml
 
+from Ingredient import Ingredient
+
 
 class Node:
+    """
+    Класс, хранящий информацию о действии
+    """
     def __init__(self, name, time: int, requirements=None, switchable=True, technical=False,
-                 parent=None, file: str = None):
+                 file: str = None, parent=None, inp_ingredients=None, out_ingredient=None, **kargs):
         """
 
         :param name:
@@ -12,7 +17,7 @@ class Node:
         :param requirements:
         :param switchable: если True, то дальше по порядку обязательно идет следующий узел
         :param technical: если True, до к моменту завершения действия сразу начинается следующее действие
-        :param parent:
+        :param parent: ссылка на обертку Action
         """
         if requirements is None:
             requirements = []
@@ -31,6 +36,15 @@ class Node:
         if self.file:
             self.info = yaml.load(open("actions/" + self.file))
 
+        self.out_ingredient = Ingredient(out_ingredient)
+        self.inp_ingredients = None
+        if inp_ingredients:
+            self.inp_ingredients: List[Ingredient] = [Ingredient(x) for x in inp_ingredients]
+
+        self.params = None
+        if kargs:
+            self.params = kargs
+
     def add_input(self, other):
         self.inp.extend(other)
         for _node in other:
@@ -44,6 +58,11 @@ class Node:
 
     def __call__(self, *other):
         self.add_input(other)
+        for node in other:
+            if node.out_ingredient:
+                if self.inp_ingredients is None:
+                    self.inp_ingredients = []
+                self.inp_ingredients.append(node.out_ingredient)
         return self
 
     def __repr__(self):

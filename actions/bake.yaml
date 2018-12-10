@@ -1,0 +1,12 @@
+Name:
+    "Запекание"
+
+Phrase:
+    - "Запекайте {ingredients} в течение {time}"
+    - "Оставьте {ingredients} в духовке на {time}"
+
+Remind:
+    - "{ingredients} еще не готовы?"
+    - "Может {ingredient} уже готовы?"
+
+Warning:

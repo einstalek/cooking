@@ -6,6 +6,9 @@ from Node import Node
 
 
 class Tree:
+    """
+    Класс, хранящий зависимости между действиями в графе
+    """
     def __init__(self, head: Node, switch_proba=0.5):
         self.switch_proba = switch_proba
         self.head = head

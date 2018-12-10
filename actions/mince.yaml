@@ -3,7 +3,7 @@ Name:
 
 Phrase:
     - "Нарежьте {ingredients} {how}"
-    - "Порежьте {ingredients} "
+    - "Порежьте {ingredients} {how}"
 
 Remind:
     - "Вы уже нарезали {ingredients}?"

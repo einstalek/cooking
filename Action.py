@@ -2,6 +2,7 @@ from typing import List
 from Node import Node
 from Timer import Timer, Manager
 import random
+import re
 
 
 class Action:
@@ -67,14 +68,34 @@ class Action:
 
     def speak(self):
         if self.__node.file is None:
-            print(self.__node.name, self.__node.time)
+            print(self.__node.name)
         else:
             phrase = random.sample(self.__node.info["Phrase"], 1)[0]
-            print(phrase)
+            params = self.extract_params(phrase)
+            print(self.reformat(params, phrase))
 
     def remind(self):
         if self.__node.file is None:
             print("isn't", self, "done yet?")
         else:
             phrase = random.sample(self.__node.info["Remind"], 1)[0]
-            print(phrase)
+            params = self.extract_params(phrase)
+            print(self.reformat(params, phrase))
+
+    @staticmethod
+    def extract_params(phrase: str) -> List[str]:
+        search = re.findall("{\w*}", phrase)
+        return [x[1:-1] for x in search]
+
+    def reformat(self, params, phrase: str):
+        reformatted: str = phrase
+        if "ingredients" in params and self.node().inp_ingredients:
+            reformatted = reformatted.replace("{ingredients}", ", ".join([x.name for x in self.node().inp_ingredients]))
+        if "time" in params:
+            reformatted = reformatted.replace("{time}", str(self.node().time))
+        if self.node().params:
+            for param in self.node().params:
+                reformatted = reformatted.replace("{" + param + "}", self.node().params[param])
+        return reformatted
+
+

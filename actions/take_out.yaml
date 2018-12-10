@@ -1,0 +1,11 @@
+Name:
+    "Вытащить"
+
+Phrase:
+    - "Вытащите {ingredients} из {where}"
+    - "Достаньте {ingredients} из {where}"
+
+Remind:
+    - "Достали {ingredients}?"
+
+Warning:

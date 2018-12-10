@@ -1,0 +1,12 @@
+Name:
+    "Варка"
+
+Phrase:
+    - "Варите {ingredients} в течение {time}"
+    - "Оставьте {ingredients} вариться на {time}"
+
+Remind:
+    - "{ingredients} еще не сварилась?"
+    - "Может {ingredient} уже сварилась?"
+
+Warning:

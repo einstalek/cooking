@@ -2,7 +2,7 @@ Name:
     "Мытье"
 
 Phrase:
-    - "Помойте {ingredients} под холодной водой"
+    - "Помойте {ingredients} в холодной воде"
     - "Промойте {ingredients} под водой"
 
 Remind:

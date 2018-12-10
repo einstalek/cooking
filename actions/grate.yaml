@@ -2,11 +2,11 @@ Name:
     "Натирание"
 
 Phrase:
-    - "Натрите {ingredient} на {how} терке"
+    - "Натрите {ingredients} на терке"
 
 Remind:
-    - "Натерли {ingredient}?"
-    - "Еще не натерли {ingredient}?"
+    - "Натерли {ingredients}?"
+    - "Еще не натерли {ingredients}?"
 
 Warning:
     - "Аккуратней с теркой, берегите пальцы"
