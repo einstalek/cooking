@@ -67,3 +67,13 @@ class Node:
 
     def __repr__(self):
         return self.name
+
+    def children(self):
+        result = []
+
+        def _get_children(node):
+            for inp in node.inp:
+                result.append(inp)
+                _get_children(inp)
+        _get_children(self)
+        return result

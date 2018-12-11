@@ -11,6 +11,9 @@ class Manager(ABC):
     def handle_intent(self, intent):
         pass
 
+    def current_state(self):
+        pass
+
 
 class Timer:
     def __init__(self, seconds, name, parent):
@@ -54,6 +57,9 @@ class Timer:
         self.time_elapsed = datetime.datetime.now() + self.left
         self.paused = False
 
+    def time_left(self):
+        if not self.elapsed and self.active:
+            return self.time_elapsed - datetime.datetime.now()
 
 if __name__ == "__main__":
     timer = Timer(3, "check", None)

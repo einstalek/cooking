@@ -13,7 +13,7 @@ class Action:
         self.cm = cm
         self.name = None
 
-    def node(self):
+    def node(self) -> Node:
         return self.__node
 
     def inp(self) -> List[Node]:

@@ -1,9 +1,10 @@
-from typing import List
+from typing import List, Optional
 from Action import Action
 from Node import Node
 from threading import Thread
 import time
 import random
+import datetime
 
 from TimeTable import TimeTable
 from Timer import Manager
@@ -15,7 +16,6 @@ class ContextManager(Manager):
     Класс, ответственный за переключения между действиями
     Так же принимает Intent от DialogManager-а при реагирует на него
     """
-
     def __init__(self, tree, n_iterations=500):
         self.n_iterations = n_iterations
         self.tree = tree
@@ -23,7 +23,7 @@ class ContextManager(Manager):
         self.finished_stack = []
         self.path: List[Node] = None
         self.current_path_idx = None
-        self.input = DialogManager(self)
+        self.dialog_manager = DialogManager(self)
 
         Manager.__init__(self)
 
@@ -31,73 +31,19 @@ class ContextManager(Manager):
         t.start()
 
     def initialize(self):
-        pop, err = self.tree.evolve(count=100, epochs=400, mutate=0.2)
-        self.path = self.tree.select(pop, 1)[0]
-        # random.seed(10)
-        # self.path = self.tree.mm_path(n_iterations=2000)
+        random.seed(11)
+        self.path = self.tree.mm_path(n_iterations=2000)
         print("РАСЧЕТНОЕ ВРЕМЯ:", TimeTable(self.tree.requirements())(self.path).time())
         self.current_path_idx = 0
         self.stack.append(Action(self.path[self.current_path_idx], self))
         self.handle_top_action()
 
-    def handle_top_action(self):
+    def current_state(self):
         """
-        Вызывается для обработки несовершенного действия на вершине стэка
+        Состояние контекст мэнеджера описывается двумя стэками
         :return:
         """
-        try:
-            top_action = self.stack[-1]
-        except IndexError:
-            print("Finished")
-            return
-
-        # Произошел переход к действию до того,
-        # как предыдущее техническое завершилось
-        # TODO: такого не должно было произойти, нужно поменять handle_next_response
-        prev_action = None
-        for action in self.finished_stack:
-            if action.queue_name() == top_action.queue_name() \
-                    and not action.timer.elapsed \
-                    and action in top_action.child_actions():
-                prev_action = action
-                break
-        if prev_action:
-            print("Когда будет готово", prev_action)
-            self.wait_for_response()
-
-        top_action.speak()
-
-        if top_action.paused():
-            top_action.restart()
-        else:
-            top_action.start()
-
-        if top_action.is_technical():
-            print()
-            self.handle_next_response()
-        else:
-            self.wait_for_response()
-
-    def wait_for_response(self):
-        """
-        Ожидание реплики со стороны клиента
-        :return:
-        """
-        t = Thread(target=self.input.run)
-        t.start()
-
-    def update(self):
-        """
-        Функция, работающая в отдельном потоке
-        Обновляет таймеры действий в стэке с перерывом в 1 секунду
-        :return:
-        """
-        while True:
-            for action in self.stack:
-                action.update()
-            for action in self.finished_stack:
-                action.update()
-            time.sleep(1)
+        return self.stack.copy(), self.finished_stack.copy()
 
     def handle_intent(self, intent: Intent):
         """
@@ -109,18 +55,54 @@ class ContextManager(Manager):
             self.handle_next_response()
         elif intent == Intent.REPEAT:
             self.handle_repeat_response()
-        elif intent == Intent.NOT_READY:
-            self.handle_not_ready_response()
+        elif intent == Intent.CHANGE:
+            self.handle_change_response()
 
-    def handle_next_response(self):
+    def handle_top_action(self):
         """
-        Интент перехода к следующему действию
+        Вызывается для обработки несовершенного действия на вершине стэка
         :return:
         """
         try:
             top_action = self.stack[-1]
         except IndexError:
-            print("Finished")
+            return
+
+        # Проверка, что предшествующие технические действия выполнены
+        prev_action = self.last_waiting_action(top_action)
+        assert prev_action is None
+
+        # Выдается реплика действия
+        top_action.speak()
+
+        # Запускается или возобновляется таймер действия
+        if top_action.paused():
+            top_action.restart()
+        else:
+            top_action.start()
+
+        # переход к следующему действию или ожидание ответа от человека
+        if top_action.is_technical():
+            print()
+            self.handle_next_response()
+        else:
+            self.wait_for_response()
+
+    def handle_next_response(self):
+        try:
+            top_action = self.stack[-1]
+        except IndexError:
+            if len(self.path) == self.current_path_idx:
+                pass
+            else:
+                # Узлы обошли не все, но когда человек дал команду 'дальше', стэк был пустой
+                # Это произошло потому, что было ожидание какого-то технического действия
+                # Поэтому здесь останавливаем техническое действие и идем дальше по path
+                self.current_path_idx += 1
+                return_to = Action(self.path[self.current_path_idx], self)
+                return_to.stop_children()
+                self.stack.append(return_to)
+                self.handle_top_action()
             return
 
         if not top_action.is_technical():
@@ -133,11 +115,126 @@ class ContextManager(Manager):
         self.current_path_idx += 1
         if len(self.stack) == 0:
             try:
-                self.stack.append(Action(self.path[self.current_path_idx], self))
+                next_action = Action(self.path[self.current_path_idx], self)
+                prev_action = self.last_waiting_action(next_action)
+                if prev_action is None:
+                    # Если все нормально, двигаемся дальше по path
+                    self.stack.append(Action(self.path[self.current_path_idx], self))
+                else:
+                    # Если следующему действию предшествует незавершенное техническое действие
+                    # Пытаемся переключиться на другое действие
+                    node_switch_to = self.try_to_switch(prev_action)
+                    if node_switch_to is None:
+                        # Если переключиться некуда, остается ждать завершения технического действия,
+                        # сдвинуть current_index на 1 назад и может быть ждать ответа
+                        self.current_path_idx -= 1
+                        print("Ждем", prev_action.node().name)
+                        self.wait_for_response()
+                        return
+                    else:
+                        # Если есть куда перейти, пересчтываем path и добавляем другое действие на верх стэка
+                        self.path = self.tree.mm_path(start=self.path[:self.current_path_idx] + [node_switch_to])
+                        self.stack.append(Action(node_switch_to, self))
             except IndexError:
-                print("Finished")
+                pass
                 return
+        else:
+            # Если в стэке уже что-то есть, то пока в него ничего не добавляем
+            pass
         self.handle_top_action()
+
+    def handle_timeout_response(self, action: Action):
+        """
+        Обработчик таймаута у текущего действия
+        :return:
+        """
+        if not action.is_technical() or len(action.out().inp) > 1:
+            # TODO: непонятный момент
+            self.remind(action)
+        elif action.is_technical() and len(action.out().inp) == 1:
+            try:
+                current_action = self.stack[-1]
+            except IndexError:
+                # Если стэк был пустым, значит мы ждади завершения технического действия
+                self.current_path_idx += 1
+                current_action = Action(self.path[self.current_path_idx], self)
+                self.stack.append(current_action)
+                self.handle_top_action()
+                return
+            if action.queue_name() != current_action.queue_name():
+                # Ставим в стэк над приостановленным действием следующее и меняем их порядок в self.path
+                current_action.pause()
+                current_action.stop_children()
+                print()
+                print("Вернемся пока к", action.queue_name())
+                next_action = None
+                for node in self.path[self.current_path_idx + 1:]:
+                    if node.queue_name == action.queue_name():
+                        next_action = Action(node, self)
+                        break
+                assert next_action is not None
+                self.path[self.current_path_idx:] = [next_action.node()] + \
+                                                    [x for x in self.path[self.current_path_idx:]
+                                                     if x != next_action.node()]
+                self.stack.append(next_action)
+                self.handle_top_action()
+
+    def last_waiting_action(self, top_action) -> Optional[Action]:
+        """
+        Если в finished_stack есть незавершенное техническое действие
+        которое предшествует top_action, то вернет его
+        :param top_action:
+        :return:
+        """
+        prev_action = None
+        for action in self.finished_stack:
+            if top_action.queue_name() == action.queue_name() \
+                    and not action.timer.elapsed \
+                    and action in top_action.child_actions():
+                prev_action = action
+                break
+        return prev_action
+
+    def try_to_switch(self, prev_action) -> Optional[Node]:
+        """
+        Пытается найти действие, которое можно выполнить раньше next_action
+        :param prev_action: незавершенное действие, предшествующее next_action
+        :return:
+        """
+        possible_moves: List[Node] = []
+        # Собираем все возможные переходы
+        for node in self.path[self.current_path_idx + 1:]:
+            if all(self.node_finished(x) for x in node.children()):
+                possible_moves.append(node)
+        if len(possible_moves) == 0:
+            return None
+
+        time = prev_action.timer.time_left()
+        time_diff = [abs(time - datetime.timedelta(seconds=node.time)) for node in possible_moves]
+        chosen_node = possible_moves[time_diff.index(min(time_diff))]
+        return chosen_node
+
+    def node_finished(self, node):
+        # Проверяет, что действие есть в завершенном стэке и оно остановлено
+        for action in self.finished_stack:
+            if action.node() == node and not action.timer.elapsed:
+                return True
+        return False
+
+    def wait_for_response(self):
+        """
+        Ожидание реплики со стороны клиента
+        :return:
+        """
+        t = Thread(target=self.dialog_manager.run)
+        t.start()
+
+    def remind(self, action):
+        if not action.is_technical():
+            action.remind()
+        else:
+            print("НАПОМИНАНИЕ:", action)
+        self.wait_for_response()
 
     def handle_repeat_response(self, *args, **kargs):
         """
@@ -148,6 +245,22 @@ class ContextManager(Manager):
         top_action.speak()
         self.wait_for_response()
 
+    def handle_change_response(self):
+        """
+        Интент смены предлагаемого действия
+        :return:
+        """
+        if len(self.stack) == 0:
+            self.wait_for_response()
+            return
+        print("OK")
+        top_node = self.stack[-1].node()
+        possible_moves = []
+        for node in self.path[self.current_path_idx + 1:]:
+            if self.node_finished(node) or len(node.inp) == 0:
+                possible_moves.append(node)
+        print(possible_moves)
+
     def on_timer_elapsed(self, action: Action):
         """
         Обработчик события истечения времени у таймера
@@ -155,59 +268,16 @@ class ContextManager(Manager):
         """
         self.handle_timeout_response(action)
 
-    def handle_timeout_response(self, action: Action):
+    def update(self):
         """
-        Обработчик таймаута у текущего действия
+        Функция, работающая в отдельном потоке
+        Обновляет таймеры действий в стэке с перерывом в 1 секунду
         :return:
         """
-        if not action.is_technical() or len(action.out().inp) > 1:
-            # Если не требуется переходить к другому действию, просто напоминаем о таймауте и замолкаем
-            self.remind(action)
-        elif action.is_technical() and len(action.out().inp) == 1:
-            print()
-            # Если вышел таймер технического действия, ставим на паузу текущее действие
-            # И кладем в стэк следующее  действие
-            current_action = self.stack[-1]
-            # Совпадает ли очередь у действия на вершине стэка и у сработавшего действия
-            if action.queue_name() == current_action.queue_name():
-                # Тут ситцация, когда перешли в действию, когда предшествующее ему
-                # техническое действие не успело завершиться
-                self.wait_for_response()
-            else:
-                # Ставим в стэк над приостановленным действием следующее и меняем их порядок в self.path
-                current_action.pause()
-                current_action.stop_children()
-                print("Let's return to", action.queue_name(), "from", action)
-                next_action = None
-                for node in self.path[self.current_path_idx + 1:]:
-                    if node.queue_name == action.queue_name():
-                        next_action = Action(node, self)
-                        break
-                idx = self.path.index(next_action.node())
-                # TODO: Здесь нужно пересчтитать path
-                self.path[self.current_path_idx:] = [self.path[idx]] + \
-                                                    [x for x in self.path[self.current_path_idx:]
-                                                     if x != next_action.node()]
-                self.stack.append(next_action)
-                self.handle_top_action()
-
-    def remind(self, action):
-        if not action.is_technical():
-            action.remind()
-        else:
-            print("НАПОМИНАНИЕ:", action)
-        self.wait_for_response()
-
-    def handle_not_ready_response(self):
-        top_action = self.stack[-1]
-        prev_action = None
-        for action in self.finished_stack:
-            if action.queue_name() == top_action.queue_name() and not action.timer.elapsed:
-                prev_action = action
-                break
-        assert prev_action is not None
-        self.wait_for_response()
-
-
-
+        while True:
+            for action in self.stack:
+                action.update()
+            for action in self.finished_stack:
+                action.update()
+            time.sleep(0.5)
 
