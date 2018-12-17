@@ -61,6 +61,8 @@ class ContextManager(Manager):
             self.handle_choosing_next()
         elif intent == Intent.CHANGE_NEXT:
             self.handle_changing_next(params)
+        elif intent == Intent.NEGATIVE:
+            self.handle_negative()
 
     def handle_top_action(self):
         """
@@ -69,6 +71,8 @@ class ContextManager(Manager):
         """
         try:
             top_action = self.stack[-1]
+            if len(self.finished_stack) == len(self.path):
+                print("Закончили!")
         except IndexError:
             return
 
@@ -317,6 +321,10 @@ class ContextManager(Manager):
         :return:
         """
         self.dialog_manager.push(unit)
+
+    def handle_negative(self):
+        print("ОК, я буду ждать дальнейшей команды")
+        self.wait_for_response()
 
 
 

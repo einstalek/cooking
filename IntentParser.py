@@ -6,6 +6,7 @@ class Intent(Enum):
     REPEAT = 1,  # Повтори предыдущую реплику
     CHOOSE_NEXT = 2,  # Давай что-нибудь другое
     CHANGE_NEXT = 3,  # Дальше будем чистить картошку
+    NEGATIVE = 4,
 
 
 class IntentParser:
@@ -25,4 +26,6 @@ class IntentParser:
             intent = Intent.REPEAT
         if any(x in phrase for x in self.choose_next):
             intent = Intent.CHOOSE_NEXT
+        if any(x in phrase for x in self.negative):
+            intent = Intent.NEGATIVE
         return intent
