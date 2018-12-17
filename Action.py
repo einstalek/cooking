@@ -1,6 +1,8 @@
 from typing import List
 from Node import Node
-from Timer import Timer, Manager
+from Timer import Timer
+from abcManager import Manager
+from ContextUnit import ContextUnit
 import random
 import re
 
@@ -28,8 +30,8 @@ class Action:
     def start(self):
         self.timer.start()
 
-    def restart(self):
-        self.timer.restart()
+    def unpause(self):
+        self.timer.unpause()
 
     def stop(self):
         self.timer.stop()
@@ -75,7 +77,10 @@ class Action:
         else:
             phrase = random.sample(self.__node.info["Phrase"], 1)[0]
             params = self.extract_params(phrase)
-            print(self.reformat(params, phrase))
+            reformatted = self.reformat(params, phrase)
+
+            print(reformatted)
+            self.cm.on_action_spoken(ContextUnit(reformatted, params))
 
     def remind(self):
         if self.__node.file is None:

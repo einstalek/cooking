@@ -1,12 +1,10 @@
-from enum import Enum
-from Timer import Manager
+from threading import Thread
+import time
+from typing import List
 
-
-class Intent(Enum):
-    NEXT = 0,  # Переход к следующему по порядку действию
-    REPEAT = 1,  # Повтори предыдущую реплику
-    TIMEOUT = 2,  # У действия сработал таймер
-    CHANGE = 3,  # Давай что-нибудь другое
+from ContextUnit import ContextUnit, UnitType
+from IntentParser import Intent, IntentParser
+from abcManager import Manager
 
 
 class DialogManager:
@@ -16,19 +14,38 @@ class DialogManager:
 
     def __init__(self, cm: Manager):
         self.context_manager = cm
-        self.stack = []
+        self._stack: List[ContextUnit] = []
+        self.run()
+        self.parser = IntentParser()
+
+    def extract_intent(self):
+        while True:
+            response = input()
+            intent = self.parser.extract_intent(response)
+
+            if intent is None and len(response) > 0:
+                # В случае, когда последним стоит выбор следующего действия
+                node_name = self.fill_choice_unit(response)
+                self.context_manager.handle_intent(Intent.CHANGE_NEXT, node_name)
+
+            if intent is not None:
+                self.context_manager.handle_intent(intent)
+            time.sleep(0.5)
+
+    def push(self, unit: ContextUnit):
+        self._stack.append(unit)
 
     def run(self):
-        response = input()
-        if 'r' == response:
-            intent = Intent.REPEAT
-        elif 'n' == response:
-            intent = Intent.NEXT
-        elif 'c' == response:
-            intent = Intent.CHANGE
-        else:
-            intent = Intent.NEXT
-        # сохраняем пришедший интент и предшуствующее ему состояние CM
-        self.stack.append([intent, self.context_manager.current_state()])
-        self.context_manager.handle_intent(intent)
+        t = Thread(target=self.extract_intent)
+        t.start()
+
+    def fill_choice_unit(self, response):
+        if not self._stack[-1].type == UnitType.CHOICE:
+            return None
+        for param in self._stack[-1].params:
+            if response in param:
+                return param
+        return None
+
+
 

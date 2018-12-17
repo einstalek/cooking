@@ -6,6 +6,6 @@ Phrase:
 
 Remind:
     - "Положили {what} {where}?"
-    - "{what} уже в {where}"
+    - "{what} уже в {where}?"
 
 Warning:

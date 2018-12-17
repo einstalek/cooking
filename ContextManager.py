@@ -1,5 +1,6 @@
 from typing import List, Optional
 from Action import Action
+from ContextUnit import ContextUnit, UnitType
 from Node import Node
 from threading import Thread
 import time
@@ -7,7 +8,7 @@ import random
 import datetime
 
 from TimeTable import TimeTable
-from Timer import Manager
+from abcManager import Manager
 from DialogManager import DialogManager, Intent
 
 
@@ -31,7 +32,7 @@ class ContextManager(Manager):
         t.start()
 
     def initialize(self):
-        random.seed(11)
+        # random.seed(11)
         self.path = self.tree.mm_path(n_iterations=2000)
         print("РАСЧЕТНОЕ ВРЕМЯ:", TimeTable(self.tree.requirements())(self.path).time())
         self.current_path_idx = 0
@@ -45,9 +46,10 @@ class ContextManager(Manager):
         """
         return self.stack.copy(), self.finished_stack.copy()
 
-    def handle_intent(self, intent: Intent):
+    def handle_intent(self, intent: Intent, params=None):
         """
         Обработчик интентов
+        :param params:
         :param intent:
         :return:
         """
@@ -55,8 +57,10 @@ class ContextManager(Manager):
             self.handle_next_response()
         elif intent == Intent.REPEAT:
             self.handle_repeat_response()
-        elif intent == Intent.CHANGE:
-            self.handle_change_response()
+        elif intent == Intent.CHOOSE_NEXT:
+            self.handle_choosing_next()
+        elif intent == Intent.CHANGE_NEXT:
+            self.handle_changing_next(params)
 
     def handle_top_action(self):
         """
@@ -77,7 +81,7 @@ class ContextManager(Manager):
 
         # Запускается или возобновляется таймер действия
         if top_action.paused():
-            top_action.restart()
+            top_action.unpause()
         else:
             top_action.start()
 
@@ -204,7 +208,7 @@ class ContextManager(Manager):
         possible_moves: List[Node] = []
         # Собираем все возможные переходы
         for node in self.path[self.current_path_idx + 1:]:
-            if all(self.node_finished(x) for x in node.children()):
+            if all(self.node_finished(x) for x in node.children()) or len(node.inp) == 0:
                 possible_moves.append(node)
         if len(possible_moves) == 0:
             return None
@@ -217,7 +221,7 @@ class ContextManager(Manager):
     def node_finished(self, node):
         # Проверяет, что действие есть в завершенном стэке и оно остановлено
         for action in self.finished_stack:
-            if action.node() == node and not action.timer.elapsed:
+            if action.node() == node and action.timer.elapsed:
                 return True
         return False
 
@@ -226,15 +230,16 @@ class ContextManager(Manager):
         Ожидание реплики со стороны клиента
         :return:
         """
-        t = Thread(target=self.dialog_manager.run)
-        t.start()
+        print("...")
+        # t = Thread(target=self.dialog_manager.extract_intent)
+        # t.start()
 
     def remind(self, action):
         if not action.is_technical():
             action.remind()
+            self.wait_for_response()
         else:
-            print("НАПОМИНАНИЕ:", action)
-        self.wait_for_response()
+            print("НАПОМИНАНИЕ:", action.node().name)
 
     def handle_repeat_response(self, *args, **kargs):
         """
@@ -245,7 +250,8 @@ class ContextManager(Manager):
         top_action.speak()
         self.wait_for_response()
 
-    def handle_change_response(self):
+    def handle_choosing_next(self):
+        # TODO
         """
         Интент смены предлагаемого действия
         :return:
@@ -253,13 +259,36 @@ class ContextManager(Manager):
         if len(self.stack) == 0:
             self.wait_for_response()
             return
-        print("OK")
-        top_node = self.stack[-1].node()
+        self.stack[-1].pause()
         possible_moves = []
         for node in self.path[self.current_path_idx + 1:]:
             if self.node_finished(node) or len(node.inp) == 0:
                 possible_moves.append(node)
-        print(possible_moves)
+
+        if len(possible_moves) == 0:
+            self.wait_for_response()
+            return
+        phrase = "Выберите следующее дествие:" + repr(possible_moves)
+        print(phrase)
+        self.dialog_manager.push(ContextUnit(phrase, unit_type=UnitType.CHOICE,
+                                             params=[str(x) for x in possible_moves]))
+        self.wait_for_response()
+
+    def handle_changing_next(self, node_name):
+        top_action = self.stack[-1]
+        if node_name is None:
+            if top_action.paused():
+                top_action.timer.restart()
+            self.wait_for_response()
+            return
+        node_to_change = [x for x in self.path[self.current_path_idx + 1:] if x.name == node_name][0]
+        temp = self.path[:self.current_path_idx] + [node_to_change]
+        new_path = self.tree.mm_path(start=temp, n_iterations=2000)
+        print("Новое время:", TimeTable(self.tree.requirements())(new_path).time())
+        self.path = new_path
+        self.stack.pop()
+        self.stack.append(Action(node_to_change, self))
+        self.handle_top_action()
 
     def on_timer_elapsed(self, action: Action):
         """
@@ -279,5 +308,16 @@ class ContextManager(Manager):
                 action.update()
             for action in self.finished_stack:
                 action.update()
-            time.sleep(0.5)
+            time.sleep(0.1)
+
+    def on_action_spoken(self, unit):
+        """
+        Когда действие произнесло фразу, добавляем ее в стэк диалог менеджера
+        :param unit:
+        :return:
+        """
+        self.dialog_manager.push(unit)
+
+
+
 

@@ -1,18 +1,6 @@
 import datetime
-from typing import Optional
 
-from abc import ABC
-
-
-class Manager(ABC):
-    def on_timer_elapsed(self, action: object):
-        pass
-
-    def handle_intent(self, intent):
-        pass
-
-    def current_state(self):
-        pass
+from abcManager import Manager
 
 
 class Timer:
@@ -53,7 +41,8 @@ class Timer:
         self.paused = True
         self.left = datetime.timedelta(seconds=self.timedelta) - (datetime.datetime.now() - self.time_started)
 
-    def restart(self):
+    def unpause(self):
+        assert self.paused
         self.time_elapsed = datetime.datetime.now() + self.left
         self.paused = False
 
@@ -61,8 +50,9 @@ class Timer:
         if not self.elapsed and self.active:
             return self.time_elapsed - datetime.datetime.now()
 
-if __name__ == "__main__":
-    timer = Timer(3, "check", None)
-    timer.start()
-    while not timer.elapsed:
-        timer.update()
+    def restart(self):
+        self.__init__(self.timedelta, self.name, self.parent)
+        self.start()
+
+
+
