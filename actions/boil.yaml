@@ -2,8 +2,8 @@ Name:
     "Варка"
 
 Phrase:
-    - "Варите {ingredients} в течение {time}"
-    - "Оставьте {ingredients} вариться на {time}"
+    - "Варите {ingredients} в течение {time} минут"
+    - "Оставьте {ingredients} вариться на {time} минут"
 
 Remind:
     - "{ingredients} еще не сварилась?"

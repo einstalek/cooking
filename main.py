@@ -39,7 +39,7 @@ if __name__ == '__main__':
     put_on_tray = Node("выкладывание на поднос", 10, ["h"], file="put_on_tray.yaml"
                        )(lay_tray)
 
-    turn_on_oven = Node("включение духовки", 3, ["h", "o"], False, file="turn_on_oven.yaml",
+    turn_on_oven = Node("включение духовки", 3, ["h", "o"], switchable=False, file="turn_on_oven.yaml",
                         regime="верхний нагрев")
     wait_oven_warming = Node("ожидание нагрева духовки", 15, ["o"], file="waiting.yaml",
                              what="нагрев духовки"

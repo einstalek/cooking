@@ -4,8 +4,8 @@ from ContextUnit import ContextUnit, UnitType
 from Node import Node
 from threading import Thread
 import time
-import random
 import datetime
+from PhraseGenerator import PhraseGenerator
 
 from TimeTable import TimeTable
 from abcManager import Manager
@@ -21,10 +21,11 @@ class ContextManager(Manager):
         self.n_iterations = n_iterations
         self.tree = tree
         self.stack: List[Action] = []
-        self.finished_stack = []
+        self.finished_stack: List[Action] = []
         self.path: List[Node] = None
         self.current_path_idx = None
         self.dialog_manager = DialogManager(self)
+        self.finished = False
 
         Manager.__init__(self)
 
@@ -34,7 +35,8 @@ class ContextManager(Manager):
     def initialize(self):
         # random.seed(11)
         self.path = self.tree.mm_path(n_iterations=2000)
-        print("РАСЧЕТНОЕ ВРЕМЯ:", TimeTable(self.tree.requirements())(self.path).time())
+        time = TimeTable(self.tree.requirements())(self.path).time()
+        PhraseGenerator.speak("calculated.time", time=time)
         self.current_path_idx = 0
         self.stack.append(Action(self.path[self.current_path_idx], self))
         self.handle_top_action()
@@ -53,6 +55,8 @@ class ContextManager(Manager):
         :param intent:
         :return:
         """
+        if self.finished:
+            return
         if intent == Intent.NEXT:
             self.handle_next_response()
         elif intent == Intent.REPEAT:
@@ -71,8 +75,9 @@ class ContextManager(Manager):
         """
         try:
             top_action = self.stack[-1]
-            if len(self.finished_stack) == len(self.path):
-                print("Закончили!")
+            if top_action.node() == self.path[-1]:
+                PhraseGenerator.speak("end.dialog")
+                self.finished = True
         except IndexError:
             return
 
@@ -109,6 +114,7 @@ class ContextManager(Manager):
                 self.current_path_idx += 1
                 return_to = Action(self.path[self.current_path_idx], self)
                 return_to.stop_children()
+                PhraseGenerator.speak("stop.waiting", queue_name=return_to.queue_name())
                 self.stack.append(return_to)
                 self.handle_top_action()
             return
@@ -127,7 +133,9 @@ class ContextManager(Manager):
                 prev_action = self.last_waiting_action(next_action)
                 if prev_action is None:
                     # Если все нормально, двигаемся дальше по path
-                    self.stack.append(Action(self.path[self.current_path_idx], self))
+                    if next_action.queue_name() != top_action.queue_name():
+                        PhraseGenerator.speak("switch.queue", queue_name=next_action.queue_name())
+                    self.stack.append(next_action)
                 else:
                     # Если следующему действию предшествует незавершенное техническое действие
                     # Пытаемся переключиться на другое действие
@@ -136,7 +144,7 @@ class ContextManager(Manager):
                         # Если переключиться некуда, остается ждать завершения технического действия,
                         # сдвинуть current_index на 1 назад и может быть ждать ответа
                         self.current_path_idx -= 1
-                        print("Ждем", prev_action.node().name)
+                        PhraseGenerator.speak("wait.technical", action=prev_action.node().name)
                         self.wait_for_response()
                         return
                     else:
@@ -151,6 +159,32 @@ class ContextManager(Manager):
             pass
         self.handle_top_action()
 
+    def node_finished(self, node):
+        # Проверяет, что действие есть в завершенном стэке и оно остановлено
+        for action in self.finished_stack:
+            if action.node() == node and action.timer.elapsed:
+                return True
+        return False
+
+    def try_to_switch(self, prev_action) -> Optional[Node]:
+        """
+        Пытается найти действие, которое можно выполнить раньше next_action с учетом его длительности
+        :param prev_action: незавершенное действие, предшествующее next_action
+        :return:
+        """
+        possible_moves: List[Node] = []
+        # Собираем все возможные переходы
+        for node in self.path[self.current_path_idx + 1:]:
+            if all(self.node_finished(x) for x in node.children()) or len(node.inp) == 0:
+                possible_moves.append(node)
+        if len(possible_moves) == 0:
+            return None
+
+        time = prev_action.timer.time_left()
+        time_diff = [abs(time - datetime.timedelta(seconds=node.time)) for node in possible_moves]
+        chosen_node = possible_moves[time_diff.index(min(time_diff))]
+        return chosen_node
+
     def handle_timeout_response(self, action: Action):
         """
         Обработчик таймаута у текущего действия
@@ -158,12 +192,14 @@ class ContextManager(Manager):
         """
         if not action.is_technical() or len(action.out().inp) > 1:
             # TODO: непонятный момент
+            action.stop()
+            action.stop_children()
             self.remind(action)
         elif action.is_technical() and len(action.out().inp) == 1:
             try:
                 current_action = self.stack[-1]
             except IndexError:
-                # Если стэк был пустым, значит мы ждади завершения технического действия
+                # Если стэк был пустым, значит мы ждали завершения технического действия
                 self.current_path_idx += 1
                 current_action = Action(self.path[self.current_path_idx], self)
                 self.stack.append(current_action)
@@ -174,7 +210,7 @@ class ContextManager(Manager):
                 current_action.pause()
                 current_action.stop_children()
                 print()
-                print("Вернемся пока к", action.queue_name())
+                PhraseGenerator.speak("stop.and.switch", action=action.node().name)
                 next_action = None
                 for node in self.path[self.current_path_idx + 1:]:
                     if node.queue_name == action.queue_name():
@@ -203,32 +239,6 @@ class ContextManager(Manager):
                 break
         return prev_action
 
-    def try_to_switch(self, prev_action) -> Optional[Node]:
-        """
-        Пытается найти действие, которое можно выполнить раньше next_action
-        :param prev_action: незавершенное действие, предшествующее next_action
-        :return:
-        """
-        possible_moves: List[Node] = []
-        # Собираем все возможные переходы
-        for node in self.path[self.current_path_idx + 1:]:
-            if all(self.node_finished(x) for x in node.children()) or len(node.inp) == 0:
-                possible_moves.append(node)
-        if len(possible_moves) == 0:
-            return None
-
-        time = prev_action.timer.time_left()
-        time_diff = [abs(time - datetime.timedelta(seconds=node.time)) for node in possible_moves]
-        chosen_node = possible_moves[time_diff.index(min(time_diff))]
-        return chosen_node
-
-    def node_finished(self, node):
-        # Проверяет, что действие есть в завершенном стэке и оно остановлено
-        for action in self.finished_stack:
-            if action.node() == node and action.timer.elapsed:
-                return True
-        return False
-
     def wait_for_response(self):
         """
         Ожидание реплики со стороны клиента
@@ -250,12 +260,14 @@ class ContextManager(Manager):
         Интент повторения реплики текущего действия
         :return:
         """
-        top_action = self.stack[-1]
-        top_action.speak()
+        try:
+            top_action = self.stack[-1]
+            top_action.speak()
+        except IndexError:
+            pass
         self.wait_for_response()
 
     def handle_choosing_next(self):
-        # TODO
         """
         Интент смены предлагаемого действия
         :return:
@@ -265,16 +277,18 @@ class ContextManager(Manager):
             return
         self.stack[-1].pause()
         possible_moves = []
+        # Проходим по всем действиям, не попавшим в stack и finished_stack
         for node in self.path[self.current_path_idx + 1:]:
-            if self.node_finished(node) or len(node.inp) == 0:
+            if len(node.inp) == 0 or all(self.node_finished(x) for x in node.inp):
                 possible_moves.append(node)
 
         if len(possible_moves) == 0:
+            PhraseGenerator.speak("nowhere.to.switch")
             self.wait_for_response()
             return
-        phrase = "Выберите следующее дествие:" + repr(possible_moves)
-        print(phrase)
-        self.dialog_manager.push(ContextUnit(phrase, unit_type=UnitType.CHOICE,
+        PhraseGenerator.speak("choose.next", options=", ".join(str(x) for x in possible_moves))
+        # Создаем форму с параметрами - названиями узлов, в которые можно перейти
+        self.dialog_manager.push(ContextUnit(repr(possible_moves), unit_type=UnitType.CHOICE,
                                              params=[str(x) for x in possible_moves]))
         self.wait_for_response()
 
@@ -288,7 +302,8 @@ class ContextManager(Manager):
         node_to_change = [x for x in self.path[self.current_path_idx + 1:] if x.name == node_name][0]
         temp = self.path[:self.current_path_idx] + [node_to_change]
         new_path = self.tree.mm_path(start=temp, n_iterations=2000)
-        print("Новое время:", TimeTable(self.tree.requirements())(new_path).time())
+        time = TimeTable(self.tree.requirements())(new_path).time()
+        PhraseGenerator.speak("calculated.time", time=time)
         self.path = new_path
         self.stack.pop()
         self.stack.append(Action(node_to_change, self))
@@ -323,7 +338,7 @@ class ContextManager(Manager):
         self.dialog_manager.push(unit)
 
     def handle_negative(self):
-        print("ОК, я буду ждать дальнейшей команды")
+        PhraseGenerator.speak("wait.confirmation")
         self.wait_for_response()
 
 

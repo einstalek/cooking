@@ -13,7 +13,6 @@ class Action:
         node.parent = self
         self.timer = Timer(node.time, node.name, self)
         self.cm = cm
-        self.name = None
 
     def node(self) -> Node:
         return self.__node
@@ -76,8 +75,13 @@ class Action:
             print(self.__node.name)
         else:
             phrase = random.sample(self.__node.info["Phrase"], 1)[0]
+            warnings = self.__node.info["Warning"]
             params = self.extract_params(phrase)
             reformatted = self.reformat(params, phrase)
+
+            if warnings:
+                warning = random.sample(warnings, 1)[0]
+                reformatted += "\n" + warning
 
             print(reformatted)
             self.cm.on_action_spoken(ContextUnit(reformatted, params))
@@ -92,10 +96,22 @@ class Action:
 
     @staticmethod
     def extract_params(phrase: str) -> List[str]:
+        """
+        Извлекает имена параметров из фразы
+        :param phrase:
+        :return:
+        """
         search = re.findall("{\w*}", phrase)
         return [x[1:-1] for x in search]
 
     def reformat(self, params, phrase: str):
+        """
+        Для каждлого параметра из params берет значение из параметров, указанных в Node
+        и вставляет их в phrase
+        :param params:
+        :param phrase:
+        :return:
+        """
         reformatted: str = phrase
         if "ingredients" in params and self.node().inp_ingredients:
             reformatted = reformatted.replace("{ingredients}", ", ".join([x.name for x in self.node().inp_ingredients]))

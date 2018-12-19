@@ -2,8 +2,8 @@ Name:
     "Запекание"
 
 Phrase:
-    - "Запекайте {ingredients} в течение {time}"
-    - "Оставьте {ingredients} в духовке на {time}"
+    - "Запекайте {ingredients} в течение {time} минут"
+    - "Оставьте {ingredients} в духовке на {time} минут"
 
 Remind:
     - "{ingredients} еще не готовы?"

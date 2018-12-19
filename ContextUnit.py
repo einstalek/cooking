@@ -12,6 +12,7 @@ class ContextUnit:
         self.type = unit_type
         self.phrase = phrase
         self.params = params
+        self.solved = False
 
     def __repr__(self):
         return self.phrase + " " + str(self.type)

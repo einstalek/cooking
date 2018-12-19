@@ -2,15 +2,25 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="e43b9acd-c475-4697-a7c5-b847c4a62f99" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/ContextUnit.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/IntentParser.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/abcManager.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/PhraseGenerator.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/dialogs/calculated.time.dialog" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/dialogs/choose.next.dialog" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/dialogs/end.dialog" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/dialogs/nowhere.to.switch.dialog" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/dialogs/stop.and.switch.dialog" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/dialogs/stop.waiting.dialog" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/dialogs/switch.queue.dialog" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/dialogs/wait.confirmation.dialog" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/dialogs/wait.technical.dialog" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Action.py" beforeDir="false" afterPath="$PROJECT_DIR$/Action.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/ContextManager.py" beforeDir="false" afterPath="$PROJECT_DIR$/ContextManager.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ContextUnit.py" beforeDir="false" afterPath="$PROJECT_DIR$/ContextUnit.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/DialogManager.py" beforeDir="false" afterPath="$PROJECT_DIR$/DialogManager.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Timer.py" beforeDir="false" afterPath="$PROJECT_DIR$/Timer.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/actions/put.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/actions/put.yaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/actions/add_cream.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/actions/add_cream.yaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/actions/bake.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/actions/bake.yaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/actions/boil.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/actions/boil.yaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/actions/mix_flour.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/actions/mix_flour.yaml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/actions/waiting.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/actions/waiting.yaml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
     </list>
@@ -24,45 +34,48 @@
     <session id="745673650">
       <usages-collector id="statistics.lifecycle.project">
         <counts>
-          <entry key="project.closed" value="6" />
+          <entry key="project.closed" value="7" />
           <entry key="project.open.time.0" value="1" />
           <entry key="project.open.time.1" value="3" />
           <entry key="project.open.time.23" value="1" />
           <entry key="project.open.time.3" value="2" />
-          <entry key="project.opened" value="7" />
+          <entry key="project.open.time.5" value="1" />
+          <entry key="project.opened" value="8" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.extensions.open">
         <counts>
+          <entry key="dialog" value="19" />
           <entry key="json" value="3" />
-          <entry key="py" value="61" />
+          <entry key="py" value="77" />
           <entry key="txt" value="3" />
-          <entry key="yaml" value="75" />
+          <entry key="yaml" value="107" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.open">
         <counts>
           <entry key="JSON" value="3" />
-          <entry key="PLAIN_TEXT" value="3" />
-          <entry key="Python" value="61" />
-          <entry key="YAML" value="75" />
+          <entry key="PLAIN_TEXT" value="22" />
+          <entry key="Python" value="77" />
+          <entry key="YAML" value="107" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.extensions.edit">
         <counts>
+          <entry key="dialog" value="1999" />
           <entry key="dummy" value="88" />
           <entry key="json" value="907" />
-          <entry key="py" value="42162" />
+          <entry key="py" value="45446" />
           <entry key="txt" value="59" />
-          <entry key="yaml" value="3419" />
+          <entry key="yaml" value="3461" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.edit">
         <counts>
           <entry key="JSON" value="907" />
-          <entry key="PLAIN_TEXT" value="147" />
-          <entry key="Python" value="42162" />
-          <entry key="YAML" value="3419" />
+          <entry key="PLAIN_TEXT" value="2146" />
+          <entry key="Python" value="45446" />
+          <entry key="YAML" value="3461" />
         </counts>
       </usages-collector>
     </session>
@@ -70,30 +83,33 @@
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/main.py">
+        <entry file="file://$PROJECT_DIR$/Action.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-385">
-              <caret line="41" column="46" selection-start-line="41" selection-start-column="46" selection-end-line="41" selection-end-column="46" />
+            <state relative-caret-position="615">
+              <caret line="86" column="65" selection-start-line="86" selection-start-column="65" selection-end-line="86" selection-end-column="65" />
               <folding>
-                <element signature="e#0#31#0" expanded="true" />
-                <marker date="1545058242346" expanded="true" signature="571:574" ph="..." />
+                <element signature="e#0#23#0" expanded="true" />
+                <marker date="1545233067710" expanded="true" signature="176:181" ph="..." />
+                <marker date="1545233067710" expanded="true" signature="504:541" ph="..." />
+                <marker date="1545233067710" expanded="true" signature="688:694" ph="..." />
+                <marker date="1545233067710" expanded="true" signature="709:938" ph="..." />
+                <marker date="1545233067710" expanded="true" signature="765:839" ph="..." />
+                <marker date="1545233067710" expanded="true" signature="856:895" ph="..." />
+                <marker date="1545233067710" expanded="true" signature="1083:1089" ph="..." />
+                <marker date="1545233067710" expanded="true" signature="1459:1465" ph="..." />
               </folding>
             </state>
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="true">
+      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/ContextManager.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="202">
-              <caret line="270" column="53" lean-forward="true" selection-start-line="270" selection-start-column="53" selection-end-line="270" selection-end-column="53" />
+            <state relative-caret-position="285">
+              <caret line="58" column="18" selection-start-line="58" selection-start-column="18" selection-end-line="58" selection-end-column="18" />
               <folding>
                 <element signature="e#0#33#0" expanded="true" />
-                <element signature="e#1211#1367#0" />
-                <element signature="e#7018#7535#0" />
-                <element signature="e#7605#8348#0" />
-                <element signature="e#8393#8620#0" />
-                <marker date="1545061462844" expanded="true" signature="486:491" ph="..." />
+                <marker date="1545235015696" expanded="true" signature="516:521" ph="..." />
               </folding>
             </state>
           </provider>
@@ -102,22 +118,22 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/ContextUnit.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="90">
-              <caret line="6" column="7" lean-forward="true" selection-start-line="6" selection-start-column="7" selection-end-line="6" selection-end-column="7" />
+            <state relative-caret-position="195">
+              <caret line="13" column="23" selection-start-line="13" selection-start-column="23" selection-end-line="13" selection-end-column="23" />
               <folding>
                 <element signature="e#0#21#0" expanded="true" />
-                <marker date="1545047822675" expanded="true" signature="69:110" ph="..." />
-                <marker date="1545047822675" expanded="true" signature="128:133" ph="..." />
+                <marker date="1545132895701" expanded="true" signature="69:110" ph="..." />
+                <marker date="1545132895701" expanded="true" signature="128:133" ph="..." />
               </folding>
             </state>
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="false">
+      <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/DialogManager.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="465">
-              <caret line="31" column="58" lean-forward="true" selection-start-line="31" selection-start-column="58" selection-end-line="31" selection-end-column="58" />
+            <state relative-caret-position="241">
+              <caret line="34" column="74" selection-start-line="34" selection-start-column="74" selection-end-line="34" selection-end-column="74" />
               <folding>
                 <element signature="e#0#28#0" expanded="true" />
               </folding>
@@ -128,47 +144,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/IntentParser.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="180">
-              <caret line="12" column="7" lean-forward="true" selection-start-line="12" selection-start-column="7" selection-end-line="12" selection-end-column="7" />
-              <folding>
-                <marker date="1545050838307" expanded="true" signature="470:475" ph="..." />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/actions/add_cream.yaml">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="60">
-              <caret line="4" column="57" selection-start-line="4" selection-start-column="57" selection-end-line="4" selection-end-column="57" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/actions/bake.yaml">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="60">
-              <caret line="4" column="23" selection-start-line="4" selection-start-column="23" selection-end-line="4" selection-end-column="23" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/actions/boil.yaml">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="135">
-              <caret line="9" column="40" lean-forward="true" selection-end-line="12" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/actions/clean.yaml">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="120">
-              <caret line="8" column="35" selection-start-line="8" selection-start-column="35" selection-end-line="8" selection-end-column="35" />
+            <state relative-caret-position="225">
+              <caret line="15" column="27" selection-start-line="15" selection-start-column="27" selection-end-line="15" selection-end-column="27" />
             </state>
           </provider>
         </entry>
@@ -190,6 +167,7 @@
       <find>run</find>
       <find>wait</find>
       <find>choos</find>
+      <find>.finished</find>
     </findStrings>
   </component>
   <component name="Git.Settings">
@@ -198,7 +176,6 @@
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
       <list>
-        <option value="$PROJECT_DIR$/action1.json" />
         <option value="$PROJECT_DIR$/inventory.json" />
         <option value="$PROJECT_DIR$/utils.py" />
         <option value="$PROJECT_DIR$/action.json" />
@@ -211,16 +188,12 @@
         <option value="$PROJECT_DIR$/Manager.py" />
         <option value="$PROJECT_DIR$/InputHandler.py" />
         <option value="$PROJECT_DIR$/actions/grate.yaml" />
-        <option value="$PROJECT_DIR$/actions/boil.yaml" />
         <option value="$PROJECT_DIR$/Ingredient.py" />
         <option value="$PROJECT_DIR$/actions/put_on_tray.yaml" />
         <option value="$PROJECT_DIR$/actions/lay_tray.yaml" />
         <option value="$PROJECT_DIR$/actions/turn_on_oven.yaml" />
-        <option value="$PROJECT_DIR$/actions/bake.yaml" />
         <option value="$PROJECT_DIR$/actions/squash.yaml" />
         <option value="$PROJECT_DIR$/actions/take_out.yaml" />
-        <option value="$PROJECT_DIR$/actions/mix_flour.yaml" />
-        <option value="$PROJECT_DIR$/actions/add_cream.yaml" />
         <option value="$PROJECT_DIR$/actions/put_in_pan.yaml" />
         <option value="$PROJECT_DIR$/actions/clean.yaml" />
         <option value="$PROJECT_DIR$/actions/mince.yaml" />
@@ -228,23 +201,38 @@
         <option value="$PROJECT_DIR$/Tree.py" />
         <option value="$PROJECT_DIR$/Node.py" />
         <option value="$PROJECT_DIR$/actions/mix.yaml" />
-        <option value="$PROJECT_DIR$/actions/waiting.yaml" />
         <option value="$PROJECT_DIR$/actions/ContextUnit.py" />
-        <option value="$PROJECT_DIR$/ContextUnit.py" />
         <option value="$PROJECT_DIR$/abcManager.py" />
         <option value="$PROJECT_DIR$/IntentParser.py" />
         <option value="$PROJECT_DIR$/actions/put.yaml" />
-        <option value="$PROJECT_DIR$/DialogManager.py" />
-        <option value="$PROJECT_DIR$/main.py" />
         <option value="$PROJECT_DIR$/Timer.py" />
+        <option value="$PROJECT_DIR$/dialogs/switching.key.dialog" />
+        <option value="$PROJECT_DIR$/dialogs/switch.queue.dialog" />
+        <option value="$PROJECT_DIR$/dialogs/wait.confirmation.dialog" />
+        <option value="$PROJECT_DIR$/dialogs/wait.technical.dialog" />
+        <option value="$PROJECT_DIR$/actions/add_cream.yaml" />
+        <option value="$PROJECT_DIR$/actions/bake.yaml" />
+        <option value="$PROJECT_DIR$/actions/boil.yaml" />
+        <option value="$PROJECT_DIR$/actions/mix_flour.yaml" />
+        <option value="$PROJECT_DIR$/actions/waiting.yaml" />
+        <option value="$PROJECT_DIR$/dialogs/calculated.time.dialog" />
+        <option value="$PROJECT_DIR$/ContextUnit.py" />
+        <option value="$PROJECT_DIR$/dialogs/choose.next.dialog" />
+        <option value="$PROJECT_DIR$/dialogs/stop.and.switch.dialog" />
+        <option value="$PROJECT_DIR$/main.py" />
+        <option value="$PROJECT_DIR$/PhraseGenerator.py" />
+        <option value="$PROJECT_DIR$/dialogs/nowhere.to.switch.dialog" />
+        <option value="$PROJECT_DIR$/dialogs/stop.waiting.dialog" />
         <option value="$PROJECT_DIR$/Action.py" />
+        <option value="$PROJECT_DIR$/dialogs/end.dialog" />
         <option value="$PROJECT_DIR$/ContextManager.py" />
+        <option value="$PROJECT_DIR$/DialogManager.py" />
       </list>
     </option>
   </component>
   <component name="ProjectFrameBounds">
     <option name="y" value="23" />
-    <option name="width" value="1557" />
+    <option name="width" value="1355" />
     <option name="height" value="1333" />
   </component>
   <component name="ProjectInspectionProfilesVisibleTreeState">
@@ -272,7 +260,6 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
-      <pane id="Scope" />
       <pane id="ProjectPane">
         <subPane>
           <expand>
@@ -283,16 +270,17 @@
             <path>
               <item name="graph" type="b2602c69:ProjectViewProjectNode" />
               <item name="graph" type="462c0819:PsiDirectoryNode" />
-              <item name="actions" type="462c0819:PsiDirectoryNode" />
+              <item name="dialogs" type="462c0819:PsiDirectoryNode" />
             </path>
           </expand>
           <select />
         </subPane>
       </pane>
+      <pane id="Scope" />
     </panes>
   </component>
   <component name="PropertiesComponent">
-    <property name="settings.editor.selected.configurable" value="preferences.sourceCode.YAML" />
+    <property name="settings.editor.selected.configurable" value="com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable" />
   </component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
@@ -312,6 +300,27 @@
     </option>
   </component>
   <component name="RunManager" selected="Python.main">
+    <configuration name="PhraseGenerator" type="PythonConfigurationType" factoryName="Python" temporary="true">
+      <module name="graph" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/PhraseGenerator.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
     <configuration name="Timer" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <module name="graph" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -401,10 +410,12 @@
       <item itemvalue="Python.tree" />
       <item itemvalue="Python.main" />
       <item itemvalue="Python.Timer" />
+      <item itemvalue="Python.PhraseGenerator" />
     </list>
     <recent_temporary>
       <list>
         <item itemvalue="Python.main" />
+        <item itemvalue="Python.PhraseGenerator" />
         <item itemvalue="Python.Timer" />
         <item itemvalue="Python.tree" />
         <item itemvalue="Python.utils" />
@@ -434,15 +445,15 @@
     </todo-panel>
   </component>
   <component name="ToolWindowManager">
-    <frame x="0" y="23" width="1557" height="1333" extended-state="0" />
+    <frame x="0" y="23" width="1355" height="1333" extended-state="0" />
     <editor active="true" />
     <layout>
-      <window_info content_ui="combo" id="Project" order="0" sideWeight="0.49692622" visible="true" weight="0.1764323" />
+      <window_info content_ui="combo" id="Project" order="0" sideWeight="0.49692622" visible="true" weight="0.20314842" />
       <window_info id="Structure" order="1" sideWeight="0.50307375" side_tool="true" weight="0.2059387" />
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" weight="0.21676068" />
-      <window_info active="true" anchor="bottom" id="Run" order="2" sideWeight="0.4986979" visible="true" weight="0.23932312" />
+      <window_info active="true" anchor="bottom" id="Run" order="2" sideWeight="0.4986979" visible="true" weight="0.34327155" />
       <window_info anchor="bottom" id="Debug" order="3" weight="0.3996777" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
@@ -455,25 +466,6 @@
       <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
       <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
     </layout>
-    <layout-to-restore>
-      <window_info content_ui="combo" id="Project" order="0" sideWeight="0.4995122" visible="true" weight="0.23783186" />
-      <window_info id="Structure" order="1" sideWeight="0.5004878" side_tool="true" weight="0.16935802" />
-      <window_info id="Favorites" order="2" side_tool="true" />
-      <window_info anchor="bottom" id="Message" order="0" />
-      <window_info anchor="bottom" id="Find" order="1" weight="0.32957292" />
-      <window_info active="true" anchor="bottom" id="Run" order="2" visible="true" weight="0.17405318" />
-      <window_info anchor="bottom" id="Debug" order="3" weight="0.3996777" />
-      <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
-      <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
-      <window_info anchor="bottom" id="TODO" order="6" />
-      <window_info anchor="bottom" id="Version Control" order="7" show_stripe_button="false" />
-      <window_info anchor="bottom" id="Terminal" order="8" />
-      <window_info anchor="bottom" id="Event Log" order="9" side_tool="true" />
-      <window_info anchor="bottom" id="Python Console" order="10" />
-      <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
-      <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
-      <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
-    </layout-to-restore>
   </component>
   <component name="VcsContentAnnotationSettings">
     <option name="myLimit" value="2678400000" />
@@ -492,27 +484,6 @@
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/Manager.py" />
-    <entry file="file://$PROJECT_DIR$/actions/put_on_tray.yaml">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="15">
-          <caret line="1" column="13" selection-start-line="1" selection-start-column="13" selection-end-line="1" selection-end-column="13" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/actions/lay_tray.yaml">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="75">
-          <caret line="5" column="7" lean-forward="true" selection-end-line="9" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/actions/turn_on_oven.yaml">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="60">
-          <caret line="4" column="27" selection-start-line="4" selection-start-column="27" selection-end-line="4" selection-end-column="27" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/Ingredient.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="75">
@@ -520,41 +491,6 @@
           <folding>
             <marker date="1544439821630" expanded="true" signature="17:22" ph="..." />
           </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/actions/squash.yaml">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="120">
-          <caret line="8" column="29" selection-end-line="10" selection-end-column="8" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/actions/take_out.yaml">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="75">
-          <caret line="5" column="40" selection-end-line="10" selection-end-column="8" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/actions/mix_flour.yaml">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="60">
-          <caret line="4" column="51" selection-start-line="4" selection-start-column="51" selection-end-line="4" selection-end-column="51" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/actions/grate.yaml">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="180">
-          <caret line="12" lean-forward="true" selection-start-line="12" selection-end-line="12" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/actions/put_in_pan.yaml">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="135">
-          <caret line="9" column="19" selection-start-line="9" selection-start-column="19" selection-end-line="9" selection-end-column="19" />
         </state>
       </provider>
     </entry>
@@ -580,20 +516,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="345">
           <caret line="767" column="8" selection-start-line="767" selection-start-column="8" selection-end-line="767" selection-end-column="8" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/actions/mix.yaml">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="135">
-          <caret line="9" column="23" selection-start-line="9" selection-start-column="23" selection-end-line="9" selection-end-column="23" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/actions/waiting.yaml">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="75">
-          <caret line="5" column="41" selection-start-line="5" selection-start-column="41" selection-end-line="5" selection-end-column="41" />
         </state>
       </provider>
     </entry>
@@ -629,23 +551,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/actions/put.yaml">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="120">
-          <caret line="8" column="28" selection-start-line="8" selection-start-column="28" selection-end-line="8" selection-end-column="28" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/DialogManager.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="465">
-          <caret line="31" column="58" lean-forward="true" selection-start-line="31" selection-start-column="58" selection-end-line="31" selection-end-column="58" />
-          <folding>
-            <element signature="e#0#28#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/Timer.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="825">
@@ -656,65 +561,10 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/ContextUnit.py">
+    <entry file="file://$PROJECT_DIR$/dialogs/wait.confirmation.dialog">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="90">
-          <caret line="6" column="7" lean-forward="true" selection-start-line="6" selection-start-column="7" selection-end-line="6" selection-end-column="7" />
-          <folding>
-            <element signature="e#0#21#0" expanded="true" />
-            <marker date="1545047822675" expanded="true" signature="69:110" ph="..." />
-            <marker date="1545047822675" expanded="true" signature="128:133" ph="..." />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/Action.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="236">
-          <caret line="32" column="12" selection-start-line="32" selection-start-column="12" selection-end-line="32" selection-end-column="12" />
-          <folding>
-            <element signature="e#0#23#0" expanded="true" />
-            <marker date="1545058633298" expanded="true" signature="176:181" ph="..." />
-            <marker date="1545058633298" expanded="true" signature="529:566" ph="..." />
-            <marker date="1545058633298" expanded="true" signature="713:719" ph="..." />
-            <marker date="1545058633298" expanded="true" signature="734:963" ph="..." />
-            <marker date="1545058633298" expanded="true" signature="790:864" ph="..." />
-            <marker date="1545058633298" expanded="true" signature="881:920" ph="..." />
-            <marker date="1545058633298" expanded="true" signature="1108:1114" ph="..." />
-            <marker date="1545058633298" expanded="true" signature="1484:1490" ph="..." />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/main.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-385">
-          <caret line="41" column="46" selection-start-line="41" selection-start-column="46" selection-end-line="41" selection-end-column="46" />
-          <folding>
-            <element signature="e#0#31#0" expanded="true" />
-            <marker date="1545058242346" expanded="true" signature="571:574" ph="..." />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/actions/add_cream.yaml">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="60">
-          <caret line="4" column="57" selection-start-line="4" selection-start-column="57" selection-end-line="4" selection-end-column="57" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/actions/bake.yaml">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="60">
-          <caret line="4" column="23" selection-start-line="4" selection-start-column="23" selection-end-line="4" selection-end-column="23" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/actions/boil.yaml">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="135">
-          <caret line="9" column="40" lean-forward="true" selection-end-line="12" />
+        <state relative-caret-position="45">
+          <caret line="3" column="36" selection-start-line="3" selection-start-column="36" selection-end-line="3" selection-end-column="36" />
         </state>
       </provider>
     </entry>
@@ -725,6 +575,104 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/actions/take_out.yaml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="75">
+          <caret line="5" column="40" selection-end-line="10" selection-end-column="8" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/actions/waiting.yaml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="75">
+          <caret line="5" column="35" selection-start-line="5" selection-start-column="35" selection-end-line="5" selection-end-column="35" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/dialogs/calculated.time.dialog">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="30">
+          <caret line="2" column="51" selection-start-line="2" selection-start-column="51" selection-end-line="2" selection-end-column="51" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/dialogs/choose.next.dialog">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="30">
+          <caret line="2" column="70" selection-start-line="2" selection-start-column="70" selection-end-line="2" selection-end-column="70" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/dialogs/wait.technical.dialog">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="45">
+          <caret line="3" column="127" selection-start-line="3" selection-start-column="127" selection-end-line="3" selection-end-column="127" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/dialogs/switch.queue.dialog">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="45">
+          <caret line="3" column="23" selection-start-line="3" selection-start-column="17" selection-end-line="3" selection-end-column="23" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/main.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="416">
+          <caret line="46" column="52" lean-forward="true" selection-start-line="46" selection-start-column="24" selection-end-line="46" selection-end-column="52" />
+          <folding>
+            <element signature="e#0#31#0" expanded="true" />
+            <marker date="1545222929991" expanded="true" signature="571:574" ph="..." />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/dialogs/nowhere.to.switch.dialog">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="34">
+          <caret line="2" column="58" selection-start-line="2" selection-start-column="58" selection-end-line="2" selection-end-column="58" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/dialogs/stop.and.switch.dialog">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="30">
+          <caret line="2" column="17" selection-start-line="2" selection-start-column="17" selection-end-line="2" selection-end-column="17" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/dialogs/stop.waiting.dialog">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="30">
+          <caret line="2" column="65" selection-start-line="2" selection-start-column="65" selection-end-line="2" selection-end-column="65" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/PhraseGenerator.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="585">
+          <caret line="39" column="30" selection-start-line="39" selection-start-column="30" selection-end-line="39" selection-end-column="30" />
+          <folding>
+            <element signature="e#0#9#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/actions/lay_tray.yaml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="60">
+          <caret line="4" column="27" lean-forward="true" selection-start-line="4" selection-start-column="27" selection-end-line="4" selection-end-column="27" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/actions/boil.yaml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="75">
+          <caret line="5" column="54" selection-start-line="5" selection-start-column="54" selection-end-line="5" selection-end-column="54" />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/actions/clean.yaml">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="120">
@@ -732,27 +680,137 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/IntentParser.py">
+    <entry file="file://$PROJECT_DIR$/actions/mix.yaml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="135">
+          <caret line="9" column="23" selection-start-line="9" selection-start-column="23" selection-end-line="9" selection-end-column="23" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/actions/put.yaml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="120">
+          <caret line="8" column="28" selection-start-line="8" selection-start-column="28" selection-end-line="8" selection-end-column="28" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/actions/put_in_pan.yaml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="135">
+          <caret line="9" column="19" selection-start-line="9" selection-start-column="19" selection-end-line="9" selection-end-column="19" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/actions/turn_on_oven.yaml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="60">
+          <caret line="4" column="27" selection-start-line="4" selection-start-column="27" selection-end-line="4" selection-end-column="27" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/actions/put_on_tray.yaml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="15">
+          <caret line="1" column="13" selection-start-line="1" selection-start-column="13" selection-end-line="1" selection-end-column="13" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/actions/squash.yaml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="120">
+          <caret line="8" column="29" selection-end-line="10" selection-end-column="8" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/actions/bake.yaml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="75">
+          <caret line="5" column="55" selection-start-line="5" selection-start-column="55" selection-end-line="5" selection-end-column="55" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/actions/grate.yaml">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="180">
-          <caret line="12" column="7" lean-forward="true" selection-start-line="12" selection-start-column="7" selection-end-line="12" selection-end-column="7" />
+          <caret line="12" lean-forward="true" selection-start-line="12" selection-end-line="12" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/actions/add_cream.yaml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="105">
+          <caret line="7" column="19" lean-forward="true" selection-start-line="7" selection-start-column="19" selection-end-line="7" selection-end-column="19" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/actions/mix_flour.yaml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="60">
+          <caret line="4" column="58" selection-start-line="4" selection-start-column="58" selection-end-line="4" selection-end-column="58" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/ContextUnit.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="195">
+          <caret line="13" column="23" selection-start-line="13" selection-start-column="23" selection-end-line="13" selection-end-column="23" />
           <folding>
-            <marker date="1545050838307" expanded="true" signature="470:475" ph="..." />
+            <element signature="e#0#21#0" expanded="true" />
+            <marker date="1545132895701" expanded="true" signature="69:110" ph="..." />
+            <marker date="1545132895701" expanded="true" signature="128:133" ph="..." />
           </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Action.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="615">
+          <caret line="86" column="65" selection-start-line="86" selection-start-column="65" selection-end-line="86" selection-end-column="65" />
+          <folding>
+            <element signature="e#0#23#0" expanded="true" />
+            <marker date="1545233067710" expanded="true" signature="176:181" ph="..." />
+            <marker date="1545233067710" expanded="true" signature="504:541" ph="..." />
+            <marker date="1545233067710" expanded="true" signature="688:694" ph="..." />
+            <marker date="1545233067710" expanded="true" signature="709:938" ph="..." />
+            <marker date="1545233067710" expanded="true" signature="765:839" ph="..." />
+            <marker date="1545233067710" expanded="true" signature="856:895" ph="..." />
+            <marker date="1545233067710" expanded="true" signature="1083:1089" ph="..." />
+            <marker date="1545233067710" expanded="true" signature="1459:1465" ph="..." />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/dialogs/end.dialog">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="30">
+          <caret line="2" column="50" selection-start-line="2" selection-start-column="50" selection-end-line="2" selection-end-column="50" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/ContextManager.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="202">
-          <caret line="270" column="53" lean-forward="true" selection-start-line="270" selection-start-column="53" selection-end-line="270" selection-end-column="53" />
+        <state relative-caret-position="285">
+          <caret line="58" column="18" selection-start-line="58" selection-start-column="18" selection-end-line="58" selection-end-column="18" />
           <folding>
             <element signature="e#0#33#0" expanded="true" />
-            <element signature="e#1211#1367#0" />
-            <element signature="e#7018#7535#0" />
-            <element signature="e#7605#8348#0" />
-            <element signature="e#8393#8620#0" />
-            <marker date="1545061462844" expanded="true" signature="486:491" ph="..." />
+            <marker date="1545235015696" expanded="true" signature="516:521" ph="..." />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/IntentParser.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="225">
+          <caret line="15" column="27" selection-start-line="15" selection-start-column="27" selection-end-line="15" selection-end-column="27" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/DialogManager.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="241">
+          <caret line="34" column="74" selection-start-line="34" selection-start-column="74" selection-end-line="34" selection-end-column="74" />
+          <folding>
+            <element signature="e#0#28#0" expanded="true" />
           </folding>
         </state>
       </provider>
