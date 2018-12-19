@@ -18,6 +18,7 @@ class ContextManager(Manager):
     Так же принимает Intent от DialogManager-а при реагирует на него
     """
     def __init__(self, tree, n_iterations=500):
+        super().__init__()
         self.n_iterations = n_iterations
         self.tree = tree
         self.stack: List[Action] = []
@@ -25,7 +26,6 @@ class ContextManager(Manager):
         self.path: List[Node] = None
         self.current_path_idx = None
         self.dialog_manager = DialogManager(self)
-        self.finished = False
 
         Manager.__init__(self)
 
@@ -55,7 +55,9 @@ class ContextManager(Manager):
         :param intent:
         :return:
         """
+        # TODO: где-то нужно отключать DM
         if self.finished:
+            PhraseGenerator.speak("end")
             return
         if intent == Intent.NEXT:
             self.handle_next_response()
@@ -76,7 +78,6 @@ class ContextManager(Manager):
         try:
             top_action = self.stack[-1]
             if top_action.node() == self.path[-1]:
-                PhraseGenerator.speak("end.dialog")
                 self.finished = True
         except IndexError:
             return

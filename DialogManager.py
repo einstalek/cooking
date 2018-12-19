@@ -6,6 +6,7 @@ from ContextUnit import ContextUnit, UnitType
 from IntentParser import Intent, IntentParser
 from abcManager import Manager
 from pymorphy2 import MorphAnalyzer
+import re
 
 
 class DialogManager:
@@ -32,11 +33,14 @@ class DialogManager:
                 if node_name:
                     self.context_manager.handle_intent(Intent.CHANGE_NEXT, node_name)
 
-                # TODO: сделать это и извлечение глагола из фразы действия
+                # TODO: учесть частицу не перед глаголом
                 # Если назван глагол в подтверждение перехода
-                verb = self.fill_choice_unit(response)
+                verb = self.fill_verb_response(response)
                 if verb:
-                    print(verb)
+                    verbs = self.extract_verbs_from_phrase(self._stack[-1].phrase)
+                    if any(verb in x for x in verbs):
+                        self.context_manager.handle_intent(Intent.NEXT)
+
 
             if intent is not None:
                 self.context_manager.handle_intent(intent)
@@ -73,5 +77,12 @@ class DialogManager:
             return parsed[0].normal_form
         return None
 
-
+    def extract_verbs_from_phrase(self, phrase) -> List[str]:
+        words = [w for w in re.split("\W", phrase) if len(w) > 0]
+        verbs = []
+        for w in words:
+            parsed = self.morph.parse(w)
+            if 'VERB' in parsed[0][1]:
+                verbs.append(parsed[0].normal_form)
+        return verbs
 

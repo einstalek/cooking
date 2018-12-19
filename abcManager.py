@@ -2,6 +2,9 @@ from abc import ABC
 
 
 class Manager(ABC):
+    def __init__(self):
+        self.finished = False
+
     def on_timer_elapsed(self, action: object):
         pass
 
