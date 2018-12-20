@@ -59,7 +59,7 @@ class ContextManager(Manager):
         if self.finished:
             PhraseGenerator.speak("end")
             return
-        if intent == Intent.NEXT:
+        if intent == Intent.NEXT_SIMPLE:
             self.handle_next_response()
         elif intent == Intent.REPEAT:
             self.handle_repeat_response()
@@ -67,7 +67,7 @@ class ContextManager(Manager):
             self.handle_choosing_next()
         elif intent == Intent.CHANGE_NEXT:
             self.handle_changing_next(params)
-        elif intent == Intent.NEGATIVE:
+        elif intent == Intent.NEGATIVE_SIMPLE:
             self.handle_negative()
 
     def handle_top_action(self):

@@ -39,8 +39,7 @@ class DialogManager:
                 if verb:
                     verbs = self.extract_verbs_from_phrase(self._stack[-1].phrase)
                     if any(verb in x for x in verbs):
-                        self.context_manager.handle_intent(Intent.NEXT)
-
+                        self.context_manager.handle_intent(Intent.NEXT_SIMPLE)
 
             if intent is not None:
                 self.context_manager.handle_intent(intent)

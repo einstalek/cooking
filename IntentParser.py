@@ -2,11 +2,11 @@ from enum import Enum
 
 
 class Intent(Enum):
-    NEXT = 0,  # Переход к следующему по порядку действию
+    NEXT_SIMPLE = 0,  # Переход к следующему по порядку действию
     REPEAT = 1,  # Повтори предыдущую реплику
     CHOOSE_NEXT = 2,  # Давай что-нибудь другое
     CHANGE_NEXT = 3,  # Дальше будем чистить картошку
-    NEGATIVE = 4,
+    NEGATIVE_SIMPLE = 4,
 
 
 class IntentParser:
@@ -21,11 +21,11 @@ class IntentParser:
     def extract_intent(self, phrase: str):
         intent = None
         if any(x in phrase for x in self.positive):
-            intent = Intent.NEXT
+            intent = Intent.NEXT_SIMPLE
         if any(x in phrase for x in self.repeat):
             intent = Intent.REPEAT
         if any(x in phrase for x in self.choose_next):
             intent = Intent.CHOOSE_NEXT
         if any(x in phrase for x in self.negative):
-            intent = Intent.NEGATIVE
+            intent = Intent.NEGATIVE_SIMPLE
         return intent
