@@ -2,11 +2,24 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="e43b9acd-c475-4697-a7c5-b847c4a62f99" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/intents.yaml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/recipes/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/recipes/cutlets_puree.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/redis_utils/Consumer.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/redis_utils/HardwareEmulator.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/redis_utils/WebServer.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/redis_utils/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/requirements.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/dictionaries/einstalek.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/dictionaries/einstalek.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Action.py" beforeDir="false" afterPath="$PROJECT_DIR$/Action.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/ContextManager.py" beforeDir="false" afterPath="$PROJECT_DIR$/ContextManager.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/DialogManager.py" beforeDir="false" afterPath="$PROJECT_DIR$/DialogManager.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/IntentParser.py" beforeDir="false" afterPath="$PROJECT_DIR$/IntentParser.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Node.py" beforeDir="false" afterPath="$PROJECT_DIR$/Node.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/TimeTable.py" beforeDir="false" afterPath="$PROJECT_DIR$/TimeTable.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Timer.py" beforeDir="false" afterPath="$PROJECT_DIR$/Timer.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Tree.py" beforeDir="false" afterPath="$PROJECT_DIR$/Tree.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/dialogs/end.dialog" beforeDir="false" afterPath="$PROJECT_DIR$/dialogs/end.dialog" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -18,47 +31,52 @@
     <session id="745673650">
       <usages-collector id="statistics.lifecycle.project">
         <counts>
-          <entry key="project.closed" value="8" />
-          <entry key="project.open.time.0" value="1" />
+          <entry key="project.closed" value="15" />
+          <entry key="project.open.time.0" value="5" />
           <entry key="project.open.time.1" value="4" />
           <entry key="project.open.time.23" value="1" />
-          <entry key="project.open.time.3" value="2" />
+          <entry key="project.open.time.3" value="3" />
+          <entry key="project.open.time.4" value="1" />
           <entry key="project.open.time.5" value="1" />
-          <entry key="project.opened" value="9" />
+          <entry key="project.opened" value="15" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.extensions.open">
         <counts>
-          <entry key="dialog" value="19" />
+          <entry key="Dockerfile" value="4" />
+          <entry key="dialog" value="21" />
           <entry key="json" value="3" />
-          <entry key="py" value="78" />
-          <entry key="txt" value="4" />
+          <entry key="py" value="142" />
+          <entry key="txt" value="8" />
           <entry key="yaml" value="108" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.open">
         <counts>
+          <entry key="Dockerfile" value="3" />
           <entry key="JSON" value="3" />
-          <entry key="PLAIN_TEXT" value="23" />
-          <entry key="Python" value="78" />
+          <entry key="PLAIN_TEXT" value="30" />
+          <entry key="Python" value="142" />
           <entry key="YAML" value="108" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.extensions.edit">
         <counts>
-          <entry key="dialog" value="1999" />
+          <entry key="Dockerfile" value="40" />
+          <entry key="dialog" value="2000" />
           <entry key="dummy" value="105" />
           <entry key="json" value="907" />
-          <entry key="py" value="45446" />
-          <entry key="txt" value="59" />
+          <entry key="py" value="47543" />
+          <entry key="txt" value="82" />
           <entry key="yaml" value="4324" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.edit">
         <counts>
+          <entry key="Dockerfile" value="40" />
           <entry key="JSON" value="907" />
-          <entry key="PLAIN_TEXT" value="2163" />
-          <entry key="Python" value="45446" />
+          <entry key="PLAIN_TEXT" value="2187" />
+          <entry key="Python" value="47543" />
           <entry key="YAML" value="4324" />
         </counts>
       </usages-collector>
@@ -67,20 +85,13 @@
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/Action.py">
+        <entry file="file://$PROJECT_DIR$/main.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="615">
-              <caret line="86" column="65" selection-start-line="86" selection-start-column="65" selection-end-line="86" selection-end-column="65" />
+            <state relative-caret-position="165">
+              <caret line="11" column="12" selection-start-line="11" selection-start-column="12" selection-end-line="11" selection-end-column="12" />
               <folding>
-                <element signature="e#0#23#0" expanded="true" />
-                <marker date="1545233067710" expanded="true" signature="176:181" ph="..." />
-                <marker date="1545233067710" expanded="true" signature="504:541" ph="..." />
-                <marker date="1545233067710" expanded="true" signature="688:694" ph="..." />
-                <marker date="1545233067710" expanded="true" signature="709:938" ph="..." />
-                <marker date="1545233067710" expanded="true" signature="765:839" ph="..." />
-                <marker date="1545233067710" expanded="true" signature="856:895" ph="..." />
-                <marker date="1545233067710" expanded="true" signature="1083:1089" ph="..." />
-                <marker date="1545233067710" expanded="true" signature="1459:1465" ph="..." />
+                <element signature="e#0#21#0" expanded="true" />
+                <marker date="1545403434776" expanded="true" signature="99:100" ph="..." />
               </folding>
             </state>
           </provider>
@@ -89,37 +100,27 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/ContextManager.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="1276">
-              <caret line="95" column="18" selection-start-line="95" selection-start-column="18" selection-end-line="95" selection-end-column="18" />
+            <state relative-caret-position="317">
+              <caret line="75" column="32" selection-start-line="75" selection-start-column="32" selection-end-line="75" selection-end-column="32" />
               <folding>
                 <element signature="e#0#33#0" expanded="true" />
-                <marker date="1545319514310" expanded="true" signature="516:521" ph="..." />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/Timer.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="435">
-              <caret line="29" column="17" selection-start-line="29" selection-start-column="17" selection-end-line="29" selection-end-column="17" />
-              <folding>
-                <element signature="e#0#15#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/ContextUnit.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="195">
-              <caret line="13" column="23" selection-start-line="13" selection-start-column="23" selection-end-line="13" selection-end-column="23" />
-              <folding>
-                <element signature="e#0#21#0" expanded="true" />
-                <marker date="1545132895701" expanded="true" signature="69:110" ph="..." />
-                <marker date="1545132895701" expanded="true" signature="128:133" ph="..." />
+                <element signature="e#1420#1576#0" />
+                <element signature="e#1644#2293#0" />
+                <element signature="e#2336#3248#0" />
+                <element signature="e#3294#6087#0" />
+                <element signature="e#6132#6355#0" />
+                <element signature="e#6425#7216#0" />
+                <element signature="e#7281#9057#0" />
+                <element signature="e#9134#9651#0" />
+                <element signature="e#9694#9791#0" />
+                <element signature="e#9915#10077#0" />
+                <element signature="e#10141#10386#0" />
+                <element signature="e#10432#11458#0" />
+                <element signature="e#11515#12216#0" />
+                <element signature="e#12274#12406#0" />
+                <element signature="e#12438#12781#0" />
+                <element signature="e#12829#12999#0" />
+                <element signature="e#13040#13115#0" />
               </folding>
             </state>
           </provider>
@@ -128,26 +129,17 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/DialogManager.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="255">
-              <caret line="25" column="30" selection-start-line="24" selection-start-column="8" selection-end-line="25" selection-end-column="30" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/intents.yaml">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="96">
-              <caret line="7" column="8" lean-forward="true" selection-start-line="7" selection-start-column="8" selection-end-line="7" selection-end-column="8" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/IntentParser.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="435">
-              <caret line="29" column="39" selection-start-line="29" selection-start-column="39" selection-end-line="29" selection-end-column="39" />
+            <state relative-caret-position="630">
+              <caret line="67" column="12" selection-start-line="67" selection-start-column="12" selection-end-line="67" selection-end-column="12" />
+              <folding>
+                <element signature="e#0#11#0" expanded="true" />
+                <element signature="e#628#1518#0" />
+                <element signature="e#2417#2700#0" />
+                <element signature="e#2754#2911#0" />
+                <element signature="e#2983#3236#0" />
+                <marker date="1545406101427" expanded="true" signature="1926:1935" ph="..." />
+                <marker date="1545406101427" expanded="true" signature="1926:2296" ph="..." />
+              </folding>
             </state>
           </provider>
         </entry>
@@ -178,13 +170,6 @@
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
       <list>
-        <option value="$PROJECT_DIR$/utils.py" />
-        <option value="$PROJECT_DIR$/action.json" />
-        <option value="$PROJECT_DIR$/action.yaml" />
-        <option value="$PROJECT_DIR$/connections.yaml" />
-        <option value="$PROJECT_DIR$/connections.txt" />
-        <option value="$PROJECT_DIR$/actions.yaml" />
-        <option value="$PROJECT_DIR$/node.py" />
         <option value="$PROJECT_DIR$/tree.py" />
         <option value="$PROJECT_DIR$/Manager.py" />
         <option value="$PROJECT_DIR$/InputHandler.py" />
@@ -198,7 +183,6 @@
         <option value="$PROJECT_DIR$/actions/put_in_pan.yaml" />
         <option value="$PROJECT_DIR$/actions/clean.yaml" />
         <option value="$PROJECT_DIR$/actions/mince.yaml" />
-        <option value="$PROJECT_DIR$/TimeTable.py" />
         <option value="$PROJECT_DIR$/Tree.py" />
         <option value="$PROJECT_DIR$/Node.py" />
         <option value="$PROJECT_DIR$/actions/mix.yaml" />
@@ -219,22 +203,31 @@
         <option value="$PROJECT_DIR$/ContextUnit.py" />
         <option value="$PROJECT_DIR$/dialogs/choose.next.dialog" />
         <option value="$PROJECT_DIR$/dialogs/stop.and.switch.dialog" />
-        <option value="$PROJECT_DIR$/main.py" />
         <option value="$PROJECT_DIR$/PhraseGenerator.py" />
         <option value="$PROJECT_DIR$/dialogs/nowhere.to.switch.dialog" />
         <option value="$PROJECT_DIR$/dialogs/stop.waiting.dialog" />
         <option value="$PROJECT_DIR$/Action.py" />
-        <option value="$PROJECT_DIR$/dialogs/end.dialog" />
-        <option value="$PROJECT_DIR$/ContextManager.py" />
-        <option value="$PROJECT_DIR$/DialogManager.py" />
         <option value="$PROJECT_DIR$/IntentParser.py" />
         <option value="$PROJECT_DIR$/intents.yaml" />
+        <option value="$PROJECT_DIR$/TimeTable.py" />
+        <option value="$PROJECT_DIR$/requirements.txt" />
+        <option value="$PROJECT_DIR$/redis_utils/models.py" />
+        <option value="$PROJECT_DIR$/recipes/cutlets_puree.py" />
+        <option value="$PROJECT_DIR$/redis_utils/HardwareEmulator.py" />
+        <option value="$PROJECT_DIR$/redis_utils/Consumer.py" />
+        <option value="$PROJECT_DIR$/redis_utils/WebServer.py" />
+        <option value="$PROJECT_DIR$/dialogs/end.dialog" />
+        <option value="$PROJECT_DIR$/main.py" />
+        <option value="$PROJECT_DIR$/Dockerfile" />
+        <option value="$PROJECT_DIR$/ContextManager.py" />
+        <option value="$PROJECT_DIR$/DialogManager.py" />
       </list>
     </option>
   </component>
   <component name="ProjectFrameBounds">
+    <option name="x" value="47" />
     <option name="y" value="23" />
-    <option name="width" value="1355" />
+    <option name="width" value="1193" />
     <option name="height" value="1333" />
   </component>
   <component name="ProjectInspectionProfilesVisibleTreeState">
@@ -269,6 +262,11 @@
               <item name="graph" type="b2602c69:ProjectViewProjectNode" />
               <item name="graph" type="462c0819:PsiDirectoryNode" />
             </path>
+            <path>
+              <item name="graph" type="b2602c69:ProjectViewProjectNode" />
+              <item name="graph" type="462c0819:PsiDirectoryNode" />
+              <item name="redis_utils" type="462c0819:PsiDirectoryNode" />
+            </path>
           </expand>
           <select />
         </subPane>
@@ -281,6 +279,10 @@
   </component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/app" />
+      <recent name="$PROJECT_DIR$" />
+    </key>
+    <key name="CopyFile.RECENT_KEYS">
       <recent name="$PROJECT_DIR$" />
     </key>
   </component>
@@ -296,7 +298,28 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Python.main">
+  <component name="RunManager" selected="Python.main (1)">
+    <configuration name="HardwareEmulator" type="PythonConfigurationType" factoryName="Python" temporary="true">
+      <module name="graph" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/redis_utils" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/redis_utils/HardwareEmulator.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
     <configuration name="PhraseGenerator" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <module name="graph" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -309,7 +332,7 @@
       <option name="IS_MODULE_SDK" value="true" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/PhraseGenerator.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/app/PhraseGenerator.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -330,7 +353,7 @@
       <option name="IS_MODULE_SDK" value="true" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/Timer.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/app/Timer.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -339,7 +362,7 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <configuration name="main" type="PythonConfigurationType" factoryName="Python" temporary="true">
+    <configuration name="main (1)" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <module name="graph" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -360,7 +383,7 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <configuration name="tree" type="PythonConfigurationType" factoryName="Python" temporary="true">
+    <configuration name="main" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <module name="graph" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -372,7 +395,7 @@
       <option name="IS_MODULE_SDK" value="true" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/Tree.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/app/main.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -381,41 +404,32 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <configuration name="utils" type="PythonConfigurationType" factoryName="Python" temporary="true">
-      <module name="graph" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/utils.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <option name="EMULATE_TERMINAL" value="false" />
-      <option name="MODULE_MODE" value="false" />
-      <option name="REDIRECT_INPUT" value="false" />
-      <option name="INPUT_FILE" value="" />
+    <configuration name="Dockerfile" type="docker-deploy" factoryName="dockerfile">
+      <deployment type="dockerfile">
+        <settings>
+          <option name="sourceFilePath" value="Dockerfile" />
+          <option name="startBrowserSettings">
+            <browser url="http://127.0.0.1" />
+          </option>
+        </settings>
+      </deployment>
       <method v="2" />
     </configuration>
     <list>
-      <item itemvalue="Python.utils" />
-      <item itemvalue="Python.tree" />
+      <item itemvalue="Docker.Dockerfile" />
       <item itemvalue="Python.main" />
       <item itemvalue="Python.Timer" />
       <item itemvalue="Python.PhraseGenerator" />
+      <item itemvalue="Python.main (1)" />
+      <item itemvalue="Python.HardwareEmulator" />
     </list>
     <recent_temporary>
       <list>
+        <item itemvalue="Python.main (1)" />
+        <item itemvalue="Python.HardwareEmulator" />
         <item itemvalue="Python.main" />
         <item itemvalue="Python.PhraseGenerator" />
         <item itemvalue="Python.Timer" />
-        <item itemvalue="Python.tree" />
-        <item itemvalue="Python.utils" />
       </list>
     </recent_temporary>
   </component>
@@ -442,23 +456,24 @@
     </todo-panel>
   </component>
   <component name="ToolWindowManager">
-    <frame x="0" y="23" width="1355" height="1333" extended-state="0" />
+    <frame x="47" y="23" width="1193" height="1333" extended-state="0" />
     <editor active="true" />
     <layout>
-      <window_info active="true" content_ui="combo" id="Project" order="0" sideWeight="0.49692622" visible="true" weight="0.20314842" />
+      <window_info content_ui="combo" id="Project" order="0" sideWeight="0.49692622" visible="true" weight="0.23122866" />
       <window_info id="Structure" order="1" sideWeight="0.50307375" side_tool="true" weight="0.2059387" />
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" weight="0.21676068" />
-      <window_info anchor="bottom" id="Run" order="2" sideWeight="0.4986979" weight="0.34327155" />
+      <window_info anchor="bottom" id="Run" order="2" sideWeight="0.4986979" weight="0.22481869" />
       <window_info anchor="bottom" id="Debug" order="3" weight="0.3996777" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
-      <window_info anchor="bottom" id="TODO" order="6" visible="true" weight="0.32957292" />
+      <window_info anchor="bottom" id="TODO" order="6" weight="0.32957292" />
       <window_info anchor="bottom" id="Version Control" order="7" show_stripe_button="false" />
       <window_info anchor="bottom" id="Terminal" order="8" weight="0.32957292" />
       <window_info anchor="bottom" id="Event Log" order="9" sideWeight="0.50130206" side_tool="true" weight="0.3215149" />
       <window_info anchor="bottom" id="Python Console" order="10" />
+      <window_info anchor="bottom" id="Docker" order="11" weight="0.32957292" />
       <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
       <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
       <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
@@ -468,36 +483,7 @@
     <option name="myLimit" value="2678400000" />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/inventory.json" />
-    <entry file="file://$PROJECT_DIR$/utils.py" />
-    <entry file="file://$PROJECT_DIR$/action.json" />
-    <entry file="file://$PROJECT_DIR$/connections.txt" />
-    <entry file="file://$PROJECT_DIR$/actions.yaml" />
-    <entry file="file://$USER_HOME$/anaconda3/envs/graph/lib/python3.6/random.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-758">
-          <caret line="319" selection-start-line="319" selection-end-line="319" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/Manager.py" />
-    <entry file="file://$PROJECT_DIR$/Ingredient.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="75">
-          <caret line="5" column="24" selection-start-line="5" selection-start-column="24" selection-end-line="5" selection-end-column="24" />
-          <folding>
-            <marker date="1544439821630" expanded="true" signature="17:22" ph="..." />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/TimeTable.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="660">
-          <caret line="44" selection-start-line="44" selection-end-line="44" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/error.txt">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="105">
@@ -509,31 +495,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="345">
           <caret line="767" column="8" selection-start-line="767" selection-start-column="8" selection-end-line="767" selection-end-column="8" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/Node.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="527">
-          <caret line="68" column="22" selection-start-line="68" selection-start-column="22" selection-end-line="68" selection-end-column="22" />
-          <folding>
-            <element signature="e#0#23#0" expanded="true" />
-            <marker date="1544527382659" expanded="true" signature="1722:1760" ph="..." />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/abcManager.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="135">
-          <caret line="9" lean-forward="true" selection-start-line="9" selection-end-line="9" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/Tree.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="619">
-          <caret line="343" column="11" lean-forward="true" selection-start-line="343" selection-start-column="11" selection-end-line="343" selection-end-column="11" />
         </state>
       </provider>
     </entry>
@@ -593,17 +554,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/main.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="416">
-          <caret line="46" column="52" lean-forward="true" selection-start-line="46" selection-start-column="24" selection-end-line="46" selection-end-column="52" />
-          <folding>
-            <element signature="e#0#31#0" expanded="true" />
-            <marker date="1545222929991" expanded="true" signature="571:574" ph="..." />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/dialogs/nowhere.to.switch.dialog">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="34">
@@ -622,16 +572,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="30">
           <caret line="2" column="65" selection-start-line="2" selection-start-column="65" selection-end-line="2" selection-end-column="65" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/PhraseGenerator.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="585">
-          <caret line="39" column="30" selection-start-line="39" selection-start-column="30" selection-end-line="39" selection-end-column="30" />
-          <folding>
-            <element signature="e#0#9#0" expanded="true" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -719,17 +659,123 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/dialogs/end.dialog">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="30">
-          <caret line="2" column="50" selection-start-line="2" selection-start-column="50" selection-end-line="2" selection-end-column="50" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/actions/add_cream.yaml">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="105">
           <caret line="7" column="19" lean-forward="true" selection-start-line="7" selection-start-column="19" selection-end-line="7" selection-end-column="19" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/intents.yaml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="96">
+          <caret line="7" column="8" lean-forward="true" selection-start-line="7" selection-start-column="8" selection-end-line="7" selection-end-column="8" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/requirements.txt">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="30">
+          <caret line="2" selection-start-line="2" selection-end-line="2" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/recipes/cutlets_puree.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="747">
+          <caret line="80" column="29" lean-forward="true" selection-start-line="80" selection-start-column="29" selection-end-line="80" selection-end-column="29" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/ContextUnit.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="180">
+          <caret line="13" column="23" selection-start-line="13" selection-start-column="23" selection-end-line="13" selection-end-column="23" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/redis_utils/models.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state>
+          <caret selection-end-line="8" selection-end-column="36" />
+          <folding>
+            <element signature="e#0#10#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/redis_utils/__init__.py">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/dialogs/end.dialog">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="30">
+          <caret line="2" column="50" lean-forward="true" selection-start-line="2" selection-start-column="50" selection-end-line="2" selection-end-column="50" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/abcManager.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="135">
+          <caret line="9" selection-start-line="9" selection-end-line="9" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Action.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1290">
+          <caret line="86" column="65" selection-start-line="86" selection-start-column="65" selection-end-line="86" selection-end-column="65" />
+          <folding>
+            <element signature="e#0#23#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/redis_utils/WebServer.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="240">
+          <caret line="16" column="49" lean-forward="true" selection-start-line="16" selection-start-column="49" selection-end-line="16" selection-end-column="49" />
+          <folding>
+            <element signature="e#0#11#0" expanded="true" />
+            <marker date="1545399847317" expanded="true" signature="137:174" ph="..." />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Ingredient.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state>
+          <caret column="9" lean-forward="true" selection-start-column="9" selection-end-column="9" />
+          <folding>
+            <marker date="1544439821630" expanded="true" signature="17:22" ph="..." />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/IntentParser.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="435">
+          <caret line="29" column="39" selection-start-line="29" selection-start-column="39" selection-end-line="29" selection-end-column="39" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Node.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="45">
+          <caret line="3" column="23" selection-start-line="3" selection-start-column="23" selection-end-line="3" selection-end-column="23" />
+          <folding>
+            <marker date="1545394636254" expanded="true" signature="1722:1760" ph="..." />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/redis_utils/HardwareEmulator.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="75">
+          <caret line="5" column="24" lean-forward="true" selection-start-line="5" selection-start-column="24" selection-end-line="5" selection-end-column="24" />
+          <folding>
+            <marker date="1545396194490" expanded="true" signature="69:74" ph="..." />
+          </folding>
         </state>
       </provider>
     </entry>
@@ -743,65 +789,112 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/Action.py">
+    <entry file="file://$PROJECT_DIR$/TimeTable.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="615">
-          <caret line="86" column="65" selection-start-line="86" selection-start-column="65" selection-end-line="86" selection-end-column="65" />
+        <state relative-caret-position="15">
+          <caret line="1" column="21" selection-start-line="1" selection-start-column="21" selection-end-line="1" selection-end-column="21" />
           <folding>
             <element signature="e#0#23#0" expanded="true" />
-            <marker date="1545233067710" expanded="true" signature="176:181" ph="..." />
-            <marker date="1545233067710" expanded="true" signature="504:541" ph="..." />
-            <marker date="1545233067710" expanded="true" signature="688:694" ph="..." />
-            <marker date="1545233067710" expanded="true" signature="709:938" ph="..." />
-            <marker date="1545233067710" expanded="true" signature="765:839" ph="..." />
-            <marker date="1545233067710" expanded="true" signature="856:895" ph="..." />
-            <marker date="1545233067710" expanded="true" signature="1083:1089" ph="..." />
-            <marker date="1545233067710" expanded="true" signature="1459:1465" ph="..." />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/ContextUnit.py">
+    <entry file="file://$PROJECT_DIR$/Tree.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="195">
-          <caret line="13" column="23" selection-start-line="13" selection-start-column="23" selection-end-line="13" selection-end-column="23" />
+        <state>
+          <folding>
+            <element signature="e#0#23#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/main.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="165">
+          <caret line="11" column="12" selection-start-line="11" selection-start-column="12" selection-end-line="11" selection-end-column="12" />
           <folding>
             <element signature="e#0#21#0" expanded="true" />
-            <marker date="1545132895701" expanded="true" signature="69:110" ph="..." />
-            <marker date="1545132895701" expanded="true" signature="128:133" ph="..." />
+            <marker date="1545403434776" expanded="true" signature="99:100" ph="..." />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/PhraseGenerator.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="405">
+          <caret line="27" selection-start-line="27" selection-end-line="27" />
+          <folding>
+            <element signature="e#0#9#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Dockerfile">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="15">
+          <caret line="1" column="37" lean-forward="true" selection-start-line="1" selection-start-column="37" selection-end-line="1" selection-end-column="37" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$USER_HOME$/anaconda3/envs/graph/lib/python3.6/site-packages/pika/adapters/blocking_connection.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="277">
+          <caret line="1800" column="8" selection-start-line="1800" selection-start-column="8" selection-end-line="1800" selection-end-column="8" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/redis_utils/Consumer.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="150">
+          <caret line="10" column="15" selection-start-line="10" selection-start-column="15" selection-end-line="10" selection-end-column="15" />
+          <folding>
+            <element signature="e#0#11#0" expanded="true" />
+            <marker date="1545399445393" expanded="true" signature="103:108" ph="..." />
+            <marker date="1545399445393" expanded="true" signature="263:401" ph="..." />
           </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/ContextManager.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1276">
-          <caret line="95" column="18" selection-start-line="95" selection-start-column="18" selection-end-line="95" selection-end-column="18" />
+        <state relative-caret-position="317">
+          <caret line="75" column="32" selection-start-line="75" selection-start-column="32" selection-end-line="75" selection-end-column="32" />
           <folding>
             <element signature="e#0#33#0" expanded="true" />
-            <marker date="1545319514310" expanded="true" signature="516:521" ph="..." />
+            <element signature="e#1420#1576#0" />
+            <element signature="e#1644#2293#0" />
+            <element signature="e#2336#3248#0" />
+            <element signature="e#3294#6087#0" />
+            <element signature="e#6132#6355#0" />
+            <element signature="e#6425#7216#0" />
+            <element signature="e#7281#9057#0" />
+            <element signature="e#9134#9651#0" />
+            <element signature="e#9694#9791#0" />
+            <element signature="e#9915#10077#0" />
+            <element signature="e#10141#10386#0" />
+            <element signature="e#10432#11458#0" />
+            <element signature="e#11515#12216#0" />
+            <element signature="e#12274#12406#0" />
+            <element signature="e#12438#12781#0" />
+            <element signature="e#12829#12999#0" />
+            <element signature="e#13040#13115#0" />
           </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/IntentParser.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="435">
-          <caret line="29" column="39" selection-start-line="29" selection-start-column="39" selection-end-line="29" selection-end-column="39" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/intents.yaml">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="96">
-          <caret line="7" column="8" lean-forward="true" selection-start-line="7" selection-start-column="8" selection-end-line="7" selection-end-column="8" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/DialogManager.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="255">
-          <caret line="25" column="30" selection-start-line="24" selection-start-column="8" selection-end-line="25" selection-end-column="30" />
+        <state relative-caret-position="630">
+          <caret line="67" column="12" selection-start-line="67" selection-start-column="12" selection-end-line="67" selection-end-column="12" />
+          <folding>
+            <element signature="e#0#11#0" expanded="true" />
+            <element signature="e#628#1518#0" />
+            <element signature="e#2417#2700#0" />
+            <element signature="e#2754#2911#0" />
+            <element signature="e#2983#3236#0" />
+            <marker date="1545406101427" expanded="true" signature="1926:1935" ph="..." />
+            <marker date="1545406101427" expanded="true" signature="1926:2296" ph="..." />
+          </folding>
         </state>
       </provider>
     </entry>

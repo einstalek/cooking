@@ -26,9 +26,6 @@ class ContextManager(Manager):
         self.path: List[Node] = None
         self.current_path_idx = None
         self.dialog_manager = DialogManager(self)
-
-        Manager.__init__(self)
-
         t = Thread(target=self.update)
         t.start()
 
@@ -39,7 +36,13 @@ class ContextManager(Manager):
         PhraseGenerator.speak("calculated.time", time=time)
         self.current_path_idx = 0
         self.stack.append(Action(self.path[self.current_path_idx], self))
+
+        # TODO: почему из докера run блокирующий, а через main нет?
+        # Начинаем собирать сообщения из MQ
         self.handle_top_action()
+        print("before run")
+        self.dialog_manager.run()
+        print("after run")
 
     def current_state(self):
         """
@@ -240,14 +243,13 @@ class ContextManager(Manager):
                 break
         return prev_action
 
-    def wait_for_response(self):
+    @staticmethod
+    def wait_for_response():
         """
         Ожидание реплики со стороны клиента
         :return:
         """
         print("...")
-        # t = Thread(target=self.dialog_manager.extract_intent)
-        # t.start()
 
     def remind(self, action):
         if not action.is_technical():

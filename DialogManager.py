@@ -1,5 +1,5 @@
-from threading import Thread
 import time
+from threading import Thread
 from typing import List
 
 from ContextUnit import ContextUnit, UnitType
@@ -7,6 +7,9 @@ from IntentParser import Intent, IntentParser
 from abcManager import Manager
 from pymorphy2 import MorphAnalyzer
 import re
+
+import pika
+from pika.adapters.blocking_connection import BlockingChannel
 
 
 class DialogManager:
@@ -18,32 +21,34 @@ class DialogManager:
     def __init__(self, cm: Manager):
         self.context_manager = cm
         self._stack: List[ContextUnit] = []
-        self.run()
         self.parser = IntentParser()
 
-    def extract_intent(self):
-        while True:
-            response = input()
-            intent = self.parser.extract_intent(response)
+    def extract_intent(self, response):
+        """
+        Извлекает из пришедшего сообщения интент и уведомляет об этом CM
+        :param response:
+        :return:
+        """
+        intent = self.parser.extract_intent(response)
 
-            if intent is None and len(response) > 0:
-                # В случае, когда последним стоит выбор следующего действия
-                # и сейчас ввели название следующего действия
-                node_name = self.fill_choice_unit(response)
-                if node_name:
-                    self.context_manager.handle_intent(Intent.CHANGE_NEXT, node_name)
+        if intent is None and len(response) > 0:
+            # В случае, когда последним стоит выбор следующего действия
+            # и сейчас ввели название следующего действия
+            node_name = self.fill_choice_unit(response)
+            if node_name:
+                self.context_manager.handle_intent(Intent.CHANGE_NEXT, node_name)
 
-                # TODO: учесть частицу не перед глаголом
-                # Если назван глагол в подтверждение перехода
-                verb = self.fill_verb_response(response)
-                if verb:
-                    verbs = self.extract_verbs_from_phrase(self._stack[-1].phrase)
-                    if any(verb in x for x in verbs):
-                        self.context_manager.handle_intent(Intent.NEXT_SIMPLE)
+            # TODO: учесть частицу не перед глаголом
+            # Если назван глагол в подтверждение перехода
+            verb = self.fill_verb_response(response)
+            if verb:
+                verbs = self.extract_verbs_from_phrase(self._stack[-1].phrase)
+                if any(verb in x for x in verbs):
+                    self.context_manager.handle_intent(Intent.NEXT_SIMPLE)
 
-            if intent is not None:
-                self.context_manager.handle_intent(intent)
-            time.sleep(0.5)
+        if intent is not None:
+            self.context_manager.handle_intent(intent)
+        time.sleep(0.5)
 
     def push(self, unit: ContextUnit):
         self._stack.append(unit)
@@ -54,8 +59,21 @@ class DialogManager:
                     u.solved = True
 
     def run(self):
-        t = Thread(target=self.extract_intent)
-        t.start()
+        conn = pika.BlockingConnection(pika.ConnectionParameters("localhost"))
+        channel: BlockingChannel = conn.channel()
+
+        channel.queue_declare("task_queue", durable=True)
+        channel.basic_qos(prefetch_count=1)
+        channel.basic_consume(self.callback,
+                              queue="task_queue")
+        channel.start_consuming()
+        # t = Thread(target=self.read_from_stdin)
+        # t.start()
+
+    def callback(self, ch: BlockingChannel, method, properties, body: bytes):
+        ch.basic_ack(delivery_tag=method.delivery_tag)
+        print("GOT MESSAGE:", body.decode())
+        self.extract_intent(body.decode())
 
     def fill_choice_unit(self, response):
         try:
@@ -85,3 +103,12 @@ class DialogManager:
                 verbs.append(parsed[0].normal_form)
         return verbs
 
+    def read_from_stdin(self):
+        """
+        Считывание команд из stdin
+        :return:
+        """
+        while True:
+            request = input()
+            if request:
+                self.extract_intent(request)

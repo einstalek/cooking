@@ -1,6 +1,5 @@
 from typing import List
 from Node import Node
-from math import exp
 
 
 class TimeTable:

@@ -1,0 +1,4 @@
+pika
+rom
+PyYAML
+pymorphy2
