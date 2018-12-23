@@ -1,3 +1,5 @@
+import random
+import string
 from typing import List
 import yaml
 
@@ -19,9 +21,9 @@ class Node:
         :param technical: если True, до к моменту завершения действия сразу начинается следующее действие
         :param parent: ссылка на обертку Action
         """
+        self.id = 'N' + ''.join(random.choices(string.ascii_uppercase + string.digits, k=10))
         if requirements is None:
             requirements = []
-        assert all(req in requirements for req in requirements)
         self.name = name
         self.inp: List[Node] = []
         self.out: Node = None
@@ -31,6 +33,7 @@ class Node:
         self.switchable = switchable
         self.technical = technical
         self.parent = parent
+
         self.file = file
         self.info = {}
         if self.file:
@@ -44,6 +47,28 @@ class Node:
         self.params = None
         if kargs:
             self.params = kargs
+
+    def to_dict(self):
+        conf = {
+            'id': self.id,
+            'requirements': ' '.join(self.requirements),
+            'name': self.name,
+            'inp': ' '.join([node.id for node in self.inp]),
+            'out': self.out.id if self.out else '',
+            'time': self.time,
+            'queue_name': self.queue_name,
+            'switchable': self.switchable,
+            'technical': self.technical,
+            'parent': self.parent.id if self.parent else '',
+            'out_ingredient': self.out_ingredient.id,
+            'inp_ingredients': ' '.join([ingr.id for ingr in self.inp_ingredients])
+        }
+        if self.info:
+            conf = {**conf, **self.info}
+        if self.params:
+            conf = {**conf, **self.params}
+        return conf
+
 
     def add_input(self, other):
         self.inp.extend(other)
@@ -77,3 +102,4 @@ class Node:
                 _get_children(inp)
         _get_children(self)
         return result
+

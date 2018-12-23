@@ -48,7 +48,6 @@ class DialogManager:
 
         if intent is not None:
             self.context_manager.handle_intent(intent)
-        time.sleep(0.5)
 
     def push(self, unit: ContextUnit):
         self._stack.append(unit)
@@ -59,16 +58,16 @@ class DialogManager:
                     u.solved = True
 
     def run(self):
-        conn = pika.BlockingConnection(pika.ConnectionParameters("localhost"))
-        channel: BlockingChannel = conn.channel()
-
-        channel.queue_declare("task_queue", durable=True)
-        channel.basic_qos(prefetch_count=1)
-        channel.basic_consume(self.callback,
-                              queue="task_queue")
-        channel.start_consuming()
-        # t = Thread(target=self.read_from_stdin)
-        # t.start()
+        # conn = pika.BlockingConnection(pika.ConnectionParameters("localhost"))
+        # channel: BlockingChannel = conn.channel()
+        #
+        # channel.queue_declare("task_queue", durable=True)
+        # channel.basic_qos(prefetch_count=1)
+        # channel.basic_consume(self.callback,
+        #                       queue="task_queue")
+        # channel.start_consuming()
+        t = Thread(target=self.read_from_stdin)
+        t.start()
 
     def callback(self, ch: BlockingChannel, method, properties, body: bytes):
         ch.basic_ack(delivery_tag=method.delivery_tag)
@@ -112,3 +111,4 @@ class DialogManager:
             request = input()
             if request:
                 self.extract_intent(request)
+            time.sleep(0.5)

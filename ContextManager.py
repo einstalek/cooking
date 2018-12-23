@@ -1,3 +1,5 @@
+import random
+import string
 from typing import List, Optional
 from Action import Action
 from ContextUnit import ContextUnit, UnitType
@@ -26,6 +28,7 @@ class ContextManager(Manager):
         self.path: List[Node] = None
         self.current_path_idx = None
         self.dialog_manager = DialogManager(self)
+
         t = Thread(target=self.update)
         t.start()
 
@@ -40,9 +43,6 @@ class ContextManager(Manager):
         # TODO: почему из докера run блокирующий, а через main нет?
         # Начинаем собирать сообщения из MQ
         self.handle_top_action()
-        print("before run")
-        self.dialog_manager.run()
-        print("after run")
 
     def current_state(self):
         """

@@ -1,3 +1,4 @@
+import string
 from typing import List
 from Node import Node
 from Timer import Timer
@@ -9,10 +10,20 @@ import re
 
 class Action:
     def __init__(self, node: Node, cm: Manager):
+        self.id = 'A' + ''.join(random.choices(string.ascii_uppercase + string.digits, k=10))
         self.__node = node
         node.parent = self
         self.timer = Timer(node.time, node.name, self)
         self.cm = cm
+
+    def to_dict(self):
+        conf = {
+            'id': self.id,
+            'node': self.__node.id,
+            'timer': self.timer.id,
+            'cm': self.cm.id
+        }
+        return conf
 
     def node(self) -> Node:
         return self.__node

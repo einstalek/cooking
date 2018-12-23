@@ -10,3 +10,4 @@ if __name__ == '__main__':
 
     cm = ContextManager(tree)
     cm.initialize()
+    cm.dialog_manager.run()

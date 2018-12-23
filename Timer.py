@@ -1,10 +1,13 @@
 import datetime
+import random
+import string
 
 from abcManager import Manager
 
 
 class Timer:
     def __init__(self, seconds, name, parent):
+        self.id = 'T' + ''.join(random.choices(string.ascii_uppercase + string.digits, k=10))
         self.name = name
         self.timedelta = seconds
         self.time_started = None
