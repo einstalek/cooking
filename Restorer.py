@@ -1,10 +1,11 @@
+from ContextManager import ContextManager
 from Ingredient import Ingredient
 from Node import Node
 from RedisCursor import RedisCursor
 from Tree import Tree
 
 
-class Dispatcher:
+class Restorer:
     def __init__(self):
         self.cursor = RedisCursor()
 
@@ -75,3 +76,19 @@ class Dispatcher:
         tree = Tree.from_dict(self.cursor.get(tree_id))
         tree.head = final
         return tree
+
+    def restore_context_manager(self, cm_id):
+        # TODO: разобраться с Actions
+        cm_params = self.cursor.get(cm_id)
+        tree_id = cm_params['tree']
+        tree = self.restore_tree(tree_id)
+        cm = ContextManager(tree, int(cm_params['n_iterations']))
+        cm.id = cm_params['id']
+        cm.path = []
+        for node_id in cm_params['path'].split():
+            cm.path.append([node for node in tree.nodes() if node.id == node_id][0])
+        cm.current_path_idx = int(cm_params['current_path_idx'])
+        return cm
+
+    def restore_action(self):
+        return None

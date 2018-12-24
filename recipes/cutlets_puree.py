@@ -34,7 +34,7 @@ wait_oven_warming = Node("ожидание нагрева духовки", 15, [
                          what="нагрев духовки"
                          )(turn_on_oven)
 
-put_in_oven = Node("отправление котлет в духовку", 3, ["h", "o"], False, file="put.yaml",
+put_in_oven = Node("отправление котлет в духовку", 3, ["h", "o"], switchable=False, file="put.yaml",
                    what="противень с котлетами",
                    where="духовка",
                    out_ingredient="котлеты"
@@ -57,7 +57,7 @@ mince_pot = Node("нарезание картошки", 8, ["h"], file="mince.ya
                  how="на кубики по 1 см"
                  )(clean_pot)
 
-put_in_water = Node("выкладывание картошки в кастрюлю", 3, ["h", "p"], False, file="put_in_pan.yaml",
+put_in_water = Node("выкладывание картошки в кастрюлю", 3, ["h", "p"], switchable=False, file="put_in_pan.yaml",
                     out_ingredient="картошка"
                     )(mince_pot)
 
@@ -74,7 +74,7 @@ squash = Node("толчение картошки", 5, ["h", "p"],  file="squash.
               out_ingredient="пюре"
               )(take_out_pot)
 
-mix_flour = Node("перемешивание муки", 4, ["h", "s", "f"], False, file="mix_flour.yaml"
+mix_flour = Node("перемешивание муки", 4, ["h", "s", "f"], switchable=False, file="mix_flour.yaml"
                  )
 
 add_cream = Node("добавление сливок", 3, ["h", "s", "f"], file="add_cream.yaml"

@@ -38,7 +38,7 @@ class Tree:
         tree.queue_names = d['queue_names'].split(',')
         return tree
 
-    def __leaves(self, start_node=None) -> List[Node]:
+    def leaves(self, start_node=None) -> List[Node]:
         """
         Листья всего дерева или поддерева, начинающегося из start_node
         :param start_node:
@@ -104,7 +104,7 @@ class Tree:
         if finished is None:
             finished = set()
             all_visited_nodes = []
-            start_node: Node = random.sample(self.__leaves(), 1)[0]
+            start_node: Node = random.sample(self.leaves(), 1)[0]
 
         current_node, current_queue = start_node, start_node.queue_name
         while True:
@@ -156,7 +156,7 @@ class Tree:
         """
         finished = set()
         all_visited_nodes = path.copy()
-        start_nodes = [node for node in self.__leaves() if node not in all_visited_nodes]
+        start_nodes = [node for node in self.leaves() if node not in all_visited_nodes]
 
         for queue_name in self.queue_names:
             queue_nodes = self.queue_nodes(queue_name)
@@ -196,7 +196,7 @@ class Tree:
         _get_requirements(self.head)
         return sorted(requirements)
 
-    def __nodes(self):
+    def nodes(self):
         """
         Возвращает все узлы дерева кроме корня
         :return:
@@ -228,7 +228,7 @@ class Tree:
         return _len
 
     def individual(self) -> List[Node]:
-        # nodes = self.__nodes()
+        # nodes = self.nodes()
         # random.shuffle(nodes)
         return self.path()
 
@@ -351,7 +351,7 @@ class Tree:
         while current_epoch < epochs:
             new_pop = self.epoch(current_pop, retain, mutate)
             mean_error.append(self.grade(new_pop))
-            new_best_ind = self.select(new_pop, 1)[0]
+            # new_best_ind = self.select(new_pop, 1)[0]
             # new_best_score = self.fitness(new_best_ind)
             # best_error.append(new_best_score)
             current_pop = new_pop

@@ -82,8 +82,8 @@ class Node:
         node.out = d['out'] if d['out'] != '' else None
         node.inp_ingredients = d['inp_ingredients'].split() if d['inp_ingredients'] != '' else None
         node.out_ingredient = d['out_ingredient'] if d['out_ingredient'] != '' else None
-        node.switchable = d['switchable']
-        node.technical = d['technical']
+        node.switchable = True if d['switchable'] == 'True' else False
+        node.technical = True if d['technical'] == 'True' else False
         node.parent = d['parent'] if d['parent'] != '' else None
         node.queue_name = d['queue_name']
         node.file = d['file'] if d['file'] != '' else None

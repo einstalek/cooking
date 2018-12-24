@@ -27,7 +27,7 @@ class ContextManager(Manager):
         self.stack: List[Action] = []
         self.finished_stack: List[Action] = []
         self.path: List[Node] = None
-        self.current_path_idx = None
+        self.current_path_idx: int = None
         self.dialog_manager = DialogManager(self)
 
         # TODO: remove
@@ -56,6 +56,15 @@ class ContextManager(Manager):
             'dialog_manager': self.dialog_manager.id
         }
         return conf
+
+    @staticmethod
+    def from_dict(d):
+        """
+        Реализация в классе Restorer
+        :param d:
+        :return:
+        """
+        pass
 
     def current_state(self):
         """
