@@ -25,6 +25,10 @@ class Action:
         }
         return conf
 
+    @staticmethod
+    def from_dict(d):
+        pass
+
     def node(self) -> Node:
         return self.__node
 

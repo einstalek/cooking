@@ -19,6 +19,7 @@ class ContextManager(Manager):
     Класс, ответственный за переключения между действиями
     Так же принимает Intent от DialogManager-а при реагирует на него
     """
+
     def __init__(self, tree, n_iterations=500):
         super().__init__()
         self.n_iterations = n_iterations
@@ -29,11 +30,11 @@ class ContextManager(Manager):
         self.current_path_idx = None
         self.dialog_manager = DialogManager(self)
 
-        t = Thread(target=self.update)
-        t.start()
+        # TODO: remove
+        self.update_thread = Thread(target=self.update)
+        self.update_thread.start()
 
     def initialize(self):
-        # random.seed(11)
         self.path = self.tree.mm_path(n_iterations=2000)
         time = TimeTable(self.tree.requirements())(self.path).time()
         PhraseGenerator.speak("calculated.time", time=time)
@@ -41,8 +42,20 @@ class ContextManager(Manager):
         self.stack.append(Action(self.path[self.current_path_idx], self))
 
         # TODO: почему из докера run блокирующий, а через main нет?
-        # Начинаем собирать сообщения из MQ
         self.handle_top_action()
+
+    def to_dict(self):
+        conf = {
+            'id': self.id,
+            'n_iterations': self.n_iterations,
+            'tree': self.tree.id,
+            'stack': ' '.join([action.id for action in self.stack]),
+            'finished_stack': ' '.join([action.id for action in self.finished_stack]),
+            'path': ' '.join([node.id for node in self.path]),
+            'current_path_idx': self.current_path_idx,
+            'dialog_manager': self.dialog_manager.id
+        }
+        return conf
 
     def current_state(self):
         """
@@ -58,10 +71,6 @@ class ContextManager(Manager):
         :param intent:
         :return:
         """
-        # TODO: где-то нужно отключать DM
-        if self.finished:
-            PhraseGenerator.speak("end")
-            return
         if intent == Intent.NEXT_SIMPLE:
             self.handle_next_response()
         elif intent == Intent.REPEAT:
@@ -77,6 +86,7 @@ class ContextManager(Manager):
         """
         Вызывается для обработки несовершенного действия на вершине стэка
         :return:
+
         """
         try:
             top_action = self.stack[-1]
@@ -92,6 +102,7 @@ class ContextManager(Manager):
         # Выдается реплика действия
         top_action.speak()
 
+        # TODO: remove
         # Запускается или возобновляется таймер действия
         if top_action.paused():
             top_action.unpause()
@@ -106,6 +117,9 @@ class ContextManager(Manager):
             self.wait_for_response()
 
     def handle_next_response(self):
+        if self.finished:
+            PhraseGenerator.speak("end")
+            return
         try:
             top_action = self.stack[-1]
         except IndexError:
@@ -123,6 +137,7 @@ class ContextManager(Manager):
                 self.handle_top_action()
             return
 
+        # TODO: remove
         if not top_action.is_technical():
             top_action.stop()
             top_action.stop_children()
@@ -184,11 +199,13 @@ class ContextManager(Manager):
         if len(possible_moves) == 0:
             return None
 
+        # TODO: remove
         time = prev_action.timer.time_left()
         time_diff = [abs(time - datetime.timedelta(seconds=node.time)) for node in possible_moves]
         chosen_node = possible_moves[time_diff.index(min(time_diff))]
         return chosen_node
 
+    # TODO: remove
     def handle_timeout_response(self, action: Action):
         """
         Обработчик таймаута у текущего действия
@@ -227,6 +244,7 @@ class ContextManager(Manager):
                 self.stack.append(next_action)
                 self.handle_top_action()
 
+    # TODO: remove
     def last_waiting_action(self, top_action) -> Optional[Action]:
         """
         Если в finished_stack есть незавершенное техническое действие
@@ -312,6 +330,7 @@ class ContextManager(Manager):
         self.stack.append(Action(node_to_change, self))
         self.handle_top_action()
 
+    # TODO: remove
     def on_timer_elapsed(self, action: Action):
         """
         Обработчик события истечения времени у таймера
@@ -319,6 +338,7 @@ class ContextManager(Manager):
         """
         self.handle_timeout_response(action)
 
+    # TODO: remove
     def update(self):
         """
         Функция, работающая в отдельном потоке
@@ -343,7 +363,3 @@ class ContextManager(Manager):
     def handle_negative(self):
         PhraseGenerator.speak("wait.confirmation")
         self.wait_for_response()
-
-
-
-

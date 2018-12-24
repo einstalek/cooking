@@ -1,3 +1,5 @@
+import random
+import string
 import time
 from threading import Thread
 from typing import List
@@ -19,9 +21,18 @@ class DialogManager:
     morph = MorphAnalyzer()
 
     def __init__(self, cm: Manager):
+        self.id = 'DM' + ''.join(random.choices(string.ascii_uppercase + string.digits, k=10))
         self.context_manager = cm
         self._stack: List[ContextUnit] = []
         self.parser = IntentParser()
+
+    def to_dict(self):
+        conf = {
+            'id': self.id,
+            'context_manager': self.context_manager.id,
+            'stack': ' '.join([cu.id for cu in self._stack]),
+        }
+        return conf
 
     def extract_intent(self, response):
         """
@@ -58,14 +69,6 @@ class DialogManager:
                     u.solved = True
 
     def run(self):
-        # conn = pika.BlockingConnection(pika.ConnectionParameters("localhost"))
-        # channel: BlockingChannel = conn.channel()
-        #
-        # channel.queue_declare("task_queue", durable=True)
-        # channel.basic_qos(prefetch_count=1)
-        # channel.basic_consume(self.callback,
-        #                       queue="task_queue")
-        # channel.start_consuming()
         t = Thread(target=self.read_from_stdin)
         t.start()
 
@@ -112,3 +115,13 @@ class DialogManager:
             if request:
                 self.extract_intent(request)
             time.sleep(0.5)
+
+    def read_from_mq(self):
+        conn = pika.BlockingConnection(pika.ConnectionParameters("localhost"))
+        channel: BlockingChannel = conn.channel()
+
+        channel.queue_declare("task_queue", durable=True)
+        channel.basic_qos(prefetch_count=1)
+        channel.basic_consume(self.callback,
+                              queue="task_queue")
+        channel.start_consuming()

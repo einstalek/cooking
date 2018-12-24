@@ -1,6 +1,8 @@
+import string
 from typing import List
 import random
 
+from RedisCursor import RedisCursor
 from TimeTable import TimeTable
 from Node import Node
 
@@ -9,11 +11,32 @@ class Tree:
     """
     Класс, хранящий зависимости между действиями в графе
     """
-    def __init__(self, head: Node, switch_proba=0.5):
+    def __init__(self, head: Node=None, switch_proba=0.5):
+        self.id = 'TREE' + ''.join(random.choices(string.ascii_uppercase + string.digits, k=10))
         self.switch_proba = switch_proba
         self.head = head
-        self.num_queues = len(self.head.inp)
+        if self.head:
+            self.num_queues = len(self.head.inp)
         self.queue_names = []
+
+    def to_dict(self):
+        conf = {
+            'id': self.id,
+            'switch_proba': self.switch_proba,
+            'head': self.head.id,
+            'num_queues': len(self.head.inp),
+            'queue_names': ','.join(self.queue_names)
+        }
+        return conf
+
+    @staticmethod
+    def from_dict(d):
+        tree = Tree()
+        tree.id = d['id']
+        tree.switch_proba = float(d['switch_proba'])
+        tree.num_queues = int(d['num_queues'])
+        tree.queue_names = d['queue_names'].split(',')
+        return tree
 
     def __leaves(self, start_node=None) -> List[Node]:
         """
@@ -356,3 +379,36 @@ class Tree:
                 best_fit = fit
                 best = path
         return best
+
+    def save_to_db(self):
+        """
+        Сохраняет в Redis:
+            1) Параметры дерева
+            2) Все узлы и ссылки между ними
+            3) Ингридиенты
+        :return:
+        """
+        dispatcher = RedisCursor()
+        # сохраняем параметры дерева
+        dispatcher.save_to_db(self.to_dict())
+
+        def _save_ingredients(node: Node):
+            if node.inp_ingredients:
+                for ingr in node.inp_ingredients:
+                    dispatcher.save_to_db(ingr.to_dict())
+            if node.out_ingredient:
+                dispatcher.save_to_db(node.out_ingredient.to_dict())
+
+        def _save_children(node: Node):
+            for x in node.inp:
+                dispatcher.save_to_db(x.to_dict())
+                _save_ingredients(x)
+                _save_children(x)
+
+        # сохраняем узлы дерева
+        dispatcher.save_to_db(self.head.to_dict())
+        _save_ingredients(self.head)
+        _save_children(self.head)
+
+
+
