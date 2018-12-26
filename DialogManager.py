@@ -69,13 +69,13 @@ class DialogManager:
                     u.solved = True
 
     def run(self):
-        t = Thread(target=self.read_from_stdin)
+        t = Thread(target=self.read_from_mq)
         t.start()
 
-    def callback(self, ch: BlockingChannel, method, properties, body: bytes):
-        ch.basic_ack(delivery_tag=method.delivery_tag)
+    def on_request_callback(self, ch: BlockingChannel, method, properties, body: bytes):
         print("GOT MESSAGE:", body.decode())
         self.extract_intent(body.decode())
+        ch.basic_ack(delivery_tag=method.delivery_tag)
 
     def fill_choice_unit(self, response):
         try:
@@ -122,6 +122,6 @@ class DialogManager:
 
         channel.queue_declare("task_queue", durable=True)
         channel.basic_qos(prefetch_count=1)
-        channel.basic_consume(self.callback,
+        channel.basic_consume(self.on_request_callback,
                               queue="task_queue")
         channel.start_consuming()

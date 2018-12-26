@@ -1,6 +1,10 @@
 import random
 import string
 from typing import List, Optional
+
+import pika
+from pika.adapters.blocking_connection import BlockingChannel
+
 from Action import Action
 from ContextUnit import ContextUnit, UnitType
 from Node import Node
@@ -10,8 +14,10 @@ import datetime
 from PhraseGenerator import PhraseGenerator
 
 from TimeTable import TimeTable
+from Timer import TimerEvent
 from abcManager import Manager
 from DialogManager import DialogManager, Intent
+from redis_utils.ServerMessage import ServerMessage, MessageType
 
 
 class ContextManager(Manager):
@@ -20,7 +26,7 @@ class ContextManager(Manager):
     Так же принимает Intent от DialogManager-а при реагирует на него
     """
 
-    def __init__(self, tree, n_iterations=500):
+    def __init__(self, tree, em_id='E4P1AQZI86B', n_iterations=500):
         super().__init__()
         self.n_iterations = n_iterations
         self.tree = tree
@@ -29,10 +35,61 @@ class ContextManager(Manager):
         self.path: List[Node] = None
         self.current_path_idx: int = None
         self.dialog_manager = DialogManager(self)
+        self.em_id = em_id
 
-        # TODO: remove
-        self.update_thread = Thread(target=self.update)
-        self.update_thread.start()
+    def on_outcoming_timer_event(self, mssg: str):
+        """
+        Отправляет в MQ команды по таймерам
+        :param mssg:
+        :return:
+        """
+        conn = pika.BlockingConnection(pika.ConnectionParameters(host='localhost'))
+        channel: BlockingChannel = conn.channel()
+        channel.queue_declare(queue='timer_command', durable=True)
+        channel.basic_publish(exchange='',
+                              routing_key='timer_command',
+                              body=mssg,
+                              properties=pika.BasicProperties(
+                                  delivery_mode=2
+                              ))
+        conn.close()
+
+    def on_incoming_timer_event(self):
+        """
+        Ждет события о завершении работы таймеров
+        :return:
+        """
+        conn = pika.BlockingConnection(pika.ConnectionParameters("localhost"))
+        channel: BlockingChannel = conn.channel()
+
+        channel.queue_declare("timer_event", durable=True)
+        channel.basic_qos(prefetch_count=1)
+        channel.basic_consume(self.on_incoming_timer_event_callback,
+                              queue="timer_event")
+        channel.start_consuming()
+
+    def on_incoming_timer_event_callback(self, ch: BlockingChannel, method, properties, body: bytes):
+        mssg = ServerMessage.from_bytes(body)
+        assert mssg.em_id == self.em_id
+        assert mssg.mssg_type == MessageType.TIMER
+        action = self.action_by_timer_id(mssg.request[0][0])
+        assert action is not None
+        ch.basic_ack(delivery_tag=method.delivery_tag)
+        self.on_timer_elapsed(action)
+
+    def action_by_timer_id(self, timer_id) -> Optional[Action]:
+        """
+        Ищет дейтсвие с заданным timer_id
+        :param timer_id:
+        :return:
+        """
+        for action in self.finished_stack:
+            if action.timer_id == timer_id:
+                return action
+        for action in self.stack:
+            if action.timer_id == timer_id:
+                return action
+        return None
 
     def initialize(self):
         self.path = self.tree.mm_path(n_iterations=2000)
@@ -111,9 +168,8 @@ class ContextManager(Manager):
         # Выдается реплика действия
         top_action.speak()
 
-        # TODO: remove
         # Запускается или возобновляется таймер действия
-        if top_action.paused():
+        if top_action.paused:
             top_action.unpause()
         else:
             top_action.start()
@@ -146,7 +202,6 @@ class ContextManager(Manager):
                 self.handle_top_action()
             return
 
-        # TODO: remove
         if not top_action.is_technical():
             top_action.stop()
             top_action.stop_children()
@@ -190,7 +245,7 @@ class ContextManager(Manager):
     def node_finished(self, node):
         # Проверяет, что действие есть в завершенном стэке и оно остановлено
         for action in self.finished_stack:
-            if action.node() == node and action.timer.elapsed:
+            if action.node() == node and action.elapsed:
                 return True
         return False
 
@@ -209,12 +264,12 @@ class ContextManager(Manager):
             return None
 
         # TODO: remove
-        time = prev_action.timer.time_left()
-        time_diff = [abs(time - datetime.timedelta(seconds=node.time)) for node in possible_moves]
-        chosen_node = possible_moves[time_diff.index(min(time_diff))]
+        # time = prev_action.timer.time_left()
+        # time_diff = [abs(time - datetime.timedelta(seconds=node.time)) for node in possible_moves]
+        # chosen_node = possible_moves[time_diff.index(min(time_diff))]
+        chosen_node = random.sample(possible_moves, 1)[0]
         return chosen_node
 
-    # TODO: remove
     def handle_timeout_response(self, action: Action):
         """
         Обработчик таймаута у текущего действия
@@ -253,7 +308,6 @@ class ContextManager(Manager):
                 self.stack.append(next_action)
                 self.handle_top_action()
 
-    # TODO: remove
     def last_waiting_action(self, top_action) -> Optional[Action]:
         """
         Если в finished_stack есть незавершенное техническое действие
@@ -264,7 +318,7 @@ class ContextManager(Manager):
         prev_action = None
         for action in self.finished_stack:
             if top_action.queue_name() == action.queue_name() \
-                    and not action.timer.elapsed \
+                    and not action.elapsed \
                     and action in top_action.child_actions():
                 prev_action = action
                 break
@@ -325,8 +379,8 @@ class ContextManager(Manager):
     def handle_changing_next(self, node_name):
         top_action = self.stack[-1]
         if node_name is None:
-            if top_action.paused():
-                top_action.timer.restart()
+            if top_action.paused:
+                top_action.restart()
             self.wait_for_response()
             return
         node_to_change = [x for x in self.path[self.current_path_idx + 1:] if x.name == node_name][0]
@@ -339,27 +393,12 @@ class ContextManager(Manager):
         self.stack.append(Action(node_to_change, self))
         self.handle_top_action()
 
-    # TODO: remove
     def on_timer_elapsed(self, action: Action):
         """
         Обработчик события истечения времени у таймера
         :return:
         """
         self.handle_timeout_response(action)
-
-    # TODO: remove
-    def update(self):
-        """
-        Функция, работающая в отдельном потоке
-        Обновляет таймеры действий в стэке с перерывом в 1 секунду
-        :return:
-        """
-        while True:
-            for action in self.stack:
-                action.update()
-            for action in self.finished_stack:
-                action.update()
-            time.sleep(0.1)
 
     def on_action_spoken(self, unit):
         """
