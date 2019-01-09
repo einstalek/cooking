@@ -1,6 +1,7 @@
 import string
 from typing import List
 from Node import Node
+from RedisCursor import RedisCursor
 from Timer import Timer, TimerEvent, TimerMessage
 from abcManager import Manager
 from ContextUnit import ContextUnit
@@ -26,9 +27,21 @@ class Action:
             'id': self.id,
             'node': self.__node.id,
             'timer_id': self.timer_id,
-            'cm': self.cm.id
+            'cm': self.cm.id,
+            'paused': self.paused,
+            'elapsed': self.elapsed,
         }
         return conf
+
+    @staticmethod
+    def from_dict(d):
+        action = Action(node=None, cm=None)
+        action.id = d['id']
+        action.node = d['node']
+        action.timer_id = d['timer_id']
+        action.paused = True if d['paused'] == 'True' else False
+        action.elapsed = True if d['elapsed'] == 'True' else False
+        return action
 
     def timer_message(self, event: TimerEvent) -> str:
         return TimerMessage(self.timer_id, self.timer_name, self.secs, event).to_str(self.cm.em_id)
@@ -59,9 +72,6 @@ class Action:
     def stop_children(self):
         for child in self.child_actions():
             child.stop()
-
-    def paused(self):
-        return self.paused
 
     def pause(self):
         self.paused = True

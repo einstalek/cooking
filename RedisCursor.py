@@ -27,7 +27,7 @@ class RedisCursor:
         return RedisCursor.__conn
 
     def save_to_db(self, kargs: Dict):
-        assert 'id' in kargs
+        # assert 'id' in kargs
         key, value = kargs['id'], "\t".join([str(k) + ':' + str(v) for (k, v) in kargs.items()])
         self.conn().set(key, value)
 

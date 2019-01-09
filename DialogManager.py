@@ -6,6 +6,7 @@ from typing import List
 
 from ContextUnit import ContextUnit, UnitType
 from IntentParser import Intent, IntentParser
+from RedisCursor import RedisCursor
 from abcManager import Manager
 from pymorphy2 import MorphAnalyzer
 import re
@@ -23,16 +24,23 @@ class DialogManager:
     def __init__(self, cm: Manager):
         self.id = 'DM' + ''.join(random.choices(string.ascii_uppercase + string.digits, k=10))
         self.context_manager = cm
-        self._stack: List[ContextUnit] = []
+        self.stack: List[ContextUnit] = []
         self.parser = IntentParser()
+        self.finished = False
 
     def to_dict(self):
         conf = {
             'id': self.id,
             'context_manager': self.context_manager.id,
-            'stack': ' '.join([cu.id for cu in self._stack]),
+            'stack': ' '.join([cu.id for cu in self.stack]),
         }
         return conf
+
+    def save_to_db(self):
+        cursor = RedisCursor()
+        cursor.save_to_db(self.to_dict())
+        for cu in self.stack:
+            cursor.save_to_db(cu.to_dict())
 
     def extract_intent(self, response):
         """
@@ -40,6 +48,9 @@ class DialogManager:
         :param response:
         :return:
         """
+        if self.finished:
+            return
+
         intent = self.parser.extract_intent(response)
 
         if intent is None and len(response) > 0:
@@ -53,18 +64,21 @@ class DialogManager:
             # Если назван глагол в подтверждение перехода
             verb = self.fill_verb_response(response)
             if verb:
-                verbs = self.extract_verbs_from_phrase(self._stack[-1].phrase)
+                verbs = self.extract_verbs_from_phrase(self.stack[-1].phrase)
                 if any(verb in x for x in verbs):
                     self.context_manager.handle_intent(Intent.NEXT_SIMPLE)
 
         if intent is not None:
             self.context_manager.handle_intent(intent)
 
+        self.save_to_db()
+        self.context_manager.save_to_db()
+
     def push(self, unit: ContextUnit):
-        self._stack.append(unit)
+        self.stack.append(unit)
 
         if unit.type == UnitType.CONFIRMATION:
-            for u in self._stack[:-1]:
+            for u in self.stack[:-1]:
                 if not u.solved:
                     u.solved = True
 
@@ -72,14 +86,26 @@ class DialogManager:
         t = Thread(target=self.read_from_mq)
         t.start()
 
+    # Забираем запросы от эмулятора из MQ
+    def read_from_mq(self):
+        conn = pika.BlockingConnection(pika.ConnectionParameters("localhost"))
+        self.channel: BlockingChannel = conn.channel()
+
+        self.channel.queue_declare("task_queue", durable=True)
+        self.channel.basic_qos(prefetch_count=1)
+        self.channel.basic_consume(self.on_request_callback,
+                              queue="task_queue")
+        self.channel.start_consuming()
+
     def on_request_callback(self, ch: BlockingChannel, method, properties, body: bytes):
-        print("GOT MESSAGE:", body.decode())
+        if self.finished:
+            return
         self.extract_intent(body.decode())
         ch.basic_ack(delivery_tag=method.delivery_tag)
 
     def fill_choice_unit(self, response):
         try:
-            top_unit = self._stack[-1]
+            top_unit = self.stack[-1]
         except IndexError:
             return
         if not top_unit.type == UnitType.CHOICE:
@@ -116,12 +142,6 @@ class DialogManager:
                 self.extract_intent(request)
             time.sleep(0.5)
 
-    def read_from_mq(self):
-        conn = pika.BlockingConnection(pika.ConnectionParameters("localhost"))
-        channel: BlockingChannel = conn.channel()
-
-        channel.queue_declare("task_queue", durable=True)
-        channel.basic_qos(prefetch_count=1)
-        channel.basic_consume(self.on_request_callback,
-                              queue="task_queue")
-        channel.start_consuming()
+    def stop(self):
+        self.finished = True
+        self.channel.stop_consuming()

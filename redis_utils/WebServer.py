@@ -20,6 +20,7 @@ class WebServer:
 
         self.t = Thread(target=self.run)
         self.t.start()
+        self.consume_timer_commands()
 
     def run(self):
         """
@@ -43,14 +44,12 @@ class WebServer:
         :param client_sock:
         :return:
         """
-        print('server received', mssg.mssg_type)
         he_id = mssg.em_id
 
         if he_id not in self.emulators and mssg.mssg_type == MessageType.REGISTER:
             self.emulators[he_id] = client_sock
-            return
 
-        # Текстовый запрос от клиента
+        # Текстовый запрос от клиента отправляем в MQ
         if mssg.mssg_type == MessageType.REQUEST:
             conn = pika.BlockingConnection(pika.ConnectionParameters(host='localhost'))
             channel: BlockingChannel = conn.channel()
@@ -65,18 +64,20 @@ class WebServer:
 
         # Вышло время у таймера
         if mssg.mssg_type == MessageType.TIMER:
+            print("timer event from he", mssg.request[0][0])
             conn = pika.BlockingConnection(pika.ConnectionParameters(host='localhost'))
             channel: BlockingChannel = conn.channel()
             channel.queue_declare(queue='timer_event', durable=True)
             channel.basic_publish(exchange='',
                                   routing_key='timer_event',
+                                  # TODO: implement this
                                   body='\t'.join([mssg.em_id, MessageType.TIMER.name, mssg.request[0][0]]),
                                   properties=pika.BasicProperties(
                                       delivery_mode=2
                                   ))
             conn.close()
 
-    def on_timer_command(self):
+    def consume_timer_commands(self):
         """
         Забирает команду от таймере из MQ и отправляет ее на эмулятор
         :return:
@@ -99,7 +100,7 @@ class WebServer:
         :param body:
         :return:
         """
-        print("incoming timer command from mq", body.decode())
+        print("timer command from mq", body.decode())
         mssg = ServerMessage.from_bytes(body)
         request = mssg.request[0]
 
@@ -120,4 +121,3 @@ class WebServer:
 
 if __name__ == "__main__":
     server = WebServer()
-    server.on_timer_command()

@@ -19,7 +19,7 @@ if __name__ == '__main__':
     # tree_id = list(cursor.conn().scan_iter("T*"))[0].decode()
     # restored_tree = Restorer().restore_tree(tree_id)
 
-    cm = ContextManager(tree)
+    cm = ContextManager(tree, em_id='E4P1AQZI86B')
     Thread(target=cm.on_incoming_timer_event).start()
     cm.initialize()
     cm.dialog_manager.run()

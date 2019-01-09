@@ -26,3 +26,6 @@ class Manager(ABC):
 
     def on_outcoming_timer_event(self, mssg: str):
         pass
+
+    def save_to_db(self):
+        pass

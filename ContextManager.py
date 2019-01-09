@@ -8,10 +8,10 @@ from pika.adapters.blocking_connection import BlockingChannel
 from Action import Action
 from ContextUnit import ContextUnit, UnitType
 from Node import Node
-from threading import Thread
 import time
 import datetime
 from PhraseGenerator import PhraseGenerator
+from RedisCursor import RedisCursor
 
 from TimeTable import TimeTable
 from Timer import TimerEvent
@@ -26,7 +26,7 @@ class ContextManager(Manager):
     Так же принимает Intent от DialogManager-а при реагирует на него
     """
 
-    def __init__(self, tree, em_id='E4P1AQZI86B', n_iterations=500):
+    def __init__(self, tree, em_id, n_iterations=500):
         super().__init__()
         self.n_iterations = n_iterations
         self.tree = tree
@@ -36,6 +36,35 @@ class ContextManager(Manager):
         self.current_path_idx: int = None
         self.dialog_manager = DialogManager(self)
         self.em_id = em_id
+
+    def to_dict(self):
+        conf = {
+            'id': self.id,
+            'n_iterations': self.n_iterations,
+            'tree': self.tree.id,
+            'stack': ' '.join([action.id for action in self.stack]),
+            'finished_stack': ' '.join([action.id for action in self.finished_stack]),
+            'path': ' '.join([node.id for node in self.path]),
+            'current_path_idx': self.current_path_idx,
+            'dialog_manager': self.dialog_manager.id,
+            'em_id': self.em_id,
+        }
+        return conf
+
+    def save_to_db(self):
+        """
+        Сохраняет в Redis:
+            1) Свои параметры
+            2) Параметры Actions из стэков
+        :return:
+        """
+        dispatcher = RedisCursor()
+        dispatcher.save_to_db(self.to_dict())
+
+        for action in self.stack:
+            dispatcher.save_to_db(action.to_dict())
+        for action in self.finished_stack:
+            dispatcher.save_to_db(action.to_dict())
 
     def on_outcoming_timer_event(self, mssg: str):
         """
@@ -101,28 +130,6 @@ class ContextManager(Manager):
         # TODO: почему из докера run блокирующий, а через main нет?
         self.handle_top_action()
 
-    def to_dict(self):
-        conf = {
-            'id': self.id,
-            'n_iterations': self.n_iterations,
-            'tree': self.tree.id,
-            'stack': ' '.join([action.id for action in self.stack]),
-            'finished_stack': ' '.join([action.id for action in self.finished_stack]),
-            'path': ' '.join([node.id for node in self.path]),
-            'current_path_idx': self.current_path_idx,
-            'dialog_manager': self.dialog_manager.id
-        }
-        return conf
-
-    @staticmethod
-    def from_dict(d):
-        """
-        Реализация в классе Restorer
-        :param d:
-        :return:
-        """
-        pass
-
     def current_state(self):
         """
         Состояние контекст мэнеджера описывается двумя стэками
@@ -162,8 +169,8 @@ class ContextManager(Manager):
             return
 
         # Проверка, что предшествующие технические действия выполнены
-        prev_action = self.last_waiting_action(top_action)
-        assert prev_action is None
+        # prev_action = self.last_waiting_action(top_action)
+        # assert prev_action is None
 
         # Выдается реплика действия
         top_action.speak()
@@ -184,6 +191,7 @@ class ContextManager(Manager):
     def handle_next_response(self):
         if self.finished:
             PhraseGenerator.speak("end")
+            self.stop()
             return
         try:
             top_action = self.stack[-1]
@@ -263,7 +271,6 @@ class ContextManager(Manager):
         if len(possible_moves) == 0:
             return None
 
-        # TODO: remove
         # time = prev_action.timer.time_left()
         # time_diff = [abs(time - datetime.timedelta(seconds=node.time)) for node in possible_moves]
         # chosen_node = possible_moves[time_diff.index(min(time_diff))]
@@ -411,3 +418,10 @@ class ContextManager(Manager):
     def handle_negative(self):
         PhraseGenerator.speak("wait.confirmation")
         self.wait_for_response()
+
+    def stop(self):
+        """
+        Останваливает свою работу
+        :return:
+        """
+        self.dialog_manager.stop()

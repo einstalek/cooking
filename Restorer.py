@@ -1,4 +1,7 @@
+from Action import Action
 from ContextManager import ContextManager
+from ContextUnit import ContextUnit
+from DialogManager import DialogManager
 from Ingredient import Ingredient
 from Node import Node
 from RedisCursor import RedisCursor
@@ -78,17 +81,51 @@ class Restorer:
         return tree
 
     def restore_context_manager(self, cm_id):
-        # TODO: разобраться с Actions
         cm_params = self.cursor.get(cm_id)
         tree_id = cm_params['tree']
         tree = self.restore_tree(tree_id)
-        cm = ContextManager(tree, int(cm_params['n_iterations']))
+        em_id = cm_params['em_id']
+        cm = ContextManager(tree, em_id, int(cm_params['n_iterations']))
         cm.id = cm_params['id']
         cm.path = []
         for node_id in cm_params['path'].split():
             cm.path.append([node for node in tree.nodes() if node.id == node_id][0])
         cm.current_path_idx = int(cm_params['current_path_idx'])
+
+        # воссоздаем stack
+        stack_ids = cm_params['stack'].split()
+        finished_stack_ids = cm_params['finished_stack'].split()
+
+        stack = []
+        for _id in stack_ids:
+            action = Action.from_dict(self.cursor.get(_id))
+            action.cm = cm
+            action.node = [node for node in cm.path if node.id == action.node][0]
+            stack.append(action)
+        finished_stack = []
+        for _id in finished_stack_ids:
+            action = Action.from_dict(self.cursor.get(_id))
+            action.cm = cm
+            action.node = [node for node in cm.path if node.id == action.node][0]
+            finished_stack.append(action)
         return cm
 
-    def restore_action(self):
-        return None
+    def restore_dialog_manager(self, dm_id):
+        """
+        Восстанавливает DialogManager и его ContextManager
+        :param dm_id:
+        :return:
+        """
+        dm_params = self.cursor.get(dm_id)
+        cm = self.restore_context_manager(dm_params['context_manager'])
+        dm = DialogManager(cm)
+        dm.id = dm_params['id']
+        stack_ids = dm_params['stack'].split()
+        stack = []
+        for _id in stack_ids:
+            cu = ContextUnit.from_dict(self.cursor.get(_id))
+            stack.append(cu)
+        dm.stack = stack
+        dm.context_manager = cm
+        cm.dialog_manager = dm
+        return dm, cm
