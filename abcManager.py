@@ -24,7 +24,10 @@ class Manager(ABC):
     def on_action_spoken(self, phrase):
         pass
 
-    def on_outcoming_timer_event(self, mssg: str):
+    def publish_timer_command(self, mssg: str):
+        pass
+
+    def publish_response(self, mssg: str):
         pass
 
     def save_to_db(self):

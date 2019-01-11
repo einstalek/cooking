@@ -5,7 +5,9 @@ from typing import Optional
 class MessageType(Enum):
     REGISTER = 1,
     REQUEST = 2,
-    TIMER = 3
+    TIMER = 3,
+    RESPONSE = 4,
+    FINISH = 5,
 
 
 class ServerMessage:

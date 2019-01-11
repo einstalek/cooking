@@ -12,7 +12,7 @@ class UnitType(Enum):
 class ContextUnit:
     def __init__(self, phrase: str, params: List = None, unit_type: UnitType = UnitType.CONFIRMATION):
         self.id = 'CU' + ''.join(random.choices(string.ascii_uppercase + string.digits, k=10))
-        self.type = unit_type.name
+        self.type = unit_type
         self.phrase = phrase
         self.params = params
         self.solved = False
@@ -20,10 +20,10 @@ class ContextUnit:
     def to_dict(self):
         conf = {
             'id': self.id,
-            'type': self.type,
+            'type': self.type.name,
             'phrase': self.phrase,
             'solved': self.solved,
-            'params': '\t'.join(self.params)
+            'params': '>'.join(self.params)
         }
         return conf
 
@@ -33,7 +33,7 @@ class ContextUnit:
         phrase = d['phrase']
         unit_type = UnitType[d['type']]
         solved = True if d['solved'] == 'True' else False
-        params = d['params'].split('\t')
+        params = d['params'].split('>')
         params = params if len(params) > 0 else None
         cu = ContextUnit(phrase, params, unit_type)
         cu.solved = solved

@@ -55,22 +55,26 @@ class Node:
             self.params = kargs
 
     def to_dict(self):
-        conf = {
-            'id': self.id,
-            'requirements': ' '.join(self.requirements),
-            'name': self.name,
-            'inp': ' '.join([node.id for node in self.inp]),
-            'out': self.out.id if self.out else '',
-            'time': self.time,
-            'queue_name': self.queue_name,
-            'switchable': self.switchable,
-            'technical': self.technical,
-            'parent': self.parent.id if self.parent else '',
-            'out_ingredient': self.out_ingredient.id if self.out_ingredient else '',
-            'inp_ingredients': ' '.join([ingr.id for ingr in self.inp_ingredients]) if self.inp_ingredients else '',
-            'file': self.file if self.file else '',
-            'params': '-'.join([str(x) + '=' + str(y) for (x, y) in self.params.items()]) if self.params else ''
-        }
+        try:
+            conf = {
+                'id': self.id,
+                'requirements': ' '.join(self.requirements),
+                'name': self.name,
+                'inp': ' '.join([node.id for node in self.inp]),
+                'out': self.out.id if self.out else '',
+                'time': self.time,
+                'queue_name': self.queue_name,
+                'switchable': self.switchable,
+                'technical': self.technical,
+                'parent': self.parent.id if self.parent else '',
+                'out_ingredient': self.out_ingredient.id if self.out_ingredient else '',
+                'inp_ingredients': ' '.join([ingr.id for ingr in self.inp_ingredients]) if self.inp_ingredients else '',
+                'file': self.file if self.file else '',
+                'params': '-'.join([str(x) + '=' + str(y) for (x, y) in self.params.items()]) if self.params else ''
+            }
+        except AttributeError:
+            print(self.parent)
+            raise ValueError
         return conf
 
     @staticmethod

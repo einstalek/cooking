@@ -1,5 +1,4 @@
 import random
-import string
 from typing import List, Optional
 
 import pika
@@ -8,13 +7,10 @@ from pika.adapters.blocking_connection import BlockingChannel
 from Action import Action
 from ContextUnit import ContextUnit, UnitType
 from Node import Node
-import time
-import datetime
 from PhraseGenerator import PhraseGenerator
 from RedisCursor import RedisCursor
 
 from TimeTable import TimeTable
-from Timer import TimerEvent
 from abcManager import Manager
 from DialogManager import DialogManager, Intent
 from redis_utils.ServerMessage import ServerMessage, MessageType
@@ -26,7 +22,7 @@ class ContextManager(Manager):
     Так же принимает Intent от DialogManager-а при реагирует на него
     """
 
-    def __init__(self, tree, em_id, n_iterations=500):
+    def __init__(self, tree, em_id, n_iterations=2000):
         super().__init__()
         self.n_iterations = n_iterations
         self.tree = tree
@@ -61,14 +57,17 @@ class ContextManager(Manager):
         dispatcher = RedisCursor()
         dispatcher.save_to_db(self.to_dict())
 
+        self.tree.save_to_db()
+
         for action in self.stack:
             dispatcher.save_to_db(action.to_dict())
         for action in self.finished_stack:
             dispatcher.save_to_db(action.to_dict())
 
-    def on_outcoming_timer_event(self, mssg: str):
+    def publish_timer_command(self, mssg: str):
         """
         Отправляет в MQ команды по таймерам
+        TODO: Нормально ли то, что объект может публиковать в MQ?
         :param mssg:
         :return:
         """
@@ -83,32 +82,34 @@ class ContextManager(Manager):
                               ))
         conn.close()
 
-    def on_incoming_timer_event(self):
+    def publish_response(self, mssg: str, mssg_type: MessageType = MessageType.RESPONSE):
         """
-        Ждет события о завершении работы таймеров
+        Отправляет ответы в MQ
+        :param mssg_type:
+        :param mssg:
         :return:
         """
-        conn = pika.BlockingConnection(pika.ConnectionParameters("localhost"))
+        conn = pika.BlockingConnection(pika.ConnectionParameters(host='localhost'))
         channel: BlockingChannel = conn.channel()
+        channel.queue_declare(queue='response_queue', durable=True)
+        channel.basic_publish(exchange='',
+                              routing_key='response_queue',
+                              body='\t'.join([self.em_id, mssg_type.name, mssg]),
+                              properties=pika.BasicProperties(
+                                  delivery_mode=2
+                              ))
+        conn.close()
 
-        channel.queue_declare("timer_event", durable=True)
-        channel.basic_qos(prefetch_count=1)
-        channel.basic_consume(self.on_incoming_timer_event_callback,
-                              queue="timer_event")
-        channel.start_consuming()
-
-    def on_incoming_timer_event_callback(self, ch: BlockingChannel, method, properties, body: bytes):
-        mssg = ServerMessage.from_bytes(body)
+    def on_incoming_timer_event_callback(self, mssg: ServerMessage):
         assert mssg.em_id == self.em_id
         assert mssg.mssg_type == MessageType.TIMER
         action = self.action_by_timer_id(mssg.request[0][0])
         assert action is not None
-        ch.basic_ack(delivery_tag=method.delivery_tag)
         self.on_timer_elapsed(action)
 
     def action_by_timer_id(self, timer_id) -> Optional[Action]:
         """
-        Ищет дейтсвие с заданным timer_id
+        Ищет дейтсвие с заданным timer_id в стэках
         :param timer_id:
         :return:
         """
@@ -121,21 +122,17 @@ class ContextManager(Manager):
         return None
 
     def initialize(self):
-        self.path = self.tree.mm_path(n_iterations=2000)
-        time = TimeTable(self.tree.requirements())(self.path).time()
-        PhraseGenerator.speak("calculated.time", time=time)
-        self.current_path_idx = 0
-        self.stack.append(Action(self.path[self.current_path_idx], self))
-
-        # TODO: почему из докера run блокирующий, а через main нет?
-        self.handle_top_action()
-
-    def current_state(self):
         """
-        Состояние контекст мэнеджера описывается двумя стэками
+        Должно вызываться сразу после создания объекта класса
         :return:
         """
-        return self.stack.copy(), self.finished_stack.copy()
+        self.path = self.tree.mm_path(n_iterations=2000)
+        time = TimeTable(self.tree.requirements())(self.path).time()
+        resp = PhraseGenerator.speak("calculated.time", time=time)
+        self.publish_response(resp)
+        self.current_path_idx = 0
+        self.stack.append(Action(self.path[self.current_path_idx], self))
+        self.handle_top_action()
 
     def handle_intent(self, intent: Intent, params=None):
         """
@@ -183,14 +180,17 @@ class ContextManager(Manager):
 
         # переход к следующему действию или ожидание ответа от человека
         if top_action.is_technical():
-            print()
+            # print()
+            # self.publish_response("\n")
             self.handle_next_response()
         else:
             self.wait_for_response()
 
     def handle_next_response(self):
         if self.finished:
-            PhraseGenerator.speak("end")
+            resp = PhraseGenerator.speak("end")
+            self.publish_response(resp)
+            self.publish_response(mssg="", mssg_type=MessageType.FINISH)
             self.stop()
             return
         try:
@@ -205,7 +205,8 @@ class ContextManager(Manager):
                 self.current_path_idx += 1
                 return_to = Action(self.path[self.current_path_idx], self)
                 return_to.stop_children()
-                PhraseGenerator.speak("stop.waiting", queue_name=return_to.queue_name())
+                resp = PhraseGenerator.speak("stop.waiting", queue_name=return_to.queue_name())
+                self.publish_response(resp)
                 self.stack.append(return_to)
                 self.handle_top_action()
             return
@@ -225,7 +226,8 @@ class ContextManager(Manager):
                 if prev_action is None:
                     # Если все нормально, двигаемся дальше по path
                     if next_action.queue_name() != top_action.queue_name():
-                        PhraseGenerator.speak("switch.queue", queue_name=next_action.queue_name())
+                        self.publish_response(PhraseGenerator.speak("switch.queue",
+                                                                    queue_name=next_action.queue_name()))
                     self.stack.append(next_action)
                 else:
                     # Если следующему действию предшествует незавершенное техническое действие
@@ -235,7 +237,8 @@ class ContextManager(Manager):
                         # Если переключиться некуда, остается ждать завершения технического действия,
                         # сдвинуть current_index на 1 назад и может быть ждать ответа
                         self.current_path_idx -= 1
-                        PhraseGenerator.speak("wait.technical", action=prev_action.node().name)
+                        self.publish_response(PhraseGenerator.speak("wait.technical",
+                                                                    action=prev_action.node().name))
                         self.wait_for_response()
                         return
                     else:
@@ -277,44 +280,6 @@ class ContextManager(Manager):
         chosen_node = random.sample(possible_moves, 1)[0]
         return chosen_node
 
-    def handle_timeout_response(self, action: Action):
-        """
-        Обработчик таймаута у текущего действия
-        :return:
-        """
-        if not action.is_technical() or len(action.out().inp) > 1:
-            # TODO: непонятный момент
-            action.stop()
-            action.stop_children()
-            self.remind(action)
-        elif action.is_technical() and len(action.out().inp) == 1:
-            try:
-                current_action = self.stack[-1]
-            except IndexError:
-                # Если стэк был пустым, значит мы ждали завершения технического действия
-                self.current_path_idx += 1
-                current_action = Action(self.path[self.current_path_idx], self)
-                self.stack.append(current_action)
-                self.handle_top_action()
-                return
-            if action.queue_name() != current_action.queue_name():
-                # Ставим в стэк над приостановленным действием следующее и меняем их порядок в self.path
-                current_action.pause()
-                current_action.stop_children()
-                print()
-                PhraseGenerator.speak("stop.and.switch", action=action.node().name)
-                next_action = None
-                for node in self.path[self.current_path_idx + 1:]:
-                    if node.queue_name == action.queue_name():
-                        next_action = Action(node, self)
-                        break
-                assert next_action is not None
-                self.path[self.current_path_idx:] = [next_action.node()] + \
-                                                    [x for x in self.path[self.current_path_idx:]
-                                                     if x != next_action.node()]
-                self.stack.append(next_action)
-                self.handle_top_action()
-
     def last_waiting_action(self, top_action) -> Optional[Action]:
         """
         Если в finished_stack есть незавершенное техническое действие
@@ -331,20 +296,21 @@ class ContextManager(Manager):
                 break
         return prev_action
 
-    @staticmethod
-    def wait_for_response():
+    def wait_for_response(self):
         """
         Ожидание реплики со стороны клиента
         :return:
         """
-        print("...")
+        # print("...")
+        self.publish_response("...")
 
     def remind(self, action):
         if not action.is_technical():
             action.remind()
             self.wait_for_response()
         else:
-            print("НАПОМИНАНИЕ:", action.node().name)
+            # print("НАПОМИНАНИЕ:", action.node().name)
+            self.publish_response("НАПОМИНАНИЕ:" + action.node.name + '\n...')
 
     def handle_repeat_response(self, *args, **kargs):
         """
@@ -374,10 +340,10 @@ class ContextManager(Manager):
                 possible_moves.append(node)
 
         if len(possible_moves) == 0:
-            PhraseGenerator.speak("nowhere.to.switch")
+            self.publish_response(PhraseGenerator.speak("nowhere.to.switch"))
             self.wait_for_response()
             return
-        PhraseGenerator.speak("choose.next", options=", ".join(str(x) for x in possible_moves))
+        self.publish_response(PhraseGenerator.speak("choose.next", options=", ".join(str(x) for x in possible_moves)))
         # Создаем форму с параметрами - названиями узлов, в которые можно перейти
         self.dialog_manager.push(ContextUnit(repr(possible_moves), unit_type=UnitType.CHOICE,
                                              params=[str(x) for x in possible_moves]))
@@ -394,7 +360,7 @@ class ContextManager(Manager):
         temp = self.path[:self.current_path_idx] + [node_to_change]
         new_path = self.tree.mm_path(start=temp, n_iterations=2000)
         time = TimeTable(self.tree.requirements())(new_path).time()
-        PhraseGenerator.speak("calculated.time", time=time)
+        self.publish_response(PhraseGenerator.speak("calculated.time", time=time))
         self.path = new_path
         self.stack.pop()
         self.stack.append(Action(node_to_change, self))
@@ -407,6 +373,45 @@ class ContextManager(Manager):
         """
         self.handle_timeout_response(action)
 
+    def handle_timeout_response(self, action: Action):
+        """
+        Обработчик таймаута у текущего действия
+        :return:
+        """
+        if not action.is_technical() or len(action.out().inp) > 1:
+            # TODO: непонятный момент
+            action.stop()
+            action.stop_children()
+            self.remind(action)
+        elif action.is_technical() and len(action.out().inp) == 1:
+            try:
+                current_action = self.stack[-1]
+            except IndexError:
+                # Если стэк был пустым, значит мы ждали завершения технического действия
+                self.current_path_idx += 1
+                current_action = Action(self.path[self.current_path_idx], self)
+                self.stack.append(current_action)
+                self.handle_top_action()
+                return
+            if action.queue_name() != current_action.queue_name():
+                # Ставим в стэк над приостановленным действием следующее и меняем их порядок в self.path
+                current_action.pause()
+                current_action.stop_children()
+                # print()
+                self.publish_response("\n")
+                self.publish_response(PhraseGenerator.speak("stop.and.switch", action=action.node().name))
+                next_action = None
+                for node in self.path[self.current_path_idx + 1:]:
+                    if node.queue_name == action.queue_name():
+                        next_action = Action(node, self)
+                        break
+                assert next_action is not None
+                self.path[self.current_path_idx:] = [next_action.node()] + \
+                                                    [x for x in self.path[self.current_path_idx:]
+                                                     if x != next_action.node()]
+                self.stack.append(next_action)
+                self.handle_top_action()
+
     def on_action_spoken(self, unit):
         """
         Когда действие произнесло фразу, добавляем ее в стэк диалог менеджера
@@ -416,7 +421,7 @@ class ContextManager(Manager):
         self.dialog_manager.push(unit)
 
     def handle_negative(self):
-        PhraseGenerator.speak("wait.confirmation")
+        self.publish_response(PhraseGenerator.speak("wait.confirmation"))
         self.wait_for_response()
 
     def stop(self):

@@ -11,11 +11,11 @@ from redis_utils.ServerMessage import ServerMessage, MessageType
 
 class HardwareEmulator:
     def __init__(self):
-        random.seed(1)
         self.id = 'HE' + ''.join(random.choices(string.ascii_uppercase + string.digits, k=10))
         self.server = None
         self.timers: Dict[str, Timer] = {}
         self.id = self.gen_id()
+        self.finished = False
 
         # Запуск тикера
         self.ticker = Thread(target=self.update)
@@ -38,8 +38,8 @@ class HardwareEmulator:
         Функция работает в отдельном потоке, считывая команды из stdin и отправляя их на сервер
         :return:
         """
-        while True:
-            request = input(">> ")
+        while not self.finished:
+            request = input("")
             if request:
                 mssg = ServerMessage.gen_mssg(self.id, MessageType.REQUEST, request)
                 self.send_on_server(mssg)
@@ -49,7 +49,7 @@ class HardwareEmulator:
         Принимает сообщения, приходящие от сервера
         :return:
         """
-        while True:
+        while not self.finished:
             raw_mssg = self.socket.recv(1024)
             if not raw_mssg:
                 break
@@ -71,6 +71,12 @@ class HardwareEmulator:
                     self.on_stop_timer(timer_id)
                 if event == TimerEvent.RESTART:
                     self.on_restart_timer(timer_id)
+
+            if mssg.mssg_type == MessageType.RESPONSE:
+                print(mssg.request[0][0])
+
+            if mssg.mssg_type == MessageType.FINISH:
+                self.finished = True
 
     def update(self):
         """
@@ -140,7 +146,7 @@ if __name__ == '__main__':
     print(emulator.id)
     connected = emulator.register()
     if connected:
-        emulator.run()
+        Thread(target=emulator.run).start()
 
 
 

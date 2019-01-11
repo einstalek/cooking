@@ -1,3 +1,5 @@
+from typing import Set, Dict
+
 from Action import Action
 from ContextManager import ContextManager
 from ContextUnit import ContextUnit
@@ -78,6 +80,7 @@ class Restorer:
         final = __obj[head_id]
         tree = Tree.from_dict(self.cursor.get(tree_id))
         tree.head = final
+
         return tree
 
     def restore_context_manager(self, cm_id):
@@ -96,18 +99,45 @@ class Restorer:
         stack_ids = cm_params['stack'].split()
         finished_stack_ids = cm_params['finished_stack'].split()
 
-        stack = []
+        stack, finished_stack = [], []
         for _id in stack_ids:
             action = Action.from_dict(self.cursor.get(_id))
             action.cm = cm
-            action.node = [node for node in cm.path if node.id == action.node][0]
+            node = [node for node in cm.path if node.id == action.node][0]
+            action.node = node
+            action.secs = node.time
+            action.timer_name = node.name
+            node.parent = action
             stack.append(action)
-        finished_stack = []
         for _id in finished_stack_ids:
             action = Action.from_dict(self.cursor.get(_id))
             action.cm = cm
-            action.node = [node for node in cm.path if node.id == action.node][0]
+            node = [node for node in cm.path if node.id == action.node][0]
+            action.node = node
+            action.secs = node.time
+            action.timer_name = node.name
+            node.parent = action
             finished_stack.append(action)
+
+        cm.stack = stack
+        cm.finished_stack = finished_stack
+
+        # проверяем, что в поле parent не осталось строк
+        for node in cm.tree.nodes():
+            if node.parent and isinstance(node.parent, str):
+                try:
+                    action = Action.from_dict(self.cursor.get(node.parent))
+                except KeyError:
+                    print(node.parent, node)
+                    print(stack)
+                    print(finished_stack)
+                action.cm = cm
+                action.node = node
+                action.secs = node.time
+                action.timer_name = node.name
+                node.parent = action
+
+        # print([type(node.parent) for node in cm.tree.nodes()])
         return cm
 
     def restore_dialog_manager(self, dm_id):
@@ -120,6 +150,7 @@ class Restorer:
         cm = self.restore_context_manager(dm_params['context_manager'])
         dm = DialogManager(cm)
         dm.id = dm_params['id']
+
         stack_ids = dm_params['stack'].split()
         stack = []
         for _id in stack_ids:
@@ -128,4 +159,8 @@ class Restorer:
         dm.stack = stack
         dm.context_manager = cm
         cm.dialog_manager = dm
-        return dm, cm
+        return dm
+
+
+if __name__ == "__main__":
+    dm = Restorer().restore_dialog_manager("DMNBXV5YXMLO")

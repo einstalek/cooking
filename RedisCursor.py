@@ -37,7 +37,11 @@ class RedisCursor:
         :param key:
         :return:
         """
-        return self.value_to_dict(self.conn().get(key).decode())
+        try:
+            return self.value_to_dict(self.conn().get(key).decode())
+        except AttributeError:
+            print("wrong key", key)
+            raise KeyError
 
     def value_to_dict(self, value: str):
         """

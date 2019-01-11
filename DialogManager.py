@@ -39,6 +39,7 @@ class DialogManager:
     def save_to_db(self):
         cursor = RedisCursor()
         cursor.save_to_db(self.to_dict())
+        self.context_manager.save_to_db()
         for cu in self.stack:
             cursor.save_to_db(cu.to_dict())
 
@@ -71,9 +72,6 @@ class DialogManager:
         if intent is not None:
             self.context_manager.handle_intent(intent)
 
-        self.save_to_db()
-        self.context_manager.save_to_db()
-
     def push(self, unit: ContextUnit):
         self.stack.append(unit)
 
@@ -82,26 +80,25 @@ class DialogManager:
                 if not u.solved:
                     u.solved = True
 
-    def run(self):
-        t = Thread(target=self.read_from_mq)
-        t.start()
+    # def run(self):
+    #     t = Thread(target=self.start_consuming_requests)
+    #     t.start()
 
     # Забираем запросы от эмулятора из MQ
-    def read_from_mq(self):
-        conn = pika.BlockingConnection(pika.ConnectionParameters("localhost"))
-        self.channel: BlockingChannel = conn.channel()
+    # def start_consuming_requests(self):
+    #     conn = pika.BlockingConnection(pika.ConnectionParameters("localhost"))
+    #     self.channel: BlockingChannel = conn.channel()
+    #
+    #     self.channel.queue_declare("task_queue", durable=True)
+    #     self.channel.basic_qos(prefetch_count=1)
+    #     self.channel.basic_consume(self.on_request_callback,
+    #                           queue="task_queue")
+    #     self.channel.start_consuming()
 
-        self.channel.queue_declare("task_queue", durable=True)
-        self.channel.basic_qos(prefetch_count=1)
-        self.channel.basic_consume(self.on_request_callback,
-                              queue="task_queue")
-        self.channel.start_consuming()
-
-    def on_request_callback(self, ch: BlockingChannel, method, properties, body: bytes):
+    def on_request_callback(self, request):
         if self.finished:
             return
-        self.extract_intent(body.decode())
-        ch.basic_ack(delivery_tag=method.delivery_tag)
+        self.extract_intent(request)
 
     def fill_choice_unit(self, response):
         try:
@@ -144,4 +141,4 @@ class DialogManager:
 
     def stop(self):
         self.finished = True
-        self.channel.stop_consuming()
+        # self.channel.stop_consuming()

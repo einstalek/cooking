@@ -38,6 +38,36 @@ class Tree:
         tree.queue_names = d['queue_names'].split(',')
         return tree
 
+    def save_to_db(self):
+        """
+        Сохраняет в Redis:
+            1) Параметры дерева
+            2) Все узлы и ссылки между ними
+            3) Ингридиенты
+        :return:
+        """
+        dispatcher = RedisCursor()
+        # сохраняем параметры дерева
+        dispatcher.save_to_db(self.to_dict())
+
+        def _save_ingredients(node: Node):
+            if node.inp_ingredients:
+                for ingr in node.inp_ingredients:
+                    dispatcher.save_to_db(ingr.to_dict())
+            if node.out_ingredient:
+                dispatcher.save_to_db(node.out_ingredient.to_dict())
+
+        def _save_children(node: Node):
+            for x in node.inp:
+                dispatcher.save_to_db(x.to_dict())
+                _save_ingredients(x)
+                _save_children(x)
+
+        # сохраняем узлы дерева
+        dispatcher.save_to_db(self.head.to_dict())
+        _save_ingredients(self.head)
+        _save_children(self.head)
+
     def leaves(self, start_node=None) -> List[Node]:
         """
         Листья всего дерева или поддерева, начинающегося из start_node
@@ -380,35 +410,6 @@ class Tree:
                 best = path
         return best
 
-    def save_to_db(self):
-        """
-        Сохраняет в Redis:
-            1) Параметры дерева
-            2) Все узлы и ссылки между ними
-            3) Ингридиенты
-        :return:
-        """
-        dispatcher = RedisCursor()
-        # сохраняем параметры дерева
-        dispatcher.save_to_db(self.to_dict())
-
-        def _save_ingredients(node: Node):
-            if node.inp_ingredients:
-                for ingr in node.inp_ingredients:
-                    dispatcher.save_to_db(ingr.to_dict())
-            if node.out_ingredient:
-                dispatcher.save_to_db(node.out_ingredient.to_dict())
-
-        def _save_children(node: Node):
-            for x in node.inp:
-                dispatcher.save_to_db(x.to_dict())
-                _save_ingredients(x)
-                _save_children(x)
-
-        # сохраняем узлы дерева
-        dispatcher.save_to_db(self.head.to_dict())
-        _save_ingredients(self.head)
-        _save_children(self.head)
 
 
 

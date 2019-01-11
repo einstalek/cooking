@@ -39,7 +39,7 @@ class PhraseGenerator:
     @staticmethod
     def speak(file, **params):
         phrase = PhraseGenerator.phrase(file)
-        print(PhraseGenerator.reformat(params, phrase))
+        return PhraseGenerator.reformat(params, phrase)
 
 
 if __name__ == "__main__":

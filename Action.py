@@ -1,5 +1,5 @@
 import string
-from typing import List
+from typing import List, Optional
 from Node import Node
 from RedisCursor import RedisCursor
 from Timer import Timer, TimerEvent, TimerMessage
@@ -10,14 +10,15 @@ import re
 
 
 class Action:
-    def __init__(self, node: Node, cm: Manager):
+    def __init__(self, node: Optional[Node], cm: Optional[Manager]):
         self.id = 'A' + ''.join(random.choices(string.ascii_uppercase + string.digits, k=10))
-        self.__node = node
-        node.parent = self
+        self.node = node
 
         self.timer_id = Timer.gen_id()
-        self.secs = node.time
-        self.timer_name = node.name
+        if node is not None:
+            node.parent = self
+            self.secs = node.time
+            self.timer_name = node.name
         self.cm = cm
         self.paused = None
         self.elapsed = False
@@ -25,7 +26,7 @@ class Action:
     def to_dict(self):
         conf = {
             'id': self.id,
-            'node': self.__node.id,
+            'node': self.node.id,
             'timer_id': self.timer_id,
             'cm': self.cm.id,
             'paused': self.paused,
@@ -46,28 +47,25 @@ class Action:
     def timer_message(self, event: TimerEvent) -> str:
         return TimerMessage(self.timer_id, self.timer_name, self.secs, event).to_str(self.cm.em_id)
 
-    def node(self) -> Node:
-        return self.__node
-
     def inp(self) -> List[Node]:
-        return self.__node.inp
+        return self.node.inp
 
     def out(self) -> Node:
-        return self.__node.out
+        return self.node.out
 
     def start(self):
-        self.cm.on_outcoming_timer_event(self.timer_message(TimerEvent.START))
+        self.cm.publish_timer_command(self.timer_message(TimerEvent.START))
 
     def unpause(self):
         self.paused = False
-        self.cm.on_outcoming_timer_event(self.timer_message(TimerEvent.UNPAUSE))
+        self.cm.publish_timer_command(self.timer_message(TimerEvent.UNPAUSE))
 
     def restart(self):
-        self.cm.on_outcoming_timer_event(self.timer_message(TimerEvent.RESTART))
+        self.cm.publish_timer_command(self.timer_message(TimerEvent.RESTART))
 
     def stop(self):
         self.elapsed = True
-        self.cm.on_outcoming_timer_event(self.timer_message(TimerEvent.STOP))
+        self.cm.publish_timer_command(self.timer_message(TimerEvent.STOP))
 
     def stop_children(self):
         for child in self.child_actions():
@@ -75,39 +73,39 @@ class Action:
 
     def pause(self):
         self.paused = True
-        self.cm.on_outcoming_timer_event(self.timer_message(TimerEvent.PAUSE))
+        self.cm.publish_timer_command(self.timer_message(TimerEvent.PAUSE))
 
     def is_technical(self):
-        return 'h' not in self.__node.requirements
+        return 'h' not in self.node.requirements
 
     def queue_name(self):
-        return self.__node.queue_name
+        return self.node.queue_name
 
     def child_actions(self):
         children = []
 
         def _get_children(action):
             for inp in action.inp():
-                if inp.parent is None:
-                    print(inp, inp.parent)
-                else:
-                    children.append(inp.parent)
-                    _get_children(inp.parent)
+                children.append(inp.parent)
+                _get_children(inp.parent)
 
         _get_children(self)
         return children
 
     def __repr__(self):
-        if self.__node.file:
-            return self.__node.info["Name"]
-        return self.__node.name
+        if self.node.file:
+            return self.node.info["Name"]
+        return self.node.name
+
+    def __str__(self):
+        return self.node.name[:3] + ' ' + self.id + ' ' + self.node.id
 
     def speak(self):
-        if self.__node.file is None:
-            print(self.__node.name)
+        if self.node.file is None:
+            print(self.node.name)
         else:
-            phrase = random.sample(self.__node.info["Phrase"], 1)[0]
-            warnings = self.__node.info["Warning"]
+            phrase = random.sample(self.node.info["Phrase"], 1)[0]
+            warnings = self.node.info["Warning"]
             params = self.extract_params(phrase)
             reformatted = self.reformat(params, phrase)
 
@@ -115,16 +113,19 @@ class Action:
                 warning = random.sample(warnings, 1)[0]
                 reformatted += "\n" + warning
 
-            print(reformatted)
+            # print(reformatted)
+            self.cm.publish_response(reformatted)
             self.cm.on_action_spoken(ContextUnit(reformatted, params))
 
     def remind(self):
-        if self.__node.file is None:
-            print("isn't", self, "done yet?")
+        if self.node.file is None:
+            # print("isn't", self, "done yet?")
+            self.cm.publish_response("isn't" + repr(self) + "done yet?")
         else:
-            phrase = random.sample(self.__node.info["Remind"], 1)[0]
+            phrase = random.sample(self.node.info["Remind"], 1)[0]
             params = self.extract_params(phrase)
-            print(self.reformat(params, phrase))
+            # print(self.reformat(params, phrase))
+            self.cm.publish_response(self.reformat(params, phrase))
 
     @staticmethod
     def extract_params(phrase: str) -> List[str]:
@@ -136,7 +137,7 @@ class Action:
         search = re.findall("{\w*}", phrase)
         return [x[1:-1] for x in search]
 
-    def reformat(self, params, phrase: str):
+    def reformat(self, params, phrase: str) -> str:
         """
         Для каждлого параметра из params берет значение из параметров, указанных в Node
         и вставляет их в phrase
