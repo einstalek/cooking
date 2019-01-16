@@ -39,6 +39,7 @@ class DialogManager:
     def save_to_db(self):
         cursor = RedisCursor()
         cursor.save_to_db(self.to_dict())
+
         self.context_manager.save_to_db()
         for cu in self.stack:
             cursor.save_to_db(cu.to_dict())

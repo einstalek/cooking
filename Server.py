@@ -44,9 +44,10 @@ class Server:
                     tree.assign_queue_names(["котлеты", "пюре", "соус"])
 
                     em_id = data.decode('utf-8')
-                    cm = ContextManager(tree, em_id=em_id)
+                    cm = ContextManager(tree, em_id=em_id, n_iterations=5000)
                     print("created session for", em_id)
                     cm.initialize()
+                    print(cm.path)
                     self.emulators[em_id] = cm.dialog_manager.id
                     cm.dialog_manager.save_to_db()
                     break

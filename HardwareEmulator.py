@@ -10,7 +10,9 @@ from redis_utils.ServerMessage import ServerMessage, MessageType
 
 
 class HardwareEmulator:
-    def __init__(self):
+    def __init__(self, host="localhost", port=8888):
+        self.host = host
+        self.port = port
         self.id = 'HE' + ''.join(random.choices(string.ascii_uppercase + string.digits, k=10))
         self.server = None
         self.timers: Dict[str, Timer] = {}
@@ -125,7 +127,7 @@ class HardwareEmulator:
 
     def register(self) -> bool:
         try:
-            self.socket.connect(("localhost", 8888))
+            self.socket.connect((self.host, self.port))
         except ConnectionRefusedError:
             print("Не удалось подключиться к серверу")
             return False
@@ -142,7 +144,7 @@ class HardwareEmulator:
 
 
 if __name__ == '__main__':
-    emulator = HardwareEmulator()
+    emulator = HardwareEmulator(port=8889)
     print(emulator.id)
     connected = emulator.register()
     if connected:

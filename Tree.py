@@ -273,12 +273,12 @@ class Tree:
         for node in individual:
             if not all(inp in visited_nodes for inp in node.inp):
                 # Если посетили узел, не посетив всех его детей
-                _sum -= 50
+                _sum -= 60
             try:
                 prev_node = visited_nodes[-1]
                 if not prev_node.switchable and node != prev_node.out:
                     # Если перескочили на узле, на котором нельзя было это делать
-                    _sum -= 10
+                    _sum -= 60
             except IndexError:
                 pass
             if len(node.inp) == 1 and node.inp[0].technical:
@@ -301,7 +301,7 @@ class Tree:
             try:
                 if node.queue_name != visited_nodes[-1].queue_name:
                     # Штрафуем за скачки между очередями
-                    _sum -= 10
+                    _sum -= 20
             except IndexError:
                 pass
 

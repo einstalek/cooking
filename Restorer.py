@@ -129,8 +129,6 @@ class Restorer:
                     action = Action.from_dict(self.cursor.get(node.parent))
                 except KeyError:
                     print(node.parent, node)
-                    print(stack)
-                    print(finished_stack)
                 action.cm = cm
                 action.node = node
                 action.secs = node.time

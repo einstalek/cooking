@@ -359,6 +359,12 @@ class ContextManager(Manager):
         node_to_change = [x for x in self.path[self.current_path_idx + 1:] if x.name == node_name][0]
         temp = self.path[:self.current_path_idx] + [node_to_change]
         new_path = self.tree.mm_path(start=temp, n_iterations=2000)
+
+        print("old path:")
+        print(self.path)
+        print("new path:")
+        print(new_path, end='\n\n')
+
         time = TimeTable(self.tree.requirements())(new_path).time()
         self.publish_response(PhraseGenerator.speak("calculated.time", time=time))
         self.path = new_path

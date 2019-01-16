@@ -10,13 +10,14 @@ from redis_utils.ServerMessage import ServerMessage, MessageType
 
 
 class WebServer:
-    def __init__(self, mq_host="localhost"):
+    def __init__(self, mq_host="localhost", port=8888):
         self.mq_host = mq_host
+        self.port = port
         self.emulators: Dict[str, socket.socket] = {}
         self.finished = set()
 
         self.server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.server.bind(("localhost", 8888))
+        self.server.bind(("localhost", port))
         self.server.listen(10)
 
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -161,4 +162,4 @@ class WebServer:
 
 
 if __name__ == "__main__":
-    server = WebServer()
+    server = WebServer(port=8889)

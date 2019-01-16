@@ -64,6 +64,8 @@ class Action:
         self.cm.publish_timer_command(self.timer_message(TimerEvent.RESTART))
 
     def stop(self):
+        if self.elapsed:
+            return
         self.elapsed = True
         self.cm.publish_timer_command(self.timer_message(TimerEvent.STOP))
 
