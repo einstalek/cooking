@@ -87,9 +87,11 @@ class Restorer:
         cm_params = self.cursor.get(cm_id)
         tree_id = cm_params['tree']
         tree = self.restore_tree(tree_id)
+
         em_id = cm_params['em_id']
         cm = ContextManager(tree, em_id, int(cm_params['n_iterations']))
         cm.id = cm_params['id']
+
         cm.path = []
         for node_id in cm_params['path'].split():
             cm.path.append([node for node in tree.nodes() if node.id == node_id][0])
@@ -109,6 +111,7 @@ class Restorer:
             action.timer_name = node.name
             node.parent = action
             stack.append(action)
+
         for _id in finished_stack_ids:
             action = Action.from_dict(self.cursor.get(_id))
             action.cm = cm
@@ -129,13 +132,12 @@ class Restorer:
                     action = Action.from_dict(self.cursor.get(node.parent))
                 except KeyError:
                     print(node.parent, node)
+                    raise KeyError
                 action.cm = cm
                 action.node = node
                 action.secs = node.time
                 action.timer_name = node.name
                 node.parent = action
-
-        # print([type(node.parent) for node in cm.tree.nodes()])
         return cm
 
     def restore_dialog_manager(self, dm_id):
@@ -145,7 +147,11 @@ class Restorer:
         :return:
         """
         dm_params = self.cursor.get(dm_id)
-        cm = self.restore_context_manager(dm_params['context_manager'])
+        try:
+            cm = self.restore_context_manager(dm_params['context_manager'])
+        except KeyError:
+            print(dm_params)
+            raise KeyError
         dm = DialogManager(cm)
         dm.id = dm_params['id']
 
@@ -154,11 +160,9 @@ class Restorer:
         for _id in stack_ids:
             cu = ContextUnit.from_dict(self.cursor.get(_id))
             stack.append(cu)
+
         dm.stack = stack
         dm.context_manager = cm
         cm.dialog_manager = dm
         return dm
 
-
-if __name__ == "__main__":
-    dm = Restorer().restore_dialog_manager("DMNBXV5YXMLO")

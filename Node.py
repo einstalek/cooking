@@ -12,7 +12,7 @@ class Node:
     """
 
     def __init__(self, name, time: int, requirements=None, switchable=True, technical=False,
-                 file: str = None, parent=None, inp_ingredients=None, out_ingredient=None, **kargs):
+                 file: str = None, parent=None, inp_ingredients: List[str] = None, out_ingredient=None, **kargs):
         """
 
         :param name:

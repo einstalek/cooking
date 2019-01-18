@@ -82,7 +82,7 @@ class ContextManager(Manager):
                               ))
         conn.close()
 
-    def publish_response(self, mssg: str, mssg_type: MessageType = MessageType.RESPONSE):
+    def publish_response(self, mssg: str, mssg_type: MessageType=MessageType.RESPONSE):
         """
         Отправляет ответы в MQ
         :param mssg_type:
@@ -126,6 +126,7 @@ class ContextManager(Manager):
         Должно вызываться сразу после создания объекта класса
         :return:
         """
+        random.seed(1)
         self.path = self.tree.mm_path(n_iterations=2000)
         time = TimeTable(self.tree.requirements())(self.path).time()
         resp = PhraseGenerator.speak("calculated.time", time=time)
@@ -166,7 +167,11 @@ class ContextManager(Manager):
             return
 
         # Проверка, что предшествующие технические действия выполнены
-        # prev_action = self.last_waiting_action(top_action)
+        prev_action = self.last_waiting_action(top_action)
+        if prev_action is not None:
+            print("trying to execute", top_action, "while", prev_action, "is not finished")
+            prev_action.stop()
+            prev_action.stop_children()
         # assert prev_action is None
 
         # Выдается реплика действия
@@ -180,8 +185,6 @@ class ContextManager(Manager):
 
         # переход к следующему действию или ожидание ответа от человека
         if top_action.is_technical():
-            # print()
-            # self.publish_response("\n")
             self.handle_next_response()
         else:
             self.wait_for_response()
@@ -200,7 +203,7 @@ class ContextManager(Manager):
                 pass
             else:
                 # Узлы обошли не все, но когда человек дал команду 'дальше', стэк был пустой
-                # Это произошло потому, что было ожидание какого-то технического действия
+                # потому, что было ожидание какого-то технического действия
                 # Поэтому здесь останавливаем техническое действие и идем дальше по path
                 self.current_path_idx += 1
                 return_to = Action(self.path[self.current_path_idx], self)
@@ -221,7 +224,8 @@ class ContextManager(Manager):
         self.current_path_idx += 1
         if len(self.stack) == 0:
             try:
-                next_action = Action(self.path[self.current_path_idx], self)
+                temp_node = self.path[self.current_path_idx]
+                next_action = Action(temp_node, self)
                 prev_action = self.last_waiting_action(next_action)
                 if prev_action is None:
                     # Если все нормально, двигаемся дальше по path
@@ -230,6 +234,7 @@ class ContextManager(Manager):
                                                                     queue_name=next_action.queue_name()))
                     self.stack.append(next_action)
                 else:
+                    temp_node.parent = None
                     # Если следующему действию предшествует незавершенное техническое действие
                     # Пытаемся переключиться на другое действие
                     node_switch_to = self.try_to_switch(prev_action)
@@ -243,7 +248,7 @@ class ContextManager(Manager):
                         return
                     else:
                         # Если есть куда перейти, пересчтываем path и добавляем другое действие на верх стэка
-                        self.path = self.tree.mm_path(start=self.path[:self.current_path_idx] + [node_switch_to])
+                        self.path = self.tree.mm_path(start=self.path[:self.current_path_idx] + [node_switch_to], n_iterations=1000)
                         self.stack.append(Action(node_switch_to, self))
             except IndexError:
                 pass
@@ -301,16 +306,7 @@ class ContextManager(Manager):
         Ожидание реплики со стороны клиента
         :return:
         """
-        # print("...")
         self.publish_response("...")
-
-    def remind(self, action):
-        if not action.is_technical():
-            action.remind()
-            self.wait_for_response()
-        else:
-            # print("НАПОМИНАНИЕ:", action.node().name)
-            self.publish_response("НАПОМИНАНИЕ:" + action.node.name + '\n...')
 
     def handle_repeat_response(self, *args, **kargs):
         """
@@ -360,11 +356,6 @@ class ContextManager(Manager):
         temp = self.path[:self.current_path_idx] + [node_to_change]
         new_path = self.tree.mm_path(start=temp, n_iterations=2000)
 
-        print("old path:")
-        print(self.path)
-        print("new path:")
-        print(new_path, end='\n\n')
-
         time = TimeTable(self.tree.requirements())(new_path).time()
         self.publish_response(PhraseGenerator.speak("calculated.time", time=time))
         self.path = new_path
@@ -403,7 +394,6 @@ class ContextManager(Manager):
                 # Ставим в стэк над приостановленным действием следующее и меняем их порядок в self.path
                 current_action.pause()
                 current_action.stop_children()
-                # print()
                 self.publish_response("\n")
                 self.publish_response(PhraseGenerator.speak("stop.and.switch", action=action.node().name))
                 next_action = None
@@ -417,6 +407,13 @@ class ContextManager(Manager):
                                                      if x != next_action.node()]
                 self.stack.append(next_action)
                 self.handle_top_action()
+
+    def remind(self, action):
+        if not action.is_technical():
+            action.remind()
+            self.wait_for_response()
+        else:
+            self.publish_response("НАПОМИНАНИЕ:" + action.node.name + '\n...')
 
     def on_action_spoken(self, unit):
         """

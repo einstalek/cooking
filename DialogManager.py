@@ -16,9 +16,6 @@ from pika.adapters.blocking_connection import BlockingChannel
 
 
 class DialogManager:
-    """
-    Класс, принимающий реплики человека и извлекающий из них интенты
-    """
     morph = MorphAnalyzer()
 
     def __init__(self, cm: Manager):
@@ -40,7 +37,6 @@ class DialogManager:
         cursor = RedisCursor()
         cursor.save_to_db(self.to_dict())
 
-        self.context_manager.save_to_db()
         for cu in self.stack:
             cursor.save_to_db(cu.to_dict())
 
@@ -80,21 +76,6 @@ class DialogManager:
             for u in self.stack[:-1]:
                 if not u.solved:
                     u.solved = True
-
-    # def run(self):
-    #     t = Thread(target=self.start_consuming_requests)
-    #     t.start()
-
-    # Забираем запросы от эмулятора из MQ
-    # def start_consuming_requests(self):
-    #     conn = pika.BlockingConnection(pika.ConnectionParameters("localhost"))
-    #     self.channel: BlockingChannel = conn.channel()
-    #
-    #     self.channel.queue_declare("task_queue", durable=True)
-    #     self.channel.basic_qos(prefetch_count=1)
-    #     self.channel.basic_consume(self.on_request_callback,
-    #                           queue="task_queue")
-    #     self.channel.start_consuming()
 
     def on_request_callback(self, request):
         if self.finished:
@@ -142,4 +123,5 @@ class DialogManager:
 
     def stop(self):
         self.finished = True
-        # self.channel.stop_consuming()
+
+

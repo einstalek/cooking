@@ -27,7 +27,7 @@ class RedisCursor:
         return RedisCursor.__conn
 
     def save_to_db(self, kargs: Dict):
-        # assert 'id' in kargs
+        assert 'id' in kargs
         key, value = kargs['id'], "\t".join([str(k) + ':' + str(v) for (k, v) in kargs.items()])
         self.conn().set(key, value)
 
@@ -39,8 +39,8 @@ class RedisCursor:
         """
         try:
             return self.value_to_dict(self.conn().get(key).decode())
-        except AttributeError:
-            print("wrong key", key)
+        except AttributeError as e:
+            print("wrong key:", key)
             raise KeyError
 
     def value_to_dict(self, value: str):

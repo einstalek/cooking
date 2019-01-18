@@ -8,7 +8,7 @@ from pika.adapters.blocking_connection import BlockingChannel
 from ContextManager import ContextManager
 from Restorer import Restorer
 from Tree import Tree
-from recipes import cutlets_puree
+from recipes import cutlets_puree, simple_recipe
 from redis_utils.ServerMessage import ServerMessage
 
 
@@ -19,6 +19,7 @@ class Server:
         self.restorer = Restorer()
         self.emulators: Dict[str, str] = {}
 
+        # сокет для связи в WebServer
         self.server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.server.bind((self.host, self.port))
         self.server.listen(10)
@@ -38,18 +39,19 @@ class Server:
                     break
                 else:
                     # Для нового эмулятора сохраняем начальный CM и DM в Redis
-                    # TODO: Tree не должно храниться в памяти
-                    final = cutlets_puree.final
+                    # final = cutlets_puree.final
+                    final = simple_recipe.final
                     tree = Tree(final, switch_proba=0.5)
-                    tree.assign_queue_names(["котлеты", "пюре", "соус"])
+                    # tree.assign_queue_names(["котлеты", "пюре", "соус"])
+                    tree.assign_queue_names(["омлет", "тмин"])
 
                     em_id = data.decode('utf-8')
-                    cm = ContextManager(tree, em_id=em_id, n_iterations=5000)
+                    cm = ContextManager(tree, em_id=em_id, n_iterations=7000)
                     print("created session for", em_id)
                     cm.initialize()
-                    print(cm.path)
                     self.emulators[em_id] = cm.dialog_manager.id
                     cm.dialog_manager.save_to_db()
+                    cm.save_to_db()
                     break
 
     def start_consuming_timer_events(self):
@@ -78,7 +80,7 @@ class Server:
 
     def on_incoming_timer_event_callback(self, ch: BlockingChannel, method, properties, body: bytes):
         """
-        Что происходит, когда пришло событие об истечении времени таймера
+        Что происходит, когда пришло событие об истечении времени таймера на эмуляторе
         :param ch:
         :param method:
         :param properties:
@@ -93,11 +95,22 @@ class Server:
         dm_id = self.emulators[mssg.em_id]
         dialog_manager = self.restorer.restore_dialog_manager(dm_id)
         context_manager = dialog_manager.context_manager
+
         context_manager.on_incoming_timer_event_callback(mssg)
+
         dialog_manager.save_to_db()
+        dialog_manager.context_manager.save_to_db()
         ch.basic_ack(delivery_tag=method.delivery_tag)
 
     def on_request_callback(self, ch: BlockingChannel, method, properties, body: bytes):
+        """
+        Что происходит, когда от эмулятора пришел запрос
+        :param ch:
+        :param method:
+        :param properties:
+        :param body:
+        :return:
+        """
         mssg = ServerMessage.from_bytes(body)
         if mssg.em_id not in self.emulators:
             print("no session for", mssg.em_id)
@@ -105,8 +118,11 @@ class Server:
             return
         dm_id = self.emulators[mssg.em_id]
         dialog_manager = self.restorer.restore_dialog_manager(dm_id)
+
         dialog_manager.on_request_callback(mssg.request[0][0])
+
         dialog_manager.save_to_db()
+        dialog_manager.context_manager.save_to_db()
         ch.basic_ack(delivery_tag=method.delivery_tag)
 
 

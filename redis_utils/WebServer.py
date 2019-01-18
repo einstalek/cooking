@@ -7,6 +7,7 @@ from pika.adapters.blocking_connection import BlockingChannel
 
 from Timer import TimerEvent
 from redis_utils.ServerMessage import ServerMessage, MessageType
+import datetime
 
 
 class WebServer:
@@ -16,10 +17,12 @@ class WebServer:
         self.emulators: Dict[str, socket.socket] = {}
         self.finished = set()
 
+        # Ожидаем подключение от эмулятора
         self.server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.server.bind(("localhost", port))
         self.server.listen(10)
 
+        # сокет, через который происходит взаимодействие с сервером
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
         self.t = Thread(target=self.run)
@@ -44,7 +47,7 @@ class WebServer:
 
     def handle_incoming_mssg(self, mssg: ServerMessage, client_sock: socket.socket):
         """
-        Кладет сообщения от эмулятора из сокета  в MQ
+        Кладет сообщения от эмулятора в MQ
         :param mssg:
         :param client_sock:
         :return:
@@ -55,18 +58,18 @@ class WebServer:
             return
 
         if em_id not in self.emulators and mssg.mssg_type == MessageType.REGISTER:
-            print("registered", em_id)
+            self.log("registered", em_id)
             self.emulators[em_id] = client_sock
             try:
                 self.socket.connect(("localhost", 9999))
                 self.socket.send(em_id.encode('utf-8'))
                 self.socket.close()
             except OSError:
-                print("error occurred")
+                self.log("error occurred")
 
         # Текстовый запрос от клиента отправляем в MQ
         if mssg.mssg_type == MessageType.REQUEST:
-            print("request from", em_id, mssg.request[0][0])
+            self.log("request from", em_id, mssg.request[0][0])
             conn = pika.BlockingConnection(pika.ConnectionParameters(host='localhost'))
             channel: BlockingChannel = conn.channel()
             channel.queue_declare(queue='task_queue', durable=True)
@@ -81,7 +84,7 @@ class WebServer:
 
         # Вышло время у таймера
         if mssg.mssg_type == MessageType.TIMER:
-            print("timer event from he", mssg.request[0][0])
+            self.log("timer event from he", mssg.request[0][0])
             conn = pika.BlockingConnection(pika.ConnectionParameters(host='localhost'))
             channel: BlockingChannel = conn.channel()
             channel.queue_declare(queue='timer_event', durable=True)
@@ -109,6 +112,7 @@ class WebServer:
         channel.start_consuming()
 
     def consume_responses(self):
+        # Забирает текст из MQ и отправляет его на эмулятор
         conn = pika.BlockingConnection(pika.ConnectionParameters(self.mq_host))
         channel: BlockingChannel = conn.channel()
 
@@ -127,7 +131,7 @@ class WebServer:
         :param body:
         :return:
         """
-        print("timer command from mq", body.decode())
+        self.log("timer command from mq", body.decode())
         mssg = ServerMessage.from_bytes(body)
         request = mssg.request[0]
 
@@ -137,7 +141,7 @@ class WebServer:
         timer_secs = int(timer_secs)
 
         if em_id not in self.emulators:
-            print("Нет эмулятора с ID", em_id)
+            self.log("Нет эмулятора с ID", em_id)
             ch.basic_ack(delivery_tag=method.delivery_tag)
             return
 
@@ -146,8 +150,16 @@ class WebServer:
         ch.basic_ack(delivery_tag=method.delivery_tag)
 
     def response_callback(self, ch: BlockingChannel, method, properties, body: bytes):
+        """
+        Отправляет ответ от сервера на эмулятор
+        :param ch:
+        :param method:
+        :param properties:
+        :param body:
+        :return:
+        """
         mssg = ServerMessage.from_bytes(body)
-        print("response for", mssg.em_id)
+        self.log("response for", mssg.em_id)
         if mssg.em_id not in self.emulators:
             ch.basic_ack(delivery_tag=method.delivery_tag)
             return
@@ -159,6 +171,10 @@ class WebServer:
             self.finished.add(mssg.em_id)
 
         ch.basic_ack(delivery_tag=method.delivery_tag)
+
+    @staticmethod
+    def log(*args):
+        print(datetime.datetime.now(), ":", *args)
 
 
 if __name__ == "__main__":
