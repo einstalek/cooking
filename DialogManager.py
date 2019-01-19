@@ -57,6 +57,7 @@ class DialogManager:
             node_name = self.fill_choice_unit(response)
             if node_name:
                 self.context_manager.handle_intent(Intent.CHANGE_NEXT, node_name)
+                # TODO: add return statement
 
             # TODO: учесть частицу не перед глаголом
             # Если назван глагол в подтверждение перехода
@@ -123,5 +124,4 @@ class DialogManager:
 
     def stop(self):
         self.finished = True
-
 

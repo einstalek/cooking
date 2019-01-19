@@ -3,7 +3,9 @@ from typing import List, Optional
 
 import pika
 from pika.adapters.blocking_connection import BlockingChannel
+from pika import exceptions as pika_exceptions
 
+import exceptions
 from Action import Action
 from ContextUnit import ContextUnit, UnitType
 from Node import Node
@@ -71,7 +73,10 @@ class ContextManager(Manager):
         :param mssg:
         :return:
         """
-        conn = pika.BlockingConnection(pika.ConnectionParameters(host='localhost'))
+        try:
+            conn = pika.BlockingConnection(pika.ConnectionParameters(host='localhost'))
+        except pika_exceptions.ConnectionClosed:
+            raise exceptions.MqConnectionError
         channel: BlockingChannel = conn.channel()
         channel.queue_declare(queue='timer_command', durable=True)
         channel.basic_publish(exchange='',
@@ -89,7 +94,10 @@ class ContextManager(Manager):
         :param mssg:
         :return:
         """
-        conn = pika.BlockingConnection(pika.ConnectionParameters(host='localhost'))
+        try:
+            conn = pika.BlockingConnection(pika.ConnectionParameters(host='localhost'))
+        except pika_exceptions.ConnectionClosed:
+            raise exceptions.MqConnectionError
         channel: BlockingChannel = conn.channel()
         channel.queue_declare(queue='response_queue', durable=True)
         channel.basic_publish(exchange='',
@@ -352,12 +360,21 @@ class ContextManager(Manager):
                 top_action.restart()
             self.wait_for_response()
             return
+
         node_to_change = [x for x in self.path[self.current_path_idx + 1:] if x.name == node_name][0]
         temp = self.path[:self.current_path_idx] + [node_to_change]
         new_path = self.tree.mm_path(start=temp, n_iterations=2000)
 
-        time = TimeTable(self.tree.requirements())(new_path).time()
-        self.publish_response(PhraseGenerator.speak("calculated.time", time=time))
+        # TODO: recalculation instead of calculation
+        time = TimeTable(self.tree.requirements())(self.path).time()
+        recalculated_time = TimeTable(self.tree.requirements())(new_path).time()
+        time_diff = recalculated_time - time
+        if time_diff > 0:
+            self.publish_response(PhraseGenerator.speak("recalculated.time.more", time_diff=time_diff))
+        elif time_diff < 0:
+            self.publish_response(PhraseGenerator.speak("recalculated.time.less", time=time_diff))
+        else:
+            self.publish_response(PhraseGenerator.speak("recalculated.time.eq"))
         self.path = new_path
         self.stack.pop()
         self.stack.append(Action(node_to_change, self))
