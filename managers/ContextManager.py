@@ -6,16 +6,16 @@ from pika.adapters.blocking_connection import BlockingChannel
 from pika import exceptions as pika_exceptions
 
 import exceptions
-from Action import Action
-from ContextUnit import ContextUnit, UnitType
-from Node import Node
-from PhraseGenerator import PhraseGenerator
-from RedisCursor import RedisCursor
+from base_structures.Action import Action
+from managers.ContextUnit import ContextUnit, UnitType
+from base_structures.Node import Node
+from text_utils.PhraseGenerator import PhraseGenerator
+from redis_utils.RedisCursor import RedisCursor
 
-from TimeTable import TimeTable
-from abcManager import Manager
-from DialogManager import DialogManager, Intent
-from redis_utils.ServerMessage import ServerMessage, MessageType
+from base_structures.TimeTable import TimeTable
+from managers.abcManager import Manager
+from managers.DialogManager import DialogManager, Intent
+from servers.ServerMessage import ServerMessage, MessageType
 
 
 class ContextManager(Manager):
@@ -152,12 +152,16 @@ class ContextManager(Manager):
         """
         if intent == Intent.NEXT_SIMPLE:
             self.handle_next_response()
+
         elif intent == Intent.REPEAT:
             self.handle_repeat_response()
+
         elif intent == Intent.CHOOSE_NEXT:
             self.handle_choosing_next()
+
         elif intent == Intent.CHANGE_NEXT:
             self.handle_changing_next(params)
+
         elif intent == Intent.NEGATIVE_SIMPLE:
             self.handle_negative()
 
@@ -287,6 +291,7 @@ class ContextManager(Manager):
         if len(possible_moves) == 0:
             return None
 
+        # выбираем случайный из возможных узлов для перехода
         # time = prev_action.timer.time_left()
         # time_diff = [abs(time - datetime.timedelta(seconds=node.time)) for node in possible_moves]
         # chosen_node = possible_moves[time_diff.index(min(time_diff))]
@@ -365,7 +370,6 @@ class ContextManager(Manager):
         temp = self.path[:self.current_path_idx] + [node_to_change]
         new_path = self.tree.mm_path(start=temp, n_iterations=2000)
 
-        # TODO: recalculation instead of calculation
         time = TimeTable(self.tree.requirements())(self.path).time()
         recalculated_time = TimeTable(self.tree.requirements())(new_path).time()
         time_diff = recalculated_time - time
@@ -375,6 +379,7 @@ class ContextManager(Manager):
             self.publish_response(PhraseGenerator.speak("recalculated.time.less", time=time_diff))
         else:
             self.publish_response(PhraseGenerator.speak("recalculated.time.eq"))
+
         self.path = new_path
         self.stack.pop()
         self.stack.append(Action(node_to_change, self))

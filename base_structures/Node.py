@@ -3,7 +3,7 @@ import string
 from typing import List
 import yaml
 
-from Ingredient import Ingredient
+from base_structures.Ingredient import Ingredient
 
 
 class Node:

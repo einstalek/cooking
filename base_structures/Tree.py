@@ -2,9 +2,9 @@ import string
 from typing import List
 import random
 
-from RedisCursor import RedisCursor
-from TimeTable import TimeTable
-from Node import Node
+from redis_utils.RedisCursor import RedisCursor
+from base_structures.TimeTable import TimeTable
+from base_structures.Node import Node
 
 
 class Tree:

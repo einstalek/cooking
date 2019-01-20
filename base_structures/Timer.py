@@ -3,7 +3,7 @@ import random
 import string
 from enum import Enum
 
-from redis_utils.ServerMessage import MessageType
+from servers.ServerMessage import MessageType
 
 
 class TimerEvent(Enum):

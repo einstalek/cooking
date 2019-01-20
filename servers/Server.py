@@ -5,11 +5,11 @@ from typing import Dict
 import pika
 from pika.adapters.blocking_connection import BlockingChannel
 
-from ContextManager import ContextManager
-from Restorer import Restorer
-from Tree import Tree
-from recipes import cutlets_puree, simple_recipe
-from redis_utils.ServerMessage import ServerMessage
+from managers.ContextManager import ContextManager
+from redis_utils.Restorer import Restorer
+from base_structures.Tree import Tree
+from recipes import simple_recipe
+from servers.ServerMessage import ServerMessage
 
 
 class Server:

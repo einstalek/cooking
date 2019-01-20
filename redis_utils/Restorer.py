@@ -1,13 +1,11 @@
-from typing import Set, Dict
-
-from Action import Action
-from ContextManager import ContextManager
-from ContextUnit import ContextUnit
-from DialogManager import DialogManager
-from Ingredient import Ingredient
+from base_structures.Action import Action
+from managers.ContextManager import ContextManager
+from managers.ContextUnit import ContextUnit
+from managers.DialogManager import DialogManager
+from base_structures.Ingredient import Ingredient
 from Node import Node
-from RedisCursor import RedisCursor
-from Tree import Tree
+from redis_utils.RedisCursor import RedisCursor
+from base_structures.Tree import Tree
 
 
 class Restorer:

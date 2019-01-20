@@ -2,7 +2,7 @@ import random
 import string
 from abc import ABC
 
-from redis_utils.WebServer import WebServer
+from servers.WebServer import WebServer
 
 
 class Manager(ABC):

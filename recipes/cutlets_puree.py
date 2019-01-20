@@ -1,4 +1,4 @@
-from Node import Node
+from base_structures.Node import Node
 
 
 clean_pepper = Node("чистка перца", 15, ["h"], file="clean.yaml",

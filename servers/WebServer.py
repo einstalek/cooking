@@ -5,8 +5,8 @@ from typing import Dict
 import pika
 from pika.adapters.blocking_connection import BlockingChannel
 
-from Timer import TimerEvent
-from redis_utils.ServerMessage import ServerMessage, MessageType
+from base_structures.Timer import TimerEvent
+from servers.ServerMessage import ServerMessage, MessageType
 import datetime
 
 

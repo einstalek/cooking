@@ -1,4 +1,4 @@
-from Node import Node
+from base_structures.Node import Node
 
 clean_eggs = Node("промывка куриных яиц", 5, ["h"], switchable=False, file="clean.yaml",
                   inp_ingredients=["куринце яйца"],

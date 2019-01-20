@@ -5,8 +5,9 @@ from threading import Thread
 from typing import Dict
 import socket
 
-from Timer import Timer, TimerEvent
-from redis_utils.ServerMessage import ServerMessage, MessageType
+import exceptions
+from base_structures.Timer import Timer, TimerEvent
+from servers.ServerMessage import ServerMessage, MessageType
 
 
 class HardwareEmulator:
@@ -65,12 +66,16 @@ class HardwareEmulator:
                 event = TimerEvent[event]
                 if event == TimerEvent.START:
                     self.on_start_timer(timer_id, timer_name, secs)
+
                 if event == TimerEvent.PAUSE:
                     self.on_pause_timer(timer_id)
+
                 if event == TimerEvent.UNPAUSE:
                     self.on_unpause_timer(timer_id)
+
                 if event == TimerEvent.STOP:
                     self.on_stop_timer(timer_id)
+
                 if event == TimerEvent.RESTART:
                     self.on_restart_timer(timer_id)
 
@@ -100,7 +105,9 @@ class HardwareEmulator:
         """
         timer = Timer(secs, name, parent=self)
         timer.id = timer_id
-        assert timer_id not in self.timers
+        if timer_id in self.timers:
+            raise exceptions.StartExistingTimerError
+
         self.timers[timer_id] = timer
         timer.start()
 
@@ -129,8 +136,8 @@ class HardwareEmulator:
         try:
             self.socket.connect((self.host, self.port))
         except ConnectionRefusedError:
-            print("Не удалось подключиться к серверу")
-            return False
+            raise exceptions.RegistrationRefusedError
+
         mssg = ServerMessage.gen_mssg(self.id, MessageType.REGISTER)
         self.send_on_server(mssg)
         return True

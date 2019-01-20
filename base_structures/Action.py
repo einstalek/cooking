@@ -1,10 +1,9 @@
 import string
 from typing import List, Optional
-from Node import Node
-from RedisCursor import RedisCursor
-from Timer import Timer, TimerEvent, TimerMessage
-from abcManager import Manager
-from ContextUnit import ContextUnit
+from base_structures.Node import Node
+from base_structures.Timer import Timer, TimerEvent, TimerMessage
+from managers.abcManager import Manager
+from managers.ContextUnit import ContextUnit
 import random
 import re
 
@@ -12,10 +11,9 @@ import re
 class Action:
     def __init__(self, node: Optional[Node], cm: Optional[Manager]):
         self.id = 'A' + ''.join(random.choices(string.ascii_uppercase + string.digits, k=10))
-
         print("Action -- ", self.id)
-        self.node = node
 
+        self.node = node
         self.timer_id = Timer.gen_id()
         if node is not None:
             node.parent = self
@@ -119,18 +117,15 @@ class Action:
                 warning = random.sample(warnings, 1)[0]
                 reformatted += "\n" + warning
 
-            # print(reformatted)
             self.cm.publish_response(reformatted)
             self.cm.on_action_spoken(ContextUnit(reformatted, params))
 
     def remind(self):
         if self.node.file is None:
-            # print("isn't", self, "done yet?")
             self.cm.publish_response("isn't" + repr(self) + "done yet?")
         else:
             phrase = random.sample(self.node.info["Remind"], 1)[0]
             params = self.extract_params(phrase)
-            # print(self.reformat(params, phrase))
             self.cm.publish_response(self.reformat(params, phrase))
 
     @staticmethod

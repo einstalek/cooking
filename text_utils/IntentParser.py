@@ -18,7 +18,7 @@ class IntentParser:
     def __init__(self):
         pass
 
-    def extract_intent(self, phrase: str):
+    def extract_intent(self, phrase: str) -> Intent:
         intent = None
         if any(x in phrase for x in self.positive):
             intent = Intent.NEXT_SIMPLE

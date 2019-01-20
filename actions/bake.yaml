@@ -4,6 +4,7 @@ Name:
 Phrase:
     - "Запекайте {ingredients} в течение {time} минут"
     - "Оставьте {ingredients} в духовке на {time} минут"
+    - "Пусть {ingredients} запекаются в течение {time} минут"
 
 Remind:
     - "{ingredients} еще не готовы?"

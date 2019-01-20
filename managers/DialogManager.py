@@ -1,18 +1,14 @@
 import random
 import string
 import time
-from threading import Thread
 from typing import List
 
-from ContextUnit import ContextUnit, UnitType
-from IntentParser import Intent, IntentParser
-from RedisCursor import RedisCursor
-from abcManager import Manager
+from managers.ContextUnit import ContextUnit, UnitType
+from text_utils.IntentParser import Intent, IntentParser
+from redis_utils.RedisCursor import RedisCursor
+from managers.abcManager import Manager
 from pymorphy2 import MorphAnalyzer
 import re
-
-import pika
-from pika.adapters.blocking_connection import BlockingChannel
 
 
 class DialogManager:
@@ -124,4 +120,5 @@ class DialogManager:
 
     def stop(self):
         self.finished = True
+
 
