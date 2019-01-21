@@ -11,7 +11,6 @@ import re
 class Action:
     def __init__(self, node: Optional[Node], cm: Optional[Manager]):
         self.id = 'A' + ''.join(random.choices(string.ascii_uppercase + string.digits, k=10))
-        print("Action -- ", self.id)
 
         self.node = node
         self.timer_id = Timer.gen_id()
@@ -24,7 +23,6 @@ class Action:
         self.elapsed = False
 
     def to_dict(self):
-        print("Saving", self.id)
         conf = {
             'id': self.id,
             'node': self.node.id,
@@ -39,7 +37,6 @@ class Action:
     def from_dict(d):
         action = Action(node=None, cm=None)
         action.id = d['id']
-        print("Changing id to:", action.id)
         action.node = d['node']
         action.timer_id = d['timer_id']
         action.paused = True if d['paused'] == 'True' else False

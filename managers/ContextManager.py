@@ -24,7 +24,7 @@ class ContextManager(Manager):
     Так же принимает Intent от DialogManager-а при реагирует на него
     """
 
-    def __init__(self, tree, em_id, n_iterations=2000):
+    def __init__(self, tree, em_id, n_iterations=100):
         super().__init__()
         self.n_iterations = n_iterations
         self.tree = tree
@@ -399,6 +399,7 @@ class ContextManager(Manager):
         """
         if not action.is_technical() or len(action.out().inp) > 1:
             # TODO: непонятный момент
+            print("Stopping", action)
             action.stop()
             action.stop_children()
             self.remind(action)

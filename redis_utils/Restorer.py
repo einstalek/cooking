@@ -3,7 +3,7 @@ from managers.ContextManager import ContextManager
 from managers.ContextUnit import ContextUnit
 from managers.DialogManager import DialogManager
 from base_structures.Ingredient import Ingredient
-from Node import Node
+from base_structures.Node import Node
 from redis_utils.RedisCursor import RedisCursor
 from base_structures.Tree import Tree
 

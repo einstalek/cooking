@@ -122,6 +122,19 @@ class Tree:
         _compare_name(self.head)
         return nodes
 
+    def rational_start(self) -> Node:
+        """
+        Строит путь в соответсвии с дополнительными правилами:
+            1) Начинает с длинной ветки
+            2) Переключается только при запуске или срабатывании таймера
+            3) Стремится завершить длинные ветки быстрее
+        :return:
+        """
+        time_queue= self.time_queue_dist()
+        longest_queue = sorted(time_queue.items(), key=lambda x: x[0], reverse=False)[0][0]
+        start_node = random.sample([node for node in self.leaves() if node.queue_name == longest_queue], 1)[0]
+        return start_node
+
     def random_path(self, finished=None, all_visited_nodes=None, start_node=None):
         """
         Вспомогательная функция, ищет случайный путь в дереве
@@ -142,7 +155,7 @@ class Tree:
             if current_node.out.is_head():
                 finished.add(current_queue)
 
-            if random.random() < self.switch_proba:
+            if random.random() > self.switch_proba:
                 # Можно уменьшить switch_proba, и тогда переключения между очередями станут реже
                 next_queue = current_queue
             else:
@@ -226,7 +239,7 @@ class Tree:
         _get_requirements(self.head)
         return sorted(requirements)
 
-    def nodes(self):
+    def nodes(self) -> List[Node]:
         """
         Возвращает все узлы дерева кроме корня
         :return:
@@ -409,6 +422,10 @@ class Tree:
                 best_fit = fit
                 best = path
         return best
+
+    def time_queue_dist(self):
+        return {queue_name: sum([node.time for node in self.queue_nodes(queue_name)])
+                for queue_name in self.queue_names}
 
 
 

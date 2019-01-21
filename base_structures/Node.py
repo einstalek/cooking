@@ -41,7 +41,7 @@ class Node:
         self.file = file
         self.info = {}
         if self.file:
-            self.info = yaml.load(open("actions/" + self.file))
+            self.info = yaml.load(open("../actions/" + self.file))
 
         self.out_ingredient = None
         if out_ingredient:
@@ -93,7 +93,7 @@ class Node:
         node.file = d['file'] if d['file'] != '' else None
         node.info = {}
         if node.file:
-            node.info = yaml.load(open("actions/" + node.file))
+            node.info = yaml.load(open("../actions/" + node.file))
         node.params = None
         if d['params'] != '':
             items = [x.split('=') for x in d['params'].split('-')]

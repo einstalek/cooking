@@ -8,7 +8,7 @@ from pika.adapters.blocking_connection import BlockingChannel
 from managers.ContextManager import ContextManager
 from redis_utils.Restorer import Restorer
 from base_structures.Tree import Tree
-from recipes import simple_recipe
+from recipes import simple_recipe, cutlets_puree
 from servers.ServerMessage import ServerMessage
 
 
@@ -39,14 +39,16 @@ class Server:
                     break
                 else:
                     # Для нового эмулятора сохраняем начальный CM и DM в Redis
-                    # final = cutlets_puree.final
                     final = simple_recipe.final
-                    tree = Tree(final, switch_proba=0.5)
-                    # tree.assign_queue_names(["котлеты", "пюре", "соус"])
+                    tree = Tree(final, switch_proba=0.01)
                     tree.assign_queue_names(["омлет", "тмин"])
 
+                    # final = cutlets_puree.final
+                    # tree = Tree(final, switch_proba=0.01)
+                    # tree.assign_queue_names(["котлеты", "пюре", "соус"])
+
                     em_id = data.decode('utf-8')
-                    cm = ContextManager(tree, em_id=em_id, n_iterations=7000)
+                    cm = ContextManager(tree, em_id=em_id, n_iterations=100)
                     print("created session for", em_id)
                     cm.initialize()
                     self.emulators[em_id] = cm.dialog_manager.id

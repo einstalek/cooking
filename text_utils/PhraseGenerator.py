@@ -10,7 +10,7 @@ class PhraseGenerator:
     @staticmethod
     def phrase(file) -> str:
         try:
-            with open(os.path.join(path, "dialogs/" + file + ".dialog")) as f:
+            with open(os.path.join(path, "../dialogs/" + file + ".dialog")) as f:
                 phrases = [x.strip() for x in f.readlines()]
                 return random.sample(phrases, 1)[0]
         except FileNotFoundError:
