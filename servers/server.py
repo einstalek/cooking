@@ -7,9 +7,10 @@ import pika
 from pika.adapters.blocking_connection import BlockingChannel
 
 from managers.context_manager import ContextManager
+from recipes.recipe_manager import RecipeManager
 from redis_utils.restorer import Restorer
 from base_structures.tree import Tree
-from recipes import simple_recipe, cutlets_puree
+from recipes import eggs_tmin, cutlets_puree
 from servers.server_message import ServerMessage
 
 
@@ -17,6 +18,7 @@ class Server:
     def __init__(self, host="localhost", port=9999):
         self.host = host
         self.port = port
+
         self.restorer = Restorer()
         self.emulators: Dict[str, str] = {}
 
@@ -24,6 +26,11 @@ class Server:
         self.server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.server.bind((self.host, self.port))
         self.server.listen(10)
+
+        self.recipe_manager = RecipeManager(
+            cutlets_puree,
+            eggs_tmin,
+        )
 
     def initialize(self):
         Thread(target=self.run_server).start()
@@ -40,7 +47,7 @@ class Server:
                     break
                 else:
                     # Для нового эмулятора сохраняем начальный CM и DM в Redis
-                    final = simple_recipe.final
+                    final = eggs_tmin.final
                     tree = Tree(final, switch_proba=0.01)
                     tree.assign_queue_names(["омлет", "тмин"])
 
@@ -56,6 +63,11 @@ class Server:
                     cm.dialog_manager.save_to_db()
                     cm.save_to_db()
                     break
+
+    def select_recipe(self):
+        # TODO: implement
+        available_recipes = ", ".join([recipe.final.name for recipe in self.recipe_manager.recipes])
+
 
     def start_consuming_timer_events(self):
         """

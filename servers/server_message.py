@@ -8,6 +8,7 @@ class MessageType(Enum):
     TIMER = 3,
     RESPONSE = 4,
     FINISH = 5,
+    SELECT = 6,
 
 
 class ServerMessage:
