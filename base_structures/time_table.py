@@ -1,5 +1,5 @@
 from typing import List
-from base_structures.Node import Node
+from base_structures.node import Node
 
 
 class TimeTable:

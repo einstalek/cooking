@@ -3,7 +3,7 @@ import string
 from typing import List
 import yaml
 
-from base_structures.Ingredient import Ingredient
+from base_structures.ingredient import Ingredient
 
 
 class Node:
@@ -11,7 +11,7 @@ class Node:
     Класс, хранящий информацию о действии
     """
 
-    def __init__(self, name, time: int, requirements=None, switchable=True, technical=False,
+    def __init__(self, name: str, time: int, requirements=None, switchable=True, technical=False,
                  file: str = None, parent=None, inp_ingredients: List[str] = None, out_ingredient=None, **kargs):
         """
 

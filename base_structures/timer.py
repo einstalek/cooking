@@ -3,7 +3,7 @@ import random
 import string
 from enum import Enum
 
-from servers.ServerMessage import MessageType
+from servers.server_message import MessageType
 
 
 class TimerEvent(Enum):

@@ -2,7 +2,7 @@ import random
 import string
 from abc import ABC
 
-from servers.WebServer import WebServer
+from servers.web_server import WebServer
 
 
 class Manager(ABC):

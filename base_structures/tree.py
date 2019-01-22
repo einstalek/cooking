@@ -1,10 +1,10 @@
 import string
-from typing import List
+from typing import List, Dict
 import random
 
-from redis_utils.RedisCursor import RedisCursor
-from base_structures.TimeTable import TimeTable
-from base_structures.Node import Node
+from redis_utils.redis_cursor import RedisCursor
+from base_structures.time_table import TimeTable
+from base_structures.node import Node
 
 
 class Tree:
@@ -147,7 +147,10 @@ class Tree:
         if finished is None:
             finished = set()
             all_visited_nodes = []
-            start_node: Node = random.sample(self.leaves(), 1)[0]
+            start_node = self.rational_start()
+            # start_node: Node = random.sample(self.leaves(), 1)[0]
+
+        time_dist = self.time_queue_dist()
 
         current_node, current_queue = start_node, start_node.queue_name
         while True:
@@ -160,13 +163,13 @@ class Tree:
                 next_queue = current_queue
             else:
                 try:
-                    next_queue = random.sample([name for name in self.queue_names
-                                                if name != current_queue and name not in finished], 1)[0]
+                    possible_queue_moves = [name for name in self.queue_names
+                                            if name != current_queue and name not in finished]
+                    max_priority = max([time_dist[name] for name in possible_queue_moves])
+                    possible_queue_moves = [name for name in possible_queue_moves if time_dist[name] == max_priority]
+                    next_queue = random.sample(possible_queue_moves, 1)[0]
                 except ValueError:
                     next_queue = current_queue
-
-            if current_node.technical:
-                time = current_node.time
 
             possible_nodes_to_move = self.queue_nodes(next_queue)
             if current_node.switchable:
@@ -208,6 +211,7 @@ class Tree:
             for node in queue_nodes:
                 if node not in all_visited_nodes and all(x in all_visited_nodes for x in node.inp):
                     start_nodes.append(node)
+
         start_node = random.sample(start_nodes, 1)[0]
         return self.random_path(finished, all_visited_nodes, start_node)
 
@@ -423,7 +427,7 @@ class Tree:
                 best = path
         return best
 
-    def time_queue_dist(self):
+    def time_queue_dist(self) -> Dict[str, float]:
         return {queue_name: sum([node.time for node in self.queue_nodes(queue_name)])
                 for queue_name in self.queue_names}
 

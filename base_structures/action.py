@@ -1,9 +1,9 @@
 import string
 from typing import List, Optional
-from base_structures.Node import Node
-from base_structures.Timer import Timer, TimerEvent, TimerMessage
-from managers.abcManager import Manager
-from managers.ContextUnit import ContextUnit
+from base_structures.node import Node
+from base_structures.timer import Timer, TimerEvent, TimerMessage
+from managers.abc_manager import Manager
+from managers.context_unit import ContextUnit
 import random
 import re
 
@@ -118,6 +118,7 @@ class Action:
             self.cm.on_action_spoken(ContextUnit(reformatted, params))
 
     def remind(self):
+        # TODO: напоминания не добавляются в стэк DM
         if self.node.file is None:
             self.cm.publish_response("isn't" + repr(self) + "done yet?")
         else:

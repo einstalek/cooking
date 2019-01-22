@@ -1,11 +1,11 @@
-from base_structures.Action import Action
-from managers.ContextManager import ContextManager
-from managers.ContextUnit import ContextUnit
-from managers.DialogManager import DialogManager
-from base_structures.Ingredient import Ingredient
-from base_structures.Node import Node
-from redis_utils.RedisCursor import RedisCursor
-from base_structures.Tree import Tree
+from base_structures.action import Action
+from managers.context_manager import ContextManager
+from managers.context_unit import ContextUnit
+from managers.dialog_manager import DialogManager
+from base_structures.ingredient import Ingredient
+from base_structures.node import Node
+from redis_utils.redis_cursor import RedisCursor
+from base_structures.tree import Tree
 
 
 class Restorer:
@@ -89,6 +89,7 @@ class Restorer:
         em_id = cm_params['em_id']
         cm = ContextManager(tree, em_id, int(cm_params['n_iterations']))
         cm.id = cm_params['id']
+        cm.finished = True if cm_params['finished'] == 'True' else False
 
         cm.path = []
         for node_id in cm_params['path'].split():

@@ -3,10 +3,10 @@ import string
 import time
 from typing import List
 
-from managers.ContextUnit import ContextUnit, UnitType
-from text_utils.IntentParser import Intent, IntentParser
-from redis_utils.RedisCursor import RedisCursor
-from managers.abcManager import Manager
+from managers.context_unit import ContextUnit, UnitType
+from text_utils.intent_parser import Intent, IntentParser
+from redis_utils.redis_cursor import RedisCursor
+from managers.abc_manager import Manager
 from pymorphy2 import MorphAnalyzer
 import re
 
@@ -50,10 +50,9 @@ class DialogManager:
         if intent is None and len(response) > 0:
             # В случае, когда последним стоит выбор следующего действия
             # и сейчас ввели название следующего действия
-            node_name = self.fill_choice_unit(response)
-            if node_name:
-                self.context_manager.handle_intent(Intent.CHANGE_NEXT, node_name)
-                # TODO: add return statement
+            queue_name = self.fill_choice_unit(response)
+            if queue_name:
+                self.context_manager.handle_intent(Intent.CHANGE_NEXT, queue_name)
 
             # TODO: учесть частицу не перед глаголом
             # Если назван глагол в подтверждение перехода
@@ -86,6 +85,7 @@ class DialogManager:
             return
         if not top_unit.type == UnitType.CHOICE:
             return None
+
         for param in top_unit.params:
             if response in param:
                 return param

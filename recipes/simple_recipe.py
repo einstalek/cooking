@@ -1,4 +1,4 @@
-from base_structures.Node import Node
+from base_structures.node import Node
 
 clean_eggs = Node("промывка куриных яиц", 5, ["h"], switchable=False, file="clean.yaml",
                   inp_ingredients=["куринце яйца"],
@@ -16,13 +16,14 @@ bake_eggs = Node("запекание яиц", 20, ["o", "p"], technical=True, fi
                  out_ingredient="омлет")(put_eggs_on_pan)
 
 take_out_eggs = Node("доставание омлета", 5, ["h", "o", "p"], file="take_out.yaml",
-                     out_ingredient="омлет")(bake_eggs)
+                     out_ingredient="омлет",
+                     where="сковорода")(bake_eggs)
 
 clean_tmin = Node("помыть тмин", 10, ["h"], file="clean.yaml",
                   out_ingredient="помытый тмин")
 cut_tmin = Node("тмин", 10, ["h"], file="mince.yaml",
                 out_ingredient="тмин")(clean_tmin)
 
-final = Node("омлет", 5)(take_out_eggs, cut_tmin)
-
+final = Node("омлет с тмином", 5)(take_out_eggs, cut_tmin)
+queue_names = ["омлет", "тмин"]
 

@@ -6,8 +6,8 @@ from typing import Dict
 import socket
 
 import exceptions
-from base_structures.Timer import Timer, TimerEvent
-from servers.ServerMessage import ServerMessage, MessageType
+from base_structures.timer import Timer, TimerEvent
+from servers.server_message import ServerMessage, MessageType
 
 
 class HardwareEmulator:
@@ -83,6 +83,7 @@ class HardwareEmulator:
                 print(mssg.request[0][0])
 
             if mssg.mssg_type == MessageType.FINISH:
+                print("Навык заввершил работу")
                 self.finished = True
 
     def update(self):

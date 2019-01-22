@@ -1,3 +1,4 @@
+import datetime
 import random
 from typing import List, Optional
 
@@ -6,16 +7,16 @@ from pika.adapters.blocking_connection import BlockingChannel
 from pika import exceptions as pika_exceptions
 
 import exceptions
-from base_structures.Action import Action
-from managers.ContextUnit import ContextUnit, UnitType
-from base_structures.Node import Node
-from text_utils.PhraseGenerator import PhraseGenerator
-from redis_utils.RedisCursor import RedisCursor
+from base_structures.action import Action
+from managers.context_unit import ContextUnit, UnitType
+from base_structures.node import Node
+from text_utils.phrase_generator import PhraseGenerator
+from redis_utils.redis_cursor import RedisCursor
 
-from base_structures.TimeTable import TimeTable
-from managers.abcManager import Manager
-from managers.DialogManager import DialogManager, Intent
-from servers.ServerMessage import ServerMessage, MessageType
+from base_structures.time_table import TimeTable
+from managers.abc_manager import Manager
+from managers.dialog_manager import DialogManager, Intent
+from servers.server_message import ServerMessage, MessageType
 
 
 class ContextManager(Manager):
@@ -34,6 +35,7 @@ class ContextManager(Manager):
         self.current_path_idx: int = None
         self.dialog_manager = DialogManager(self)
         self.em_id = em_id
+        self.finished = False
 
     def to_dict(self):
         conf = {
@@ -46,6 +48,7 @@ class ContextManager(Manager):
             'current_path_idx': self.current_path_idx,
             'dialog_manager': self.dialog_manager.id,
             'em_id': self.em_id,
+            'finished': str(self.finished)
         }
         return conf
 
@@ -87,7 +90,7 @@ class ContextManager(Manager):
                               ))
         conn.close()
 
-    def publish_response(self, mssg: str, mssg_type: MessageType=MessageType.RESPONSE):
+    def publish_response(self, mssg: str, mssg_type: MessageType = MessageType.RESPONSE):
         """
         Отправляет ответы в MQ
         :param mssg_type:
@@ -134,8 +137,7 @@ class ContextManager(Manager):
         Должно вызываться сразу после создания объекта класса
         :return:
         """
-        random.seed(1)
-        self.path = self.tree.mm_path(n_iterations=2000)
+        self.path = self.tree.mm_path(n_iterations=100)
         time = TimeTable(self.tree.requirements())(self.path).time()
         resp = PhraseGenerator.speak("calculated.time", time=time)
         self.publish_response(resp)
@@ -181,10 +183,10 @@ class ContextManager(Manager):
         # Проверка, что предшествующие технические действия выполнены
         prev_action = self.last_waiting_action(top_action)
         if prev_action is not None:
-            print("trying to execute", top_action, "while", prev_action, "is not finished")
+            mssg = "trying to execute", top_action, "while", prev_action, "is not finished"
+            self.log(mssg)
             prev_action.stop()
             prev_action.stop_children()
-        # assert prev_action is None
 
         # Выдается реплика действия
         top_action.speak()
@@ -206,7 +208,7 @@ class ContextManager(Manager):
             resp = PhraseGenerator.speak("end")
             self.publish_response(resp)
             self.publish_response(mssg="", mssg_type=MessageType.FINISH)
-            self.stop()
+            # self.stop()
             return
         try:
             top_action = self.stack[-1]
@@ -260,7 +262,8 @@ class ContextManager(Manager):
                         return
                     else:
                         # Если есть куда перейти, пересчтываем path и добавляем другое действие на верх стэка
-                        self.path = self.tree.mm_path(start=self.path[:self.current_path_idx] + [node_switch_to], n_iterations=1000)
+                        self.path = self.tree.mm_path(start=self.path[:self.current_path_idx] + [node_switch_to],
+                                                      n_iterations=100)
                         self.stack.append(Action(node_switch_to, self))
             except IndexError:
                 pass
@@ -292,9 +295,9 @@ class ContextManager(Manager):
             return None
 
         # выбираем случайный из возможных узлов для перехода
-        # time = prev_action.timer.time_left()
-        # time_diff = [abs(time - datetime.timedelta(seconds=node.time)) for node in possible_moves]
-        # chosen_node = possible_moves[time_diff.index(min(time_diff))]
+        time_dist = self.tree.time_queue_dist()
+        node_priority = {node: time_dist[node.queue_name] for node in possible_moves}
+        possible_moves = [node for node in possible_moves if node_priority[node] == max(node_priority.values())]
         chosen_node = random.sample(possible_moves, 1)[0]
         return chosen_node
 
@@ -305,10 +308,12 @@ class ContextManager(Manager):
         :param top_action:
         :return:
         """
+        # TODO: нужна ли проверка на паузу
         prev_action = None
         for action in self.finished_stack:
             if top_action.queue_name() == action.queue_name() \
                     and not action.elapsed \
+                    and not action.paused \
                     and action in top_action.child_actions():
                 prev_action = action
                 break
@@ -352,31 +357,40 @@ class ContextManager(Manager):
             self.publish_response(PhraseGenerator.speak("nowhere.to.switch"))
             self.wait_for_response()
             return
-        self.publish_response(PhraseGenerator.speak("choose.next", options=", ".join(str(x) for x in possible_moves)))
-        # Создаем форму с параметрами - названиями узлов, в которые можно перейти
-        self.dialog_manager.push(ContextUnit(repr(possible_moves), unit_type=UnitType.CHOICE,
-                                             params=[str(x) for x in possible_moves]))
+
+        queues = set([node.queue_name for node in possible_moves])
+        self.publish_response(PhraseGenerator.speak("choose.next", options=", ".join(str(x) for x in queues)))
+        # Создаем форму с параметрами - названиями очередей, в которые можно перейти
+        self.dialog_manager.push(ContextUnit(repr(queues), unit_type=UnitType.CHOICE,
+                                             params=[str(x) for x in queues]))
         self.wait_for_response()
 
-    def handle_changing_next(self, node_name):
+    def handle_changing_next(self, queue_name):
         top_action = self.stack[-1]
-        if node_name is None:
+        if queue_name is None:
             if top_action.paused:
                 top_action.restart()
             self.wait_for_response()
             return
 
-        node_to_change = [x for x in self.path[self.current_path_idx + 1:] if x.name == node_name][0]
-        temp = self.path[:self.current_path_idx] + [node_to_change]
-        new_path = self.tree.mm_path(start=temp, n_iterations=2000)
+        # Проходим по всем действиям, не попавшим в stack и finished_stack
+        possible_moves = []
+        for node in self.path[self.current_path_idx + 1:]:
+            if (len(node.inp) == 0 or all(self.node_finished(x) for x in node.inp)) \
+                    and node.queue_name == queue_name:
+                possible_moves.append(node)
 
+        node_to_change = random.sample([x for x in possible_moves], 1)[0]
+
+        temp = self.path[:self.current_path_idx] + [node_to_change]
+        new_path = self.tree.mm_path(start=temp, n_iterations=100)
         time = TimeTable(self.tree.requirements())(self.path).time()
         recalculated_time = TimeTable(self.tree.requirements())(new_path).time()
         time_diff = recalculated_time - time
         if time_diff > 0:
             self.publish_response(PhraseGenerator.speak("recalculated.time.more", time_diff=time_diff))
         elif time_diff < 0:
-            self.publish_response(PhraseGenerator.speak("recalculated.time.less", time=time_diff))
+            self.publish_response(PhraseGenerator.speak("recalculated.time.less", time_diff=time_diff))
         else:
             self.publish_response(PhraseGenerator.speak("recalculated.time.eq"))
 
@@ -399,7 +413,7 @@ class ContextManager(Manager):
         """
         if not action.is_technical() or len(action.out().inp) > 1:
             # TODO: непонятный момент
-            print("Stopping", action)
+            # Действие вроде техническое, но сразу переходить после него не обязательно
             action.stop()
             action.stop_children()
             self.remind(action)
@@ -411,14 +425,15 @@ class ContextManager(Manager):
                 self.current_path_idx += 1
                 current_action = Action(self.path[self.current_path_idx], self)
                 self.stack.append(current_action)
+                current_action.stop_children()
+                PhraseGenerator.speak("stop.waiting", queue_name=action.queue_name())
                 self.handle_top_action()
                 return
             if action.queue_name() != current_action.queue_name():
                 # Ставим в стэк над приостановленным действием следующее и меняем их порядок в self.path
                 current_action.pause()
                 current_action.stop_children()
-                self.publish_response("\n")
-                self.publish_response(PhraseGenerator.speak("stop.and.switch", action=action.node().name))
+                self.publish_response("\n\n" + PhraseGenerator.speak("stop.and.switch", action=action.node().name))
                 next_action = None
                 for node in self.path[self.current_path_idx + 1:]:
                     if node.queue_name == action.queue_name():
@@ -436,7 +451,7 @@ class ContextManager(Manager):
             action.remind()
             self.wait_for_response()
         else:
-            self.publish_response("НАПОМИНАНИЕ:" + action.node.name + '\n...')
+            self.publish_response("НАПОМИНАНИЕ: " + action.node.name + '\n...')
 
     def on_action_spoken(self, unit):
         """
@@ -456,3 +471,7 @@ class ContextManager(Manager):
         :return:
         """
         self.dialog_manager.stop()
+
+    @staticmethod
+    def log(*args):
+        print(datetime.datetime.now(), ":", *args)

@@ -1,3 +1,4 @@
+import datetime
 import socket
 from threading import Thread
 from typing import Dict
@@ -5,11 +6,11 @@ from typing import Dict
 import pika
 from pika.adapters.blocking_connection import BlockingChannel
 
-from managers.ContextManager import ContextManager
-from redis_utils.Restorer import Restorer
-from base_structures.Tree import Tree
+from managers.context_manager import ContextManager
+from redis_utils.restorer import Restorer
+from base_structures.tree import Tree
 from recipes import simple_recipe, cutlets_puree
-from servers.ServerMessage import ServerMessage
+from servers.server_message import ServerMessage
 
 
 class Server:
@@ -28,7 +29,7 @@ class Server:
         Thread(target=self.run_server).start()
         Thread(target=self.start_consuming_timer_events).start()
         Thread(target=self.start_consuming_requests).start()
-        print("Initialized")
+        self.log("Initialized")
 
     def run_server(self):
         while True:
@@ -44,12 +45,12 @@ class Server:
                     tree.assign_queue_names(["омлет", "тмин"])
 
                     # final = cutlets_puree.final
-                    # tree = Tree(final, switch_proba=0.01)
+                    # tree = Tree(final, switch_proba=0.001)
                     # tree.assign_queue_names(["котлеты", "пюре", "соус"])
 
                     em_id = data.decode('utf-8')
                     cm = ContextManager(tree, em_id=em_id, n_iterations=100)
-                    print("created session for", em_id)
+                    self.log("created session for " + em_id)
                     cm.initialize()
                     self.emulators[em_id] = cm.dialog_manager.id
                     cm.dialog_manager.save_to_db()
@@ -91,7 +92,7 @@ class Server:
         """
         mssg = ServerMessage.from_bytes(body)
         if mssg.em_id not in self.emulators:
-            print("no session for", mssg.em_id)
+            self.log("no session for " + mssg.em_id)
             ch.basic_ack(delivery_tag=method.delivery_tag)
             return
         dm_id = self.emulators[mssg.em_id]
@@ -115,7 +116,7 @@ class Server:
         """
         mssg = ServerMessage.from_bytes(body)
         if mssg.em_id not in self.emulators:
-            print("no session for", mssg.em_id)
+            self.log("no session for " + mssg.em_id)
             ch.basic_ack(delivery_tag=method.delivery_tag)
             return
         dm_id = self.emulators[mssg.em_id]
@@ -126,6 +127,10 @@ class Server:
         dialog_manager.save_to_db()
         dialog_manager.context_manager.save_to_db()
         ch.basic_ack(delivery_tag=method.delivery_tag)
+
+    @staticmethod
+    def log(*args):
+        print(datetime.datetime.now(), ":", *args)
 
 
 if __name__ == '__main__':

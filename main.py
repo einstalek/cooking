@@ -1,7 +1,7 @@
-from managers.ContextManager import ContextManager
-from base_structures.Tree import Tree
+from managers.context_manager import ContextManager
+from base_structures.tree import Tree
 from recipes import cutlets_puree
-from redis_utils.RedisCursor import RedisCursor
+from redis_utils.redis_cursor import RedisCursor
 
 if __name__ == '__main__':
     cursor = RedisCursor()

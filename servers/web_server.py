@@ -5,8 +5,8 @@ from typing import Dict
 import pika
 from pika.adapters.blocking_connection import BlockingChannel
 
-from base_structures.Timer import TimerEvent
-from servers.ServerMessage import ServerMessage, MessageType
+from base_structures.timer import TimerEvent
+from servers.server_message import ServerMessage, MessageType
 import datetime
 
 
@@ -159,7 +159,8 @@ class WebServer:
         :return:
         """
         mssg = ServerMessage.from_bytes(body)
-        self.log("response for", mssg.em_id)
+        self.log("response for", mssg.em_id, mssg.mssg_type)
+
         if mssg.em_id not in self.emulators:
             ch.basic_ack(delivery_tag=method.delivery_tag)
             return

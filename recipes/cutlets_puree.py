@@ -1,4 +1,4 @@
-from base_structures.Node import Node
+from base_structures.node import Node
 
 
 clean_pepper = Node("чистка перца", 15, ["h"], file="clean.yaml",
@@ -80,6 +80,7 @@ mix_flour = Node("перемешивание муки", 15, ["h", "s", "f"], swi
 add_cream = Node("добавление сливок", 10, ["h", "s", "f"], file="add_cream.yaml"
                  )(mix_flour)
 
-final = Node("final", 5)(take_out_meat, squash, add_cream)
+final = Node("котлеты из индейки с пюре и соусом бешамель", 5)(take_out_meat, squash, add_cream)
+queue_names = ["котлеты", "пюре", "соус бешамель"]
 
 
