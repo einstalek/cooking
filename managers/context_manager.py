@@ -86,7 +86,7 @@ class ContextManager(Manager):
                               routing_key='timer_command',
                               body=mssg,
                               properties=pika.BasicProperties(
-                                  delivery_mode=2
+                                  delivery_mode=1
                               ))
         conn.close()
 
@@ -201,7 +201,7 @@ class ContextManager(Manager):
         if top_action.is_technical():
             self.handle_next_response()
         else:
-            self.wait_for_response()
+            pass
 
     def handle_next_response(self):
         if self.finished:
@@ -258,7 +258,6 @@ class ContextManager(Manager):
                         self.current_path_idx -= 1
                         self.publish_response(PhraseGenerator.speak("wait.technical",
                                                                     action=prev_action.node().name))
-                        self.wait_for_response()
                         return
                     else:
                         # Если есть куда перейти, пересчтываем path и добавляем другое действие на верх стэка
@@ -319,13 +318,6 @@ class ContextManager(Manager):
                 break
         return prev_action
 
-    def wait_for_response(self):
-        """
-        Ожидание реплики со стороны клиента
-        :return:
-        """
-        self.publish_response("...")
-
     def handle_repeat_response(self, *args, **kargs):
         """
         Интент повторения реплики текущего действия
@@ -336,7 +328,6 @@ class ContextManager(Manager):
             top_action.speak()
         except IndexError:
             pass
-        self.wait_for_response()
 
     def handle_choosing_next(self):
         """
@@ -344,7 +335,6 @@ class ContextManager(Manager):
         :return:
         """
         if len(self.stack) == 0:
-            self.wait_for_response()
             return
         self.stack[-1].pause()
         possible_moves = []
@@ -355,7 +345,6 @@ class ContextManager(Manager):
 
         if len(possible_moves) == 0:
             self.publish_response(PhraseGenerator.speak("nowhere.to.switch"))
-            self.wait_for_response()
             return
 
         queues = set([node.queue_name for node in possible_moves])
@@ -363,14 +352,12 @@ class ContextManager(Manager):
         # Создаем форму с параметрами - названиями очередей, в которые можно перейти
         self.dialog_manager.push(ContextUnit(repr(queues), unit_type=UnitType.CHOICE,
                                              params=[str(x) for x in queues]))
-        self.wait_for_response()
 
     def handle_changing_next(self, queue_name):
         top_action = self.stack[-1]
         if queue_name is None:
             if top_action.paused:
                 top_action.restart()
-            self.wait_for_response()
             return
 
         # Проходим по всем действиям, не попавшим в stack и finished_stack
@@ -449,9 +436,8 @@ class ContextManager(Manager):
     def remind(self, action):
         if not action.is_technical():
             action.remind()
-            self.wait_for_response()
         else:
-            self.publish_response("НАПОМИНАНИЕ: " + action.node.name + '\n...')
+            self.publish_response("НАПОМИНАНИЕ: " + action.node.name)
 
     def on_action_spoken(self, unit):
         """
@@ -463,7 +449,6 @@ class ContextManager(Manager):
 
     def handle_negative(self):
         self.publish_response(PhraseGenerator.speak("wait.confirmation"))
-        self.wait_for_response()
 
     def stop(self):
         """

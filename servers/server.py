@@ -6,12 +6,14 @@ from typing import Dict
 import pika
 from pika.adapters.blocking_connection import BlockingChannel
 
+import exceptions
+from pika import exceptions as pika_exceptions
 from managers.context_manager import ContextManager
 from recipes.recipe_manager import RecipeManager
 from redis_utils.restorer import Restorer
 from base_structures.tree import Tree
 from recipes import eggs_tmin, cutlets_puree
-from servers.server_message import ServerMessage
+from servers.server_message import ServerMessage, MessageType
 
 
 class Server:
@@ -47,26 +49,61 @@ class Server:
                     break
                 else:
                     # Для нового эмулятора сохраняем начальный CM и DM в Redis
-                    final = eggs_tmin.final
-                    tree = Tree(final, switch_proba=0.01)
-                    tree.assign_queue_names(["омлет", "тмин"])
+                    # final = eggs_tmin.final
+                    # tree = Tree(final, switch_proba=0.01)
+                    # tree.assign_queue_names(["омлет", "тмин"])
 
                     # final = cutlets_puree.final
                     # tree = Tree(final, switch_proba=0.001)
                     # tree.assign_queue_names(["котлеты", "пюре", "соус"])
 
-                    em_id = data.decode('utf-8')
-                    cm = ContextManager(tree, em_id=em_id, n_iterations=100)
-                    self.log("created session for " + em_id)
-                    cm.initialize()
-                    self.emulators[em_id] = cm.dialog_manager.id
-                    cm.dialog_manager.save_to_db()
-                    cm.save_to_db()
+                    mssg = data.decode('utf-8').split('\t')
+
+                    if len(mssg) == 1:
+                        em_id = mssg[0]
+                        self.select_recipe(em_id)
+                        self.log("created session for " + em_id)
+
+                    elif len(mssg) == 2:
+                        em_id, recipe_name = mssg
+                        recipe = [recipe for recipe in self.recipe_manager.recipes
+                                  if recipe.final.name == recipe_name][0]
+                        tree = self.recipe_manager.activate(recipe)
+
+                        cm = ContextManager(tree, em_id=em_id, n_iterations=100)
+                        cm.initialize()
+                        self.emulators[em_id] = cm.dialog_manager.id
+                        cm.dialog_manager.save_to_db()
+                        cm.save_to_db()
+
                     break
 
-    def select_recipe(self):
-        # TODO: implement
+    def select_recipe(self, em_id: str):
         available_recipes = ", ".join([recipe.final.name for recipe in self.recipe_manager.recipes])
+        select_mssg = "Выбирети один из следующих рецептов:\n" + available_recipes
+        self.publish_response(em_id, select_mssg, MessageType.SELECT)
+
+    def publish_response(self, em_id: str, mssg: str, mssg_type: MessageType):
+        """
+        Отправляет ответы в MQ
+        :param em_id:
+        :param mssg_type:
+        :param mssg:
+        :return:
+        """
+        try:
+            conn = pika.BlockingConnection(pika.ConnectionParameters(host='localhost'))
+        except pika_exceptions.ConnectionClosed:
+            raise exceptions.MqConnectionError
+        channel: BlockingChannel = conn.channel()
+        channel.queue_declare(queue='response_queue', durable=True)
+        channel.basic_publish(exchange='',
+                              routing_key='response_queue',
+                              body='\t'.join([em_id, mssg_type.name, mssg]),
+                              properties=pika.BasicProperties(
+                                  delivery_mode=1
+                              ))
+        conn.close()
 
 
     def start_consuming_timer_events(self):
@@ -127,6 +164,7 @@ class Server:
         :return:
         """
         mssg = ServerMessage.from_bytes(body)
+
         if mssg.em_id not in self.emulators:
             self.log("no session for " + mssg.em_id)
             ch.basic_ack(delivery_tag=method.delivery_tag)

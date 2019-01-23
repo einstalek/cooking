@@ -1,10 +1,10 @@
 from base_structures.node import Node
 
 clean_eggs = Node("промывка куриных яиц", 5, ["h"], switchable=False, file="clean.yaml",
-                  inp_ingredients=["куринце яйца"],
+                  inp_ingredients=["куриные яйца"],
                   out_ingredient="помытые куриные яйца")
 
-mince_eggs = Node("взбивка яиц", 10, ["h"], file="mince.yaml",
+mince_eggs = Node("разбивание яиц", 10, ["h"], file="break_eggs.yaml",
                   out_ingredient="взбитые яйца")(clean_eggs)
 
 warm_pan = Node("нагреть сковороду", 20, ["o"], technical=True, file="turn_on_oven.yaml")
@@ -20,6 +20,7 @@ take_out_eggs = Node("доставание омлета", 5, ["h", "o", "p"], fi
                      where="сковорода")(bake_eggs)
 
 clean_tmin = Node("помыть тмин", 10, ["h"], file="clean.yaml",
+                  inp_ingredients=["тмин"],
                   out_ingredient="помытый тмин")
 cut_tmin = Node("тмин", 10, ["h"], file="mince.yaml",
                 out_ingredient="тмин")(clean_tmin)

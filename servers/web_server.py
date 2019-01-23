@@ -11,7 +11,7 @@ import datetime
 
 
 class WebServer:
-    def __init__(self, mq_host="localhost", port=8888):
+    def __init__(self, mq_host="localhost", port=8889):
         self.mq_host = mq_host
         self.port = port
         self.emulators: Dict[str, socket.socket] = {}
@@ -21,9 +21,6 @@ class WebServer:
         self.server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.server.bind(("localhost", port))
         self.server.listen(10)
-
-        # сокет, через который происходит взаимодействие с сервером
-        self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
         self.t = Thread(target=self.run)
         self.t.start()
@@ -61,9 +58,10 @@ class WebServer:
             self.log("registered", em_id)
             self.emulators[em_id] = client_sock
             try:
-                self.socket.connect(("localhost", 9999))
-                self.socket.send(em_id.encode('utf-8'))
-                self.socket.close()
+                sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                sock.connect(("localhost", 9999))
+                sock.send(em_id.encode('utf-8'))
+                sock.close()
             except OSError:
                 self.log("error occurred")
 
@@ -96,6 +94,12 @@ class WebServer:
                                       delivery_mode=2
                                   ))
             conn.close()
+
+        if mssg.mssg_type == MessageType.SELECT:
+            sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            sock.connect(("localhost", 9999))
+            sock.send((em_id + "\t" + mssg.request[0][0]).encode('utf-8'))
+            sock.close()
 
     def consume_timer_commands(self):
         """
@@ -164,6 +168,11 @@ class WebServer:
         if mssg.em_id not in self.emulators:
             ch.basic_ack(delivery_tag=method.delivery_tag)
             return
+
+        if mssg.mssg_type == MessageType.SELECT:
+            self.emulators[mssg.em_id].send('\t'.join([mssg.em_id, MessageType.SELECT.name,
+                                                       mssg.request[0][0]]).encode('utf-8'))
+
         if mssg.mssg_type == MessageType.RESPONSE:
             self.emulators[mssg.em_id].send('\t'.join([mssg.em_id, MessageType.RESPONSE.name,
                                                        mssg.request[0][0]]).encode('utf-8'))
