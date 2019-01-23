@@ -90,6 +90,11 @@ class Restorer:
         cm = ContextManager(tree, em_id, int(cm_params['n_iterations']))
         cm.id = cm_params['id']
         cm.finished = True if cm_params['finished'] == 'True' else False
+        if cm_params['queues_visited'] != "":
+            names = cm_params['queues_visited'].split('>')
+            cm.queues_visited = set(names)
+        else:
+            cm.queues_visited = set()
 
         cm.path = []
         for node_id in cm_params['path'].split():

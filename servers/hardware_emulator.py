@@ -1,12 +1,15 @@
 import random
 import string
+import sys
 import time
 from threading import Thread
 from typing import Dict
 import socket
 
-import exceptions
+sys.path.insert(0, "/Users/einstalek/graph")
+
 from base_structures.timer import Timer, TimerEvent
+from custom_exceptions import RegistrationRefusedError, StartExistingTimerError
 from servers.server_message import ServerMessage, MessageType
 
 
@@ -130,7 +133,7 @@ class HardwareEmulator:
         timer = Timer(secs, name, parent=self)
         timer.id = timer_id
         if timer_id in self.timers:
-            raise exceptions.StartExistingTimerError
+            raise StartExistingTimerError
 
         self.timers[timer_id] = timer
         timer.start()
@@ -160,7 +163,7 @@ class HardwareEmulator:
         try:
             self.socket.connect((self.host, self.port))
         except ConnectionRefusedError:
-            raise exceptions.RegistrationRefusedError
+            raise RegistrationRefusedError
 
         mssg = ServerMessage.gen_mssg(self.id, MessageType.REGISTER)
         self.send_on_server(mssg)

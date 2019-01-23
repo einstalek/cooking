@@ -6,7 +6,7 @@ from typing import Dict
 import pika
 from pika.adapters.blocking_connection import BlockingChannel
 
-import exceptions
+import custom_exceptions
 from pika import exceptions as pika_exceptions
 from managers.context_manager import ContextManager
 from recipes.recipe_manager import RecipeManager
@@ -94,7 +94,7 @@ class Server:
         try:
             conn = pika.BlockingConnection(pika.ConnectionParameters(host='localhost'))
         except pika_exceptions.ConnectionClosed:
-            raise exceptions.MqConnectionError
+            raise custom_exceptions.MqConnectionError
         channel: BlockingChannel = conn.channel()
         channel.queue_declare(queue='response_queue', durable=True)
         channel.basic_publish(exchange='',

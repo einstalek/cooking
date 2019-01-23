@@ -6,7 +6,7 @@ import pika
 from pika.adapters.blocking_connection import BlockingChannel
 from pika import exceptions as pika_exceptions
 
-import exceptions
+import custom_exceptions
 from base_structures.action import Action
 from managers.context_unit import ContextUnit, UnitType
 from base_structures.node import Node
@@ -26,6 +26,12 @@ class ContextManager(Manager):
     """
 
     def __init__(self, tree, em_id, n_iterations=100):
+        """
+        WARNING: добавляя новое поле, его нужно добавить в to_dict и в Restorer
+        :param tree:
+        :param em_id:
+        :param n_iterations:
+        """
         super().__init__()
         self.n_iterations = n_iterations
         self.tree = tree
@@ -36,6 +42,7 @@ class ContextManager(Manager):
         self.dialog_manager = DialogManager(self)
         self.em_id = em_id
         self.finished = False
+        self.queues_visited = set()
 
     def to_dict(self):
         conf = {
@@ -48,7 +55,8 @@ class ContextManager(Manager):
             'current_path_idx': self.current_path_idx,
             'dialog_manager': self.dialog_manager.id,
             'em_id': self.em_id,
-            'finished': str(self.finished)
+            'finished': str(self.finished),
+            'queues_visited': '>'.join(self.queues_visited) if len(self.queues_visited) > 0 else ''
         }
         return conf
 
@@ -79,7 +87,7 @@ class ContextManager(Manager):
         try:
             conn = pika.BlockingConnection(pika.ConnectionParameters(host='localhost'))
         except pika_exceptions.ConnectionClosed:
-            raise exceptions.MqConnectionError
+            raise custom_exceptions.MqConnectionError
         channel: BlockingChannel = conn.channel()
         channel.queue_declare(queue='timer_command', durable=True)
         channel.basic_publish(exchange='',
@@ -100,7 +108,7 @@ class ContextManager(Manager):
         try:
             conn = pika.BlockingConnection(pika.ConnectionParameters(host='localhost'))
         except pika_exceptions.ConnectionClosed:
-            raise exceptions.MqConnectionError
+            raise custom_exceptions.MqConnectionError
         channel: BlockingChannel = conn.channel()
         channel.queue_declare(queue='response_queue', durable=True)
         channel.basic_publish(exchange='',
@@ -188,6 +196,11 @@ class ContextManager(Manager):
             prev_action.stop()
             prev_action.stop_children()
 
+        # Если к ветке приступили только что, озвучиваем ее входные ингридиенты
+        if top_action.queue_name() not in self.queues_visited:
+            self.queues_visited.add(top_action.queue_name())
+            self.publish_response(PhraseGenerator.speak("start.new.queue",
+                                                        queue_name=top_action.queue_name()))
         # Выдается реплика действия
         top_action.speak()
 
@@ -208,7 +221,6 @@ class ContextManager(Manager):
             resp = PhraseGenerator.speak("end")
             self.publish_response(resp)
             self.publish_response(mssg="", mssg_type=MessageType.FINISH)
-            # self.stop()
             return
         try:
             top_action = self.stack[-1]

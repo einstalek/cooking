@@ -163,6 +163,7 @@ class Tree:
                 next_queue = current_queue
             else:
                 try:
+                    # Выбираем следующую по длине очередь
                     possible_queue_moves = [name for name in self.queue_names
                                             if name != current_queue and name not in finished]
                     max_priority = max([time_dist[name] for name in possible_queue_moves])
@@ -212,8 +213,14 @@ class Tree:
                 if node not in all_visited_nodes and all(x in all_visited_nodes for x in node.inp):
                     start_nodes.append(node)
 
-        start_node = random.sample(start_nodes, 1)[0]
+        start_node = self.choose_most_prior_node(start_nodes)
         return self.random_path(finished, all_visited_nodes, start_node)
+
+    def choose_most_prior_node(self, nodes: List[Node]) -> Node:
+        time_dist = self.time_queue_dist()
+        priority = {node: time_dist[node.queue_name] for node in nodes}
+        prior_nodes = [node for node in priority if priority[node] == max(priority.values())]
+        return random.sample(prior_nodes, 1)[0]
 
     def path(self, path: List[Node] = None):
         """
@@ -226,6 +233,23 @@ class Tree:
             return self.random_path()
         else:
             return self.continue_path(path)
+
+    def mm_path(self, n_iterations: int = 100, start: List[Node] = None) -> List[Node]:
+        """
+        Ищет лучший обход среди случайно сгенерированных
+        :param start:
+        :param n_iterations:
+        :return:
+        """
+        best = self.path(start)
+        best_fit = self.fitness(best)
+        for i in range(n_iterations):
+            path = self.path(start)
+            fit = self.fitness(path)
+            if fit > best_fit:
+                best_fit = fit
+                best = path
+        return best
 
     def requirements(self):
         """
@@ -409,23 +433,6 @@ class Tree:
         grades = [(ind, self.fitness(ind)) for ind in population]
         sorted_pop = [x[0] for x in sorted(grades, key=lambda x: x[1], reverse=True)]
         return sorted_pop[:count]
-
-    def mm_path(self, n_iterations: int = 100, start: List[Node] = None) -> List[Node]:
-        """
-        Ищет лучший обход среди случайно сгенерированных
-        :param start:
-        :param n_iterations:
-        :return:
-        """
-        best = self.path(start)
-        best_fit = self.fitness(best)
-        for i in range(n_iterations):
-            path = self.path(start)
-            fit = self.fitness(path)
-            if fit > best_fit:
-                best_fit = fit
-                best = path
-        return best
 
     def time_queue_dist(self) -> Dict[str, float]:
         return {queue_name: sum([node.time for node in self.queue_nodes(queue_name)])
