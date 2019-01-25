@@ -147,7 +147,10 @@ class ContextManager(Manager):
         """
         self.path = self.tree.mm_path(n_iterations=100)
         time = TimeTable(self.tree.requirements())(self.path).time()
-        resp = PhraseGenerator.speak("calculated.time", time=time)
+        resp = PhraseGenerator.speak("overview",
+                                     queue_names=', '.join(self.tree.queue_names),
+                                     number=len(self.tree.queue_names))
+        resp += "\n" + PhraseGenerator.speak("calculated.time", time=time)
         self.publish_response(resp)
         self.current_path_idx = 0
         self.stack.append(Action(self.path[self.current_path_idx], self))
@@ -197,12 +200,21 @@ class ContextManager(Manager):
             prev_action.stop_children()
 
         # Если к ветке приступили только что, озвучиваем ее входные ингридиенты
+        # TODO: Fix this
+        resp = None
         if top_action.queue_name() not in self.queues_visited:
             self.queues_visited.add(top_action.queue_name())
-            self.publish_response(PhraseGenerator.speak("start.new.queue",
-                                                        queue_name=top_action.queue_name()))
-        # Выдается реплика действия
-        top_action.speak()
+            try:
+                requirements = ', '.join([str(x) for x in self.tree.queue_ingredients(top_action.queue_name())])
+                resp = PhraseGenerator.speak("start.new.queue",
+                                             queue_name=top_action.queue_name(),
+                                             requirements=requirements,
+                                             )
+            except TypeError:
+                pass
+
+        print(">>", resp)
+        top_action.speak(add=resp)
 
         # Запускается или возобновляется таймер действия
         if top_action.paused:
@@ -430,6 +442,7 @@ class ContextManager(Manager):
                 return
             if action.queue_name() != current_action.queue_name():
                 # Ставим в стэк над приостановленным действием следующее и меняем их порядок в self.path
+                # TODO: обработать неразрывные действия
                 current_action.pause()
                 current_action.stop_children()
                 self.publish_response("\n\n" + PhraseGenerator.speak("stop.and.switch", action=action.node().name))

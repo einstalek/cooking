@@ -101,7 +101,7 @@ class Action:
     def __str__(self):
         return self.node.name + ' ' + self.id + ' ' + self.node.id
 
-    def speak(self):
+    def speak(self, add: str = None):
         if self.node.file is None:
             print(self.node.name)
         else:
@@ -113,6 +113,9 @@ class Action:
             if warnings:
                 warning = random.sample(warnings, 1)[0]
                 reformatted += "\n" + warning
+
+            if add:
+                reformatted = add + '\n' + reformatted
 
             self.cm.publish_response(reformatted)
             self.cm.on_action_spoken(ContextUnit(reformatted, params))

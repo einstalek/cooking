@@ -48,23 +48,16 @@ class Server:
                 if not data:
                     break
                 else:
-                    # Для нового эмулятора сохраняем начальный CM и DM в Redis
-                    # final = eggs_tmin.final
-                    # tree = Tree(final, switch_proba=0.01)
-                    # tree.assign_queue_names(["омлет", "тмин"])
-
-                    # final = cutlets_puree.final
-                    # tree = Tree(final, switch_proba=0.001)
-                    # tree.assign_queue_names(["котлеты", "пюре", "соус"])
-
                     mssg = data.decode('utf-8').split('\t')
 
                     if len(mssg) == 1:
+                        # Пришел запрос на регистрацию
                         em_id = mssg[0]
                         self.select_recipe(em_id)
                         self.log("created session for " + em_id)
 
                     elif len(mssg) == 2:
+                        # Пришло название выбранного рецепта
                         em_id, recipe_name = mssg
                         recipe = [recipe for recipe in self.recipe_manager.recipes
                                   if recipe.final.name == recipe_name][0]
@@ -80,7 +73,7 @@ class Server:
 
     def select_recipe(self, em_id: str):
         available_recipes = ", ".join([recipe.final.name for recipe in self.recipe_manager.recipes])
-        select_mssg = "Выбирети один из следующих рецептов:\n" + available_recipes
+        select_mssg = "Выберите один из следующих рецептов:\n" + available_recipes
         self.publish_response(em_id, select_mssg, MessageType.SELECT)
 
     def publish_response(self, em_id: str, mssg: str, mssg_type: MessageType):

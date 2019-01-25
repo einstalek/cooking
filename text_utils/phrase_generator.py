@@ -25,7 +25,8 @@ class PhraseGenerator:
     def reformat(to_insert: Dict, phrase: str):
         reformatted: str = phrase
         params = PhraseGenerator.extract_params(phrase)
-        assert all(x in params for x in to_insert)
+
+        # assert all(x in params for x in to_insert)
 
         for param in to_insert:
             reformatted = reformatted.replace("{" + param + "}", str(to_insert[param]))

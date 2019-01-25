@@ -1,10 +1,9 @@
 from base_structures.node import Node
 
-
 clean_pepper = Node("чистка перца", 15, ["h"], file="clean.yaml",
-                        inp_ingredients=["болгарский перец"],
-                        out_ingredient="помытый болгарский перец"
-                        )
+                    inp_ingredients=["болгарский перец"],
+                    out_ingredient="помытый болгарский перец"
+                    )
 
 mince_pepper = Node("нарезание перца", 21, ["h"], file="mince.yaml",
                     out_ingredient="нарезанный перец",
@@ -17,6 +16,7 @@ grate_cheese = Node("натирание сыра", 24, ["h"], file="grate.yaml",
                     )
 
 mix_meat = Node("смешать фарш с перцем и сыром", 21, ["h"], file="mix.yaml",
+                inp_ingredients=["фарш"],
                 out_ingredient="смесь из фарша"
                 )(mince_pepper, grate_cheese)
 
@@ -70,7 +70,7 @@ take_out_pot = Node("вытаскивание картошки", 15, ["h", "p", 
                     where="из кастрюли"
                     )(boil)
 
-squash = Node("толчение картошки", 15, ["h", "p"],  file="squash.yaml",
+squash = Node("толчение картошки", 15, ["h", "p"], file="squash.yaml",
               out_ingredient="пюре"
               )(take_out_pot)
 
@@ -82,5 +82,3 @@ add_cream = Node("добавление сливок", 10, ["h", "s", "f"], file=
 
 final = Node("котлеты из индейки с пюре и соусом бешамель", 5)(take_out_meat, squash, add_cream)
 queue_names = ["котлеты", "пюре", "соус бешамель"]
-
-

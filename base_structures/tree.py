@@ -2,6 +2,7 @@ import string
 from typing import List, Dict
 import random
 
+from base_structures.ingredient import Ingredient
 from redis_utils.redis_cursor import RedisCursor
 from base_structures.time_table import TimeTable
 from base_structures.node import Node
@@ -437,6 +438,21 @@ class Tree:
     def time_queue_dist(self) -> Dict[str, float]:
         return {queue_name: sum([node.time for node in self.queue_nodes(queue_name)])
                 for queue_name in self.queue_names}
+
+    def queue_ingredients(self, queue_name) -> List[Ingredient]:
+        """
+        Возвращает входные ингридиенты ветки по ее названию
+        :param queue_name:
+        :return:
+        """
+        # TODO: Fix this
+        leaves = [node for node in self.leaves() if node.queue_name == queue_name]
+        print(">>> ", leaves)
+        print(">>>", [x.inp_ingredients for x in leaves])
+        ingredients = []
+        for node in leaves:
+            ingredients.extend(node.inp_ingredients)
+        return ingredients
 
 
 
