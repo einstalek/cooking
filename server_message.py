@@ -5,7 +5,6 @@ from typing import Optional
 class MessageType(Enum):
     REGISTER = 1,
     REQUEST = 2,
-    TIMER = 3,
     RESPONSE = 4,
     FINISH = 5,
     SELECT = 6,
@@ -28,7 +27,3 @@ class ServerMessage:
         mssg_type = MessageType[mssg_type]
         return ServerMessage(em_id, mssg_type, request)
 
-
-if __name__ == "__main__":
-    mssg = ServerMessage.gen_mssg('ISDISD', MessageType.REGISTER)
-    print(mssg)

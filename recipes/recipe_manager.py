@@ -1,4 +1,4 @@
-from base_structures.tree import Tree
+from tree import Tree
 from recipes import eggs_tmin, cutlets_puree
 import re
 

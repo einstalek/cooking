@@ -1,11 +1,11 @@
-from base_structures.action import Action
-from managers.context_manager import ContextManager
-from managers.context_unit import ContextUnit
-from managers.dialog_manager import DialogManager
-from base_structures.ingredient import Ingredient
-from base_structures.node import Node
-from redis_utils.redis_cursor import RedisCursor
-from base_structures.tree import Tree
+from action import Action
+from context_manager import ContextManager
+from context_unit import ContextUnit
+from dialog_manager import DialogManager
+from ingredient import Ingredient
+from node import Node
+from redis_cursor import RedisCursor
+from tree import Tree
 
 
 class Restorer:

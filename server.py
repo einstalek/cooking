@@ -10,12 +10,12 @@ from pika.adapters.blocking_connection import BlockingChannel
 import custom_exceptions
 from pika import exceptions as pika_exceptions
 
-from base_structures.timer import Timer, TimerEvent, TimerMessage
-from managers.context_manager import ContextManager
+from timer import Timer, TimerEvent, TimerMessage
+from context_manager import ContextManager
 from recipes.recipe_manager import RecipeManager
-from redis_utils.restorer import Restorer
+from restorer import Restorer
 from recipes import eggs_tmin, cutlets_puree
-from servers.server_message import ServerMessage, MessageType
+from server_message import ServerMessage, MessageType
 
 
 class Server:
@@ -26,57 +26,63 @@ class Server:
         self.restorer = Restorer()
         self.emulators: Dict[str, str] = {}
 
-        # сокет для связи в WebServer
         self.server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.server.bind((self.host, self.port))
         self.server.listen(10)
 
-        self.recipe_manager = RecipeManager(
-            cutlets_puree,
-            eggs_tmin,
-        )
-
+        self.recipe_manager = RecipeManager(cutlets_puree, eggs_tmin)
         self.timers: Dict[str, Dict[str, Timer]] = {}
 
     def initialize(self):
         Thread(target=self.run_server).start()
-        # Thread(target=self.start_consuming_timer_events).start()
         Thread(target=self.start_consuming_requests).start()
+        Thread(target=self.start_consuming_init).start()
         Thread(target=self.update).start()
         self.log("Initialized")
 
     def run_server(self):
         while True:
             client_sock, addr = self.server.accept()
-            while True:
-                data = client_sock.recv(1024)
-                if not data:
-                    break
-                else:
-                    mssg = data.decode('utf-8').split('\t')
+            Thread(target=self.handle_client, args=(client_sock,)).start()
 
-                    if len(mssg) == 1:
-                        # Пришел запрос на регистрацию
-                        em_id = mssg[0]
-                        self.select_recipe(em_id)
-                        self.log("created session for " + em_id)
+    def handle_client(self, client_sock):
+        while True:
+            data = client_sock.recv(1024)
+            if not data:
+                break
+            else:
+                mssg = data.decode('utf-8').split('\t')
 
-                    elif len(mssg) == 2:
-                        # Пришло название выбранного рецепта
-                        em_id, recipe_name = mssg
-                        recipe = [recipe for recipe in self.recipe_manager.recipes
-                                  if recipe.final.name == recipe_name][0]
-                        tree = self.recipe_manager.activate(recipe)
-
-                        cm = ContextManager(tree, em_id=em_id, n_iterations=100)
-                        cm.server = self
-                        self.timers[em_id] = {}
-                        cm.initialize()
-                        self.emulators[em_id] = cm.dialog_manager.id
-                        cm.dialog_manager.save_to_db()
-                        cm.save_to_db()
-
-                    break
+                em_id = mssg[0]
+                tree = self.recipe_manager.activate(cutlets_puree)
+                cm = ContextManager(tree, em_id=em_id, n_iterations=100)
+                cm.server = self
+                self.timers[em_id] = {}
+                cm.initialize()
+                self.emulators[em_id] = cm.dialog_manager.id
+                cm.dialog_manager.save_to_db()
+                cm.save_to_db()
+                # if len(mssg) == 1:
+                #     # Пришел запрос на регистрацию
+                #     em_id = mssg[0]
+                #     self.select_recipe(em_id)
+                #     self.log("created session for " + em_id)
+                #
+                # elif len(mssg) == 2:
+                #     # Пришло название выбранного рецепта
+                #     em_id, recipe_name = mssg
+                #     recipe = [recipe for recipe in self.recipe_manager.recipes
+                #               if recipe.final.name == recipe_name][0]
+                #     tree = self.recipe_manager.activate(recipe)
+                #
+                #     cm = ContextManager(tree, em_id=em_id, n_iterations=100)
+                #     cm.server = self
+                #     self.timers[em_id] = {}
+                #     cm.initialize()
+                #     self.emulators[em_id] = cm.dialog_manager.id
+                #     cm.dialog_manager.save_to_db()
+                #     cm.save_to_db()
+                break
 
     def select_recipe(self, em_id: str):
         available_recipes = ", ".join([recipe.final.name for recipe in self.recipe_manager.recipes])
@@ -105,33 +111,17 @@ class Server:
                               ))
         conn.close()
 
-    def start_consuming_timer_events(self):
-        """
-        Забираем из MQ события истечения времен у таймеров на эмуляторе
-        :return:
-        """
+    def start_consuming_init(self):
         conn = pika.BlockingConnection(pika.ConnectionParameters("localhost"))
-        channel: BlockingChannel = conn.channel()
+        self.channel_init: BlockingChannel = conn.channel()
+        self.channel_init.queue_declare("init_queue", durable=True)
+        self.channel_init.basic_qos(prefetch_count=1)
+        self.channel_init.basic_consume(self.on_init_callback,
+                                   queue="init_queue")
+        self.channel_init.start_consuming()
 
-        channel.queue_declare("timer_event", durable=True)
-        channel.basic_qos(prefetch_count=1)
-        channel.basic_consume(self.on_incoming_timer_event_callback,
-                              queue="timer_event")
-        channel.start_consuming()
-
-    def start_consuming_requests(self):
-        conn = pika.BlockingConnection(pika.ConnectionParameters("localhost"))
-        self.channel: BlockingChannel = conn.channel()
-
-        self.channel.queue_declare("task_queue", durable=True)
-        self.channel.basic_qos(prefetch_count=1)
-        self.channel.basic_consume(self.on_request_callback,
-                              queue="task_queue")
-        self.channel.start_consuming()
-
-    def on_incoming_timer_event_callback(self, ch: BlockingChannel, method, properties, body: bytes):
+    def on_init_callback(self, ch: BlockingChannel, method, properties, body: bytes):
         """
-        Что происходит, когда пришло событие об истечении времени таймера на эмуляторе
         :param ch:
         :param method:
         :param properties:
@@ -139,20 +129,25 @@ class Server:
         :return:
         """
         mssg = ServerMessage.from_bytes(body)
-        if mssg.em_id not in self.emulators:
-            self.log("no session for " + mssg.em_id)
-            ch.basic_ack(delivery_tag=method.delivery_tag)
-            return
-        dm_id = self.emulators[mssg.em_id]
-        dialog_manager = self.restorer.restore_dialog_manager(dm_id)
-        context_manager = dialog_manager.context_manager
-        context_manager.server = self
+        em_id = mssg.em_id
+        tree = self.recipe_manager.activate(cutlets_puree)
+        cm = ContextManager(tree, em_id=em_id, n_iterations=100)
+        cm.server = self
+        self.timers[em_id] = {}
+        cm.initialize()
+        self.emulators[em_id] = cm.dialog_manager.id
+        cm.dialog_manager.save_to_db()
+        cm.save_to_db()
 
-        context_manager.on_incoming_timer_event_callback(mssg)
+    def start_consuming_requests(self):
+        conn = pika.BlockingConnection(pika.ConnectionParameters("localhost"))
+        self.channel_task: BlockingChannel = conn.channel()
 
-        dialog_manager.save_to_db()
-        dialog_manager.context_manager.save_to_db()
-        ch.basic_ack(delivery_tag=method.delivery_tag)
+        self.channel_task.queue_declare("task_queue", durable=True)
+        self.channel_task.basic_qos(prefetch_count=1)
+        self.channel_task.basic_consume(self.on_request_callback,
+                                        queue="task_queue")
+        self.channel_task.start_consuming()
 
     def on_request_callback(self, ch: BlockingChannel, method, properties, body: bytes):
         """
@@ -240,6 +235,3 @@ class Server:
 
 if __name__ == '__main__':
     Server().initialize()
-
-
-

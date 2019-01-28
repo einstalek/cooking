@@ -3,8 +3,6 @@ import random
 import string
 from enum import Enum
 
-from servers.server_message import MessageType
-
 
 class TimerEvent(Enum):
     START = 0,
@@ -20,18 +18,6 @@ class TimerMessage:
         self.name = name
         self.time = time
         self.event = event
-
-    def to_str(self, em_id) -> str:
-        """
-        EMULATOR TIMER ID NAME EVENT
-        :param em_id:
-        :return:
-        """
-        return em_id + "\t" + '\t'.join([MessageType.TIMER.name,
-                                         self.timer_id,
-                                         self.name,
-                                         str(self.time),
-                                         self.event.name])
 
 
 class Timer:

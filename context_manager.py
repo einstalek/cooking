@@ -7,16 +7,17 @@ from pika.adapters.blocking_connection import BlockingChannel
 from pika import exceptions as pika_exceptions
 
 import custom_exceptions
-from base_structures.action import Action
-from managers.context_unit import ContextUnit, UnitType
-from base_structures.node import Node
+from action import Action
+from context_unit import ContextUnit, UnitType
+from intent_parser import Intent
+from node import Node
 from text_utils.phrase_generator import PhraseGenerator
-from redis_utils.redis_cursor import RedisCursor
+from redis_cursor import RedisCursor
 
-from base_structures.time_table import TimeTable
-from managers.abc_manager import Manager
-from managers.dialog_manager import DialogManager, Intent
-from servers.server_message import ServerMessage, MessageType
+from time_table import TimeTable
+from abc_manager import Manager
+from dialog_manager import DialogManager
+from server_message import MessageType
 
 
 class ContextManager(Manager):
@@ -199,6 +200,9 @@ class ContextManager(Manager):
 
         # переход к следующему действию или ожидание ответа от человека
         if top_action.is_technical():
+            resp = PhraseGenerator.speak("started.timer",
+                                         time=top_action.secs)
+            self.publish_response(resp)
             self.handle_next_response()
         else:
             pass

@@ -7,6 +7,7 @@ class Intent(Enum):
     CHOOSE_NEXT = 2,  # Давай что-нибудь другое
     CHANGE_NEXT = 3,  # Дальше будем чистить картошку
     NEGATIVE_SIMPLE = 4,
+    INIT = 5,
 
 
 class IntentParser:
@@ -14,6 +15,7 @@ class IntentParser:
     negative = {"не", "нет"}
     repeat = {"повтори", "еще раз", "еще"}
     choose_next = {"другое", "поменяй", "измени"}
+    init = {"давай готовить"}
 
     def __init__(self):
         pass
@@ -28,4 +30,6 @@ class IntentParser:
             intent = Intent.CHOOSE_NEXT
         if any(x in phrase for x in self.negative):
             intent = Intent.NEGATIVE_SIMPLE
+        if any(x in phrase for x in self.init):
+            intent = Intent.INIT
         return intent

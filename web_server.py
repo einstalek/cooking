@@ -4,9 +4,7 @@ from typing import Dict
 
 import pika
 from pika.adapters.blocking_connection import BlockingChannel
-
-from base_structures.timer import TimerEvent
-from servers.server_message import ServerMessage, MessageType
+from server_message import ServerMessage, MessageType
 import datetime
 
 
@@ -24,7 +22,6 @@ class WebServer:
 
         self.t = Thread(target=self.run)
         self.t.start()
-        Thread(target=self.consume_timer_commands).start()
         Thread(target=self.consume_responses).start()
 
     def run(self):
@@ -73,23 +70,7 @@ class WebServer:
             channel.queue_declare(queue='task_queue', durable=True)
             channel.basic_publish(exchange='',
                                   routing_key='task_queue',
-                                  # body=mssg.request[0][0],
                                   body='\t'.join([mssg.em_id, MessageType.REQUEST.name, mssg.request[0][0]]),
-                                  properties=pika.BasicProperties(
-                                      delivery_mode=2
-                                  ))
-            conn.close()
-
-        # Вышло время у таймера
-        if mssg.mssg_type == MessageType.TIMER:
-            self.log("timer event from he", mssg.request[0][0])
-            conn = pika.BlockingConnection(pika.ConnectionParameters(host='localhost'))
-            channel: BlockingChannel = conn.channel()
-            channel.queue_declare(queue='timer_event', durable=True)
-            channel.basic_publish(exchange='',
-                                  routing_key='timer_event',
-                                  # TODO: implement this
-                                  body='\t'.join([mssg.em_id, MessageType.TIMER.name, mssg.request[0][0]]),
                                   properties=pika.BasicProperties(
                                       delivery_mode=2
                                   ))
@@ -101,20 +82,6 @@ class WebServer:
             sock.send((em_id + "\t" + mssg.request[0][0]).encode('utf-8'))
             sock.close()
 
-    def consume_timer_commands(self):
-        """
-        Забирает команду от таймере из MQ и отправляет ее на эмулятор
-        :return:
-        """
-        conn = pika.BlockingConnection(pika.ConnectionParameters(self.mq_host))
-        channel: BlockingChannel = conn.channel()
-
-        channel.queue_declare("timer_command", durable=True)
-        channel.basic_qos(prefetch_count=1)
-        channel.basic_consume(self.timer_command_callback,
-                              queue="timer_command")
-        channel.start_consuming()
-
     def consume_responses(self):
         # Забирает текст из MQ и отправляет его на эмулятор
         conn = pika.BlockingConnection(pika.ConnectionParameters(self.mq_host))
@@ -125,33 +92,6 @@ class WebServer:
         channel.basic_consume(self.response_callback,
                               queue="response_queue")
         channel.start_consuming()
-
-    def timer_command_callback(self, ch: BlockingChannel, method, properties, body: bytes):
-        """
-        Отправляет команду от таймере на эмулятор
-        :param ch:
-        :param method:
-        :param properties:
-        :param body:
-        :return:
-        """
-        self.log("timer command from mq", body.decode())
-        mssg = ServerMessage.from_bytes(body)
-        request = mssg.request[0]
-
-        em_id = mssg.em_id
-        timer_id, timer_name, timer_secs, timer_event = request
-        timer_event = TimerEvent[timer_event]
-        timer_secs = int(timer_secs)
-
-        if em_id not in self.emulators:
-            self.log("Нет эмулятора с ID", em_id)
-            ch.basic_ack(delivery_tag=method.delivery_tag)
-            return
-
-        mssg = ServerMessage.gen_mssg(em_id, MessageType.TIMER, timer_id, timer_name, timer_secs, timer_event.name)
-        self.emulators[em_id].send(mssg)
-        ch.basic_ack(delivery_tag=method.delivery_tag)
 
     def response_callback(self, ch: BlockingChannel, method, properties, body: bytes):
         """

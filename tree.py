@@ -2,10 +2,10 @@ import string
 from typing import List, Dict
 import random
 
-from base_structures.ingredient import Ingredient
-from redis_utils.redis_cursor import RedisCursor
-from base_structures.time_table import TimeTable
-from base_structures.node import Node
+from ingredient import Ingredient
+from redis_cursor import RedisCursor
+from time_table import TimeTable
+from node import Node
 
 
 class Tree:

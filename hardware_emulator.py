@@ -1,13 +1,10 @@
 import random
 import string
-import sys
 from threading import Thread
 import socket
 
-sys.path.insert(0, "/Users/einstalek/graph")
-
-from custom_exceptions import RegistrationRefusedError, StartExistingTimerError
-from servers.server_message import ServerMessage, MessageType
+from custom_exceptions import RegistrationRefusedError
+from server_message import ServerMessage, MessageType
 
 
 class HardwareEmulator:
@@ -18,7 +15,7 @@ class HardwareEmulator:
         self.server = None
         self.id = self.gen_id()
         self.finished = False
-        self.selected = False
+        self.selected = True
 
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
@@ -29,6 +26,8 @@ class HardwareEmulator:
         """
         self.socket_read_thread = Thread(target=self.read_from_socket)
         self.socket_read_thread.start()
+        self.stdin_thread = Thread(target=self.read_from_input)
+        self.stdin_thread.start()
 
     def read_from_input(self):
         """
@@ -104,7 +103,6 @@ class HardwareEmulator:
 
 if __name__ == '__main__':
     emulator = HardwareEmulator(host="localhost", port=8889)
-    print(emulator.id)
     connected = emulator.register()
     if connected:
         Thread(target=emulator.run).start()

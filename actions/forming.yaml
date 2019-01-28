@@ -3,6 +3,7 @@ Name:
 
 Phrase:
     - "Сформируйте из {material} {what} {description}"
+    - "Слепите  {what} {description} из {material}"
 
 Remind:
     - "{what} уже готовы?"

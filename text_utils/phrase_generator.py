@@ -10,7 +10,7 @@ class PhraseGenerator:
     @staticmethod
     def phrase(file) -> str:
         try:
-            with open(os.path.join(path, "../dialogs/" + file + ".dialog")) as f:
+            with open(os.path.join(path, "dialogs/" + file + ".dialog")) as f:
                 phrases = [x.strip() for x in f.readlines()]
                 return random.sample(phrases, 1)[0]
         except FileNotFoundError:
@@ -25,8 +25,6 @@ class PhraseGenerator:
     def reformat(to_insert: Dict, phrase: str):
         reformatted: str = phrase
         params = PhraseGenerator.extract_params(phrase)
-
-        # assert all(x in params for x in to_insert)
 
         for param in to_insert:
             reformatted = reformatted.replace("{" + param + "}", str(to_insert[param]))

@@ -1,9 +1,9 @@
 import string
 from typing import List, Optional
-from base_structures.node import Node
-from base_structures.timer import Timer, TimerEvent, TimerMessage
-from managers.abc_manager import Manager
-from managers.context_unit import ContextUnit
+from node import Node
+from timer import Timer, TimerEvent, TimerMessage
+from abc_manager import Manager
+from context_unit import ContextUnit
 import random
 import re
 

@@ -3,10 +3,10 @@ import string
 import time
 from typing import List
 
-from managers.context_unit import ContextUnit, UnitType
-from text_utils.intent_parser import Intent, IntentParser
-from redis_utils.redis_cursor import RedisCursor
-from managers.abc_manager import Manager
+from context_unit import ContextUnit, UnitType
+from intent_parser import IntentParser, Intent
+from redis_cursor import RedisCursor
+from abc_manager import Manager
 from pymorphy2 import MorphAnalyzer
 import re
 
