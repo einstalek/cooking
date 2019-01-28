@@ -1,0 +1,11 @@
+Name:
+    "Формирование"
+
+Phrase:
+    - "Сформируйте из {material} {what} {description}"
+
+Remind:
+    - "{what} уже готовы?"
+    - "Сделали?"
+
+Warning:

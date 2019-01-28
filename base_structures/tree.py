@@ -445,13 +445,11 @@ class Tree:
         :param queue_name:
         :return:
         """
-        # TODO: Fix this
         leaves = [node for node in self.leaves() if node.queue_name == queue_name]
-        print(">>> ", leaves)
-        print(">>>", [x.inp_ingredients for x in leaves])
         ingredients = []
         for node in leaves:
-            ingredients.extend(node.inp_ingredients)
+            if node.inp_ingredients:
+                ingredients.extend(node.inp_ingredients)
         return ingredients
 
 

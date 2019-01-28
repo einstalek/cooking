@@ -1,34 +1,42 @@
 from base_structures.node import Node
 
 clean_pepper = Node("чистка перца", 15, ["h"], file="clean.yaml",
-                    inp_ingredients=["болгарский перец"],
+                    inp_ingredients=["болгарский перец:1 штука"],
                     out_ingredient="помытый болгарский перец"
                     )
 
 mince_pepper = Node("нарезание перца", 21, ["h"], file="mince.yaml",
                     out_ingredient="нарезанный перец",
-                    how="на кольца"
+                    how="на маленькие кубики"
                     )(clean_pepper)
 
 grate_cheese = Node("натирание сыра", 24, ["h"], file="grate.yaml",
-                    inp_ingredients=["сыр"],
-                    out_ingredient="натертый сыр"
+                    inp_ingredients=["сыр:100 гр"],
+                    out_ingredient="натертый сыр",
+                    description="мелкая",
                     )
 
 mix_meat = Node("смешать фарш с перцем и сыром", 21, ["h"], file="mix.yaml",
-                inp_ingredients=["фарш"],
+                inp_ingredients=["фарш:300 гр"],
                 out_ingredient="смесь из фарша"
                 )(mince_pepper, grate_cheese)
 
+form_cutlets = Node("формирование котлет", 20, ["h"], file="forming.yaml",
+                    out_ingredient="котлеты",
+                    material="фарш",
+                    what="котлеты",
+                    description="небольшого размера")(mix_meat)
+
 lay_tray = Node("застилание поднос", 12, ["h"], file="lay_tray.yaml",
                 out_ingredient="котлеты"
-                )(mix_meat)
+                )(form_cutlets)
 
 put_on_tray = Node("выкладывание на поднос", 30, ["h"], file="put_on_tray.yaml"
                    )(lay_tray)
 
 turn_on_oven = Node("включение духовки", 10, ["h", "o"], switchable=False, file="turn_on_oven.yaml",
-                    regime="верхний нагрев")
+                    regime="верхний нагрев",
+                    temperature="200")
 
 wait_oven_warming = Node("ожидание нагрева духовки", 45, ["o"], file="waiting.yaml",
                          what="нагрев духовки"

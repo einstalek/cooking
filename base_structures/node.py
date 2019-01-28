@@ -47,6 +47,7 @@ class Node:
         if out_ingredient:
             self.out_ingredient = Ingredient(out_ingredient)
         self.inp_ingredients = None
+
         if inp_ingredients:
             self.inp_ingredients: List[Ingredient] = [Ingredient(x) for x in inp_ingredients]
 

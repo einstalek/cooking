@@ -43,6 +43,7 @@ class ContextManager(Manager):
         self.em_id = em_id
         self.finished = False
         self.queues_visited = set()
+        self.server = None
 
     def to_dict(self):
         conf = {
@@ -204,16 +205,12 @@ class ContextManager(Manager):
         resp = None
         if top_action.queue_name() not in self.queues_visited:
             self.queues_visited.add(top_action.queue_name())
-            try:
-                requirements = ', '.join([str(x) for x in self.tree.queue_ingredients(top_action.queue_name())])
-                resp = PhraseGenerator.speak("start.new.queue",
-                                             queue_name=top_action.queue_name(),
-                                             requirements=requirements,
-                                             )
-            except TypeError:
-                pass
+            requirements = ', '.join([str(x) for x in self.tree.queue_ingredients(top_action.queue_name())])
+            resp = PhraseGenerator.speak("start.new.queue",
+                                         queue_name=top_action.queue_name(),
+                                         requirements=requirements,
+                                         )
 
-        print(">>", resp)
         top_action.speak(add=resp)
 
         # Запускается или возобновляется таймер действия

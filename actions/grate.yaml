@@ -2,7 +2,7 @@ Name:
     "Натирание"
 
 Phrase:
-    - "Натрите {ingredients} на терке"
+    - "Натрите {ingredients} на {description} терке"
 
 Remind:
     - "Натерли {ingredients}?"
