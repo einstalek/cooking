@@ -10,7 +10,7 @@ class Manager(ABC):
         self.em_id: str = None
         self.finished = False
         self.id = 'CM' + ''.join(random.choices(string.ascii_uppercase + string.digits, k=10))
-        self.server: WebServer = None
+        # self.server: WebServer = None
 
     def on_timer_elapsed(self, action: object):
         pass

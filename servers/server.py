@@ -1,5 +1,6 @@
 import datetime
 import socket
+import time
 from threading import Thread
 from typing import Dict
 
@@ -8,10 +9,11 @@ from pika.adapters.blocking_connection import BlockingChannel
 
 import custom_exceptions
 from pika import exceptions as pika_exceptions
+
+from base_structures.timer import Timer, TimerEvent, TimerMessage
 from managers.context_manager import ContextManager
 from recipes.recipe_manager import RecipeManager
 from redis_utils.restorer import Restorer
-from base_structures.tree import Tree
 from recipes import eggs_tmin, cutlets_puree
 from servers.server_message import ServerMessage, MessageType
 
@@ -34,10 +36,13 @@ class Server:
             eggs_tmin,
         )
 
+        self.timers: Dict[str, Dict[str, Timer]] = {}
+
     def initialize(self):
         Thread(target=self.run_server).start()
-        Thread(target=self.start_consuming_timer_events).start()
+        # Thread(target=self.start_consuming_timer_events).start()
         Thread(target=self.start_consuming_requests).start()
+        Thread(target=self.update).start()
         self.log("Initialized")
 
     def run_server(self):
@@ -64,6 +69,8 @@ class Server:
                         tree = self.recipe_manager.activate(recipe)
 
                         cm = ContextManager(tree, em_id=em_id, n_iterations=100)
+                        cm.server = self
+                        self.timers[em_id] = {}
                         cm.initialize()
                         self.emulators[em_id] = cm.dialog_manager.id
                         cm.dialog_manager.save_to_db()
@@ -97,7 +104,6 @@ class Server:
                                   delivery_mode=1
                               ))
         conn.close()
-
 
     def start_consuming_timer_events(self):
         """
@@ -140,6 +146,7 @@ class Server:
         dm_id = self.emulators[mssg.em_id]
         dialog_manager = self.restorer.restore_dialog_manager(dm_id)
         context_manager = dialog_manager.context_manager
+        context_manager.server = self
 
         context_manager.on_incoming_timer_event_callback(mssg)
 
@@ -164,6 +171,8 @@ class Server:
             return
         dm_id = self.emulators[mssg.em_id]
         dialog_manager = self.restorer.restore_dialog_manager(dm_id)
+        context_manager = dialog_manager.context_manager
+        context_manager.server = self
 
         dialog_manager.on_request_callback(mssg.request[0][0])
 
@@ -174,6 +183,59 @@ class Server:
     @staticmethod
     def log(*args):
         print(datetime.datetime.now(), ":", *args)
+
+    def on_timer_command(self, em_id: str, timer_mssg: TimerMessage):
+        event = timer_mssg.event
+        timer_id = timer_mssg.timer_id
+
+        if event == TimerEvent.START:
+            timer = Timer(timer_mssg.time, timer_mssg.name, self)
+            timer.id = timer_id
+            self.timers[em_id][timer_id] = timer
+            timer.start()
+        else:
+            assert em_id in self.timers
+            assert timer_id in self.timers[em_id]
+
+            if event == TimerEvent.PAUSE:
+                self.timers[em_id][timer_id].pause()
+            elif event == TimerEvent.UNPAUSE:
+                self.timers[em_id][timer_id].unpause()
+            elif event == TimerEvent.RESTART:
+                self.timers[em_id][timer_id].restart()
+            elif event == TimerEvent.STOP:
+                self.timers[em_id][timer_id].stop()
+
+    def on_timer_elapsed(self, timer_id):
+        em_id = None
+        for _id in self.timers:
+            if timer_id in self.timers[_id]:
+                em_id = _id
+        if em_id is None:
+            return
+
+        dm_id = self.emulators[em_id]
+        dialog_manager = self.restorer.restore_dialog_manager(dm_id)
+        context_manager = dialog_manager.context_manager
+        context_manager.server = self
+
+        context_manager.on_incoming_timer_event_callback(em_id, timer_id)
+        dialog_manager.save_to_db()
+        dialog_manager.context_manager.save_to_db()
+
+    def update(self):
+        """
+        Обновляет таймеры
+        :return:
+        """
+        while True:
+            for em_id in self.timers:
+                try:
+                    for timer_id in self.timers[em_id]:
+                        self.timers[em_id][timer_id].update()
+                except RuntimeError:
+                    continue
+            time.sleep(0.5)
 
 
 if __name__ == '__main__':

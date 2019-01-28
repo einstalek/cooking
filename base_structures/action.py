@@ -43,8 +43,8 @@ class Action:
         action.elapsed = True if d['elapsed'] == 'True' else False
         return action
 
-    def timer_message(self, event: TimerEvent) -> str:
-        return TimerMessage(self.timer_id, self.timer_name, self.secs, event).to_str(self.cm.em_id)
+    def timer_message(self, event: TimerEvent):
+        return TimerMessage(self.timer_id, self.timer_name, self.secs, event)
 
     def inp(self) -> List[Node]:
         return self.node.inp
@@ -53,20 +53,20 @@ class Action:
         return self.node.out
 
     def start(self):
-        self.cm.publish_timer_command(self.timer_message(TimerEvent.START))
+        self.cm.server.on_timer_command(self.cm.em_id, self.timer_message(TimerEvent.START))
 
     def unpause(self):
         self.paused = False
-        self.cm.publish_timer_command(self.timer_message(TimerEvent.UNPAUSE))
+        self.cm.server.on_timer_command(self.cm.em_id, self.timer_message(TimerEvent.UNPAUSE))
 
     def restart(self):
-        self.cm.publish_timer_command(self.timer_message(TimerEvent.RESTART))
+        self.cm.server.on_timer_command(self.cm.em_id, self.timer_message(TimerEvent.RESTART))
 
     def stop(self):
         if self.elapsed:
             return
         self.elapsed = True
-        self.cm.publish_timer_command(self.timer_message(TimerEvent.STOP))
+        self.cm.server.on_timer_command(self.cm.em_id, self.timer_message(TimerEvent.STOP))
 
     def stop_children(self):
         for child in self.child_actions():
@@ -74,7 +74,7 @@ class Action:
 
     def pause(self):
         self.paused = True
-        self.cm.publish_timer_command(self.timer_message(TimerEvent.PAUSE))
+        self.cm.server.on_timer_command(self.cm.em_id, self.timer_message(TimerEvent.PAUSE))
 
     def is_technical(self):
         return 'h' not in self.node.requirements
