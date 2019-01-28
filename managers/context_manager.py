@@ -78,27 +78,6 @@ class ContextManager(Manager):
         for action in self.finished_stack:
             dispatcher.save_to_db(action.to_dict())
 
-    def publish_timer_command(self, mssg: str):
-        """
-        Отправляет в MQ команды по таймерам
-        TODO: Нормально ли то, что объект может публиковать в MQ?
-        :param mssg:
-        :return:
-        """
-        try:
-            conn = pika.BlockingConnection(pika.ConnectionParameters(host='localhost'))
-        except pika_exceptions.ConnectionClosed:
-            raise custom_exceptions.MqConnectionError
-        channel: BlockingChannel = conn.channel()
-        channel.queue_declare(queue='timer_command', durable=True)
-        channel.basic_publish(exchange='',
-                              routing_key='timer_command',
-                              body=mssg,
-                              properties=pika.BasicProperties(
-                                  delivery_mode=1
-                              ))
-        conn.close()
-
     def publish_response(self, mssg: str, mssg_type: MessageType = MessageType.RESPONSE):
         """
         Отправляет ответы в MQ
@@ -120,10 +99,9 @@ class ContextManager(Manager):
                               ))
         conn.close()
 
-    def on_incoming_timer_event_callback(self, mssg: ServerMessage):
-        assert mssg.em_id == self.em_id
-        assert mssg.mssg_type == MessageType.TIMER
-        action = self.action_by_timer_id(mssg.request[0][0])
+    def on_incoming_timer_event_callback(self, em_id, timer_id):
+        assert em_id == self.em_id
+        action = self.action_by_timer_id(timer_id)
         assert action is not None
         self.on_timer_elapsed(action)
 
