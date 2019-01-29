@@ -1,15 +1,16 @@
 from threading import Thread
 from typing import Dict, List, Set
+import time
 
 import pika
 from pika.adapters.blocking_connection import BlockingChannel
 
+from intent_parser import Intent, IntentParser
 from server_message import MessageType, ServerMessage
 from skillsdk.model.voice_channel_message import VoiceChanelMessage
 from skillsdk.sdk import AppClient
 
 skill_client: AppClient = AppClient('cooking', 'key', API_HOST='ec2-63-33-202-35.eu-west-1.compute.amazonaws.com')
-finished: Set = set()
 clients: Dict[str, List[str]] = {}
 code = None
 
@@ -20,16 +21,16 @@ def handler(message: VoiceChanelMessage):
     if code is None:
         code = message.receiver_code
 
-    if message.sender_code in finished:
-        return
-
     client_id = message.sender_code
     device_id = message.device_id
     dialog_id = message.dialog_id
 
     if client_id not in clients:
+        intent: Intent = IntentParser().extract_intent(message.message_text.lower())
+        if intent != Intent.INIT:
+            return
         clients[client_id] = [device_id, dialog_id]
-        body = '\t'.join([client_id, MessageType.REGISTER.name, message.message_text])
+        body = '\t'.join([client_id, MessageType.REGISTER.name, message.message_text.lower()])
 
         conn = pika.BlockingConnection(pika.ConnectionParameters(host='localhost'))
         channel: BlockingChannel = conn.channel()
@@ -41,7 +42,7 @@ def handler(message: VoiceChanelMessage):
                                   delivery_mode=1))
         conn.close()
     else:
-        body = '\t'.join([client_id, MessageType.REQUEST.name, message.message_text])
+        body = '\t'.join([client_id, MessageType.REQUEST.name, message.message_text.lower()])
         conn = pika.BlockingConnection(pika.ConnectionParameters(host='localhost'))
         channel: BlockingChannel = conn.channel()
         channel.queue_declare(queue='task_queue', durable=True)
@@ -61,11 +62,12 @@ def response_callback(ch: BlockingChannel, method, properties, body: bytes):
     :param body:
     :return:
     """
-    global finished, code
+    global code
 
     response = ServerMessage.from_bytes(body)
     client_id = response.em_id
     if client_id not in clients:
+        ch.basic_ack(delivery_tag=method.delivery_tag)
         return
 
     to_client_message = VoiceChanelMessage()
@@ -73,10 +75,13 @@ def response_callback(ch: BlockingChannel, method, properties, body: bytes):
     to_client_message.receiver_code = client_id
     to_client_message.device_id, to_client_message.dialog_id = clients[client_id]
     to_client_message.message_text = response.request[0][0]
+
+    print("SENDING RESPONSE",response.request[0][0])
     skill_client.send_message_to_client(to_client_message)
+    time.sleep(1)
 
     if response.mssg_type == MessageType.FINISH:
-        finished.add(client_id)
+        del clients[client_id]
     ch.basic_ack(delivery_tag=method.delivery_tag)
 
 
@@ -84,7 +89,7 @@ def start_consuming():
     conn = pika.BlockingConnection(pika.ConnectionParameters("localhost"))
     channel: BlockingChannel = conn.channel()
     channel.queue_declare("response_queue", durable=True)
-    channel.basic_qos(prefetch_count=1)
+    channel.basic_qos(prefetch_count=2)
     channel.basic_consume(response_callback, queue="response_queue")
     channel.start_consuming()
 

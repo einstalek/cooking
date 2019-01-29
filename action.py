@@ -151,7 +151,7 @@ class Action:
         if "ingredients" in params and self.node().inp_ingredients:
             reformatted = reformatted.replace("{ingredients}", ", ".join([x.name for x in self.node().inp_ingredients]))
         if "time" in params:
-            reformatted = reformatted.replace("{time}", str(self.node().time))
+            reformatted = reformatted.replace("{time}", str(self.node().time // 60))
         if self.node().params:
             for param in self.node().params:
                 reformatted = reformatted.replace("{" + param + "}", self.node().params[param])

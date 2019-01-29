@@ -90,6 +90,8 @@ class ContextManager(Manager):
             conn = pika.BlockingConnection(pika.ConnectionParameters(host='localhost'))
         except pika_exceptions.ConnectionClosed:
             raise custom_exceptions.MqConnectionError
+
+        self.log("PUBLISHING RESPONSE", mssg)
         channel: BlockingChannel = conn.channel()
         channel.queue_declare(queue='response_queue', durable=True)
         channel.basic_publish(exchange='',
@@ -130,7 +132,7 @@ class ContextManager(Manager):
         resp = PhraseGenerator.speak("overview",
                                      queue_names=', '.join(self.tree.queue_names),
                                      number=len(self.tree.queue_names))
-        resp += "\n" + PhraseGenerator.speak("calculated.time", time=time)
+        resp += "\n" + PhraseGenerator.speak("calculated.time", time=time // 60)
         self.publish_response(resp)
         self.current_path_idx = 0
         self.stack.append(Action(self.path[self.current_path_idx], self))
@@ -201,7 +203,7 @@ class ContextManager(Manager):
         # переход к следующему действию или ожидание ответа от человека
         if top_action.is_technical():
             resp = PhraseGenerator.speak("started.timer",
-                                         time=top_action.secs)
+                                         time=top_action.secs // 60)
             self.publish_response(resp)
             self.handle_next_response()
         else:
@@ -378,9 +380,9 @@ class ContextManager(Manager):
         recalculated_time = TimeTable(self.tree.requirements())(new_path).time()
         time_diff = recalculated_time - time
         if time_diff > 0:
-            self.publish_response(PhraseGenerator.speak("recalculated.time.more", time_diff=time_diff))
+            self.publish_response(PhraseGenerator.speak("recalculated.time.more", time_diff=time_diff // 60))
         elif time_diff < 0:
-            self.publish_response(PhraseGenerator.speak("recalculated.time.less", time_diff=time_diff))
+            self.publish_response(PhraseGenerator.speak("recalculated.time.less", time_diff=time_diff // 60))
         else:
             self.publish_response(PhraseGenerator.speak("recalculated.time.eq"))
 

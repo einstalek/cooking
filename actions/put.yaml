@@ -2,10 +2,10 @@ Name:
     "Положить"
 
 Phrase:
-    - "Положите {what} {where}"
+    - "Положите {what} в {where}"
 
 Remind:
-    - "Положили {what} {where}?"
+    - "Положили {what} в {where}?"
     - "{what} уже в {where}?"
 
 Warning:
