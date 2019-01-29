@@ -27,14 +27,14 @@ class Server:
         self.emulators: Dict[str, str] = {}
 
         self.server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.server.bind((self.host, self.port))
-        self.server.listen(10)
+        # self.server.bind((self.host, self.port))
+        # self.server.listen(10)
 
         self.recipe_manager = RecipeManager(cutlets_puree, eggs_tmin)
         self.timers: Dict[str, Dict[str, Timer]] = {}
 
     def initialize(self):
-        Thread(target=self.run_server).start()
+        # Thread(target=self.run_server).start()
         Thread(target=self.start_consuming_requests).start()
         Thread(target=self.start_consuming_init).start()
         Thread(target=self.update).start()
@@ -129,6 +129,7 @@ class Server:
         :return:
         """
         mssg = ServerMessage.from_bytes(body)
+        print("INIT FROM", mssg.em_id, mssg.request[0][0])
         em_id = mssg.em_id
         tree = self.recipe_manager.activate(cutlets_puree)
         cm = ContextManager(tree, em_id=em_id, n_iterations=100)
@@ -138,6 +139,7 @@ class Server:
         self.emulators[em_id] = cm.dialog_manager.id
         cm.dialog_manager.save_to_db()
         cm.save_to_db()
+        ch.basic_ack(delivery_tag=method.delivery_tag)
 
     def start_consuming_requests(self):
         conn = pika.BlockingConnection(pika.ConnectionParameters("localhost"))
@@ -159,6 +161,8 @@ class Server:
         :return:
         """
         mssg = ServerMessage.from_bytes(body)
+
+        print("REQUEST FROM", mssg.em_id, mssg.request[0][0])
 
         if mssg.em_id not in self.emulators:
             self.log("no session for " + mssg.em_id)
